@@ -101,6 +101,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	groupPinnedMsgDB, err := mgo.NewGroupPinnedMsgMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 
 	//userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
 	//msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
@@ -130,7 +134,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		conversationClient: rpcli.NewConversationClient(conversationConn),
 		//cryptoClient:       rpcli.NewCryptoClient(cryptoConn),
 	}
-	gs.db = controller.NewGroupDatabase(rdb, &config.LocalCacheConfig, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
+	gs.db = controller.NewGroupDatabase(rdb, &config.LocalCacheConfig, groupDB, groupMemberDB, groupRequestDB, groupPinnedMsgDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.notification = NewNotificationSender(gs.db, config, gs.userClient, gs.msgClient, gs.conversationClient)
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	pbgroup.RegisterGroupServer(server, &gs)

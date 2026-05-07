@@ -173,3 +173,15 @@ func (o *GroupApi) GetGroupApplicationUnhandledCount(c *gin.Context) {
 func (o *GroupApi) GetCommonGroupsWithFriend(c *gin.Context) {
 	a2r.Call(c, group.GroupClient.GetCommonGroupsWithFriend, o.Client)
 }
+
+func (o *GroupApi) PinGroupMessage(c *gin.Context) {
+	a2r.Call(c, group.GroupClient.PinGroupMessage, o.Client)
+}
+
+func (o *GroupApi) UnpinGroupMessage(c *gin.Context) {
+	a2r.Call(c, group.GroupClient.UnpinGroupMessage, o.Client)
+}
+
+func (o *GroupApi) GetGroupPinnedMessages(c *gin.Context) {
+	a2r.Call(c, group.GroupClient.GetGroupPinnedMessages, o.Client)
+}

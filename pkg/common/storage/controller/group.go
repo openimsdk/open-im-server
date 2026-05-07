@@ -126,6 +126,11 @@ type GroupDatabase interface {
 	FindJoinGroupID(ctx context.Context, userID string) ([]string, error)
 
 	GetGroupApplicationUnhandledCount(ctx context.Context, groupIDs []string, ts int64) (int64, error)
+
+	// 群置顶消息：保留最近 N 条
+	PinGroupMessage(ctx context.Context, groupID string, msg *model.GroupPinnedMessage) ([]*model.GroupPinnedMessage, error)
+	UnpinGroupMessage(ctx context.Context, groupID string, pinID string, seq int64) ([]*model.GroupPinnedMessage, error)
+	GetGroupPinnedMessages(ctx context.Context, groupID string) ([]*model.GroupPinnedMessage, error)
 }
 
 func NewGroupDatabase(
@@ -134,24 +139,39 @@ func NewGroupDatabase(
 	groupDB database.Group,
 	groupMemberDB database.GroupMember,
 	groupRequestDB database.GroupRequest,
+	groupPinnedMsgDB database.GroupPinnedMsg,
 	ctxTx tx.Tx,
 	groupHash cache.GroupHash,
 ) GroupDatabase {
 	return &groupDatabase{
-		groupDB:        groupDB,
-		groupMemberDB:  groupMemberDB,
-		groupRequestDB: groupRequestDB,
-		ctxTx:          ctxTx,
-		cache:          redis2.NewGroupCacheRedis(rdb, localCache, groupDB, groupMemberDB, groupRequestDB, groupHash, redis2.GetRocksCacheOptions()),
+		groupDB:          groupDB,
+		groupMemberDB:    groupMemberDB,
+		groupRequestDB:   groupRequestDB,
+		groupPinnedMsgDB: groupPinnedMsgDB,
+		ctxTx:            ctxTx,
+		cache:            redis2.NewGroupCacheRedis(rdb, localCache, groupDB, groupMemberDB, groupRequestDB, groupHash, redis2.GetRocksCacheOptions()),
 	}
 }
 
 type groupDatabase struct {
-	groupDB        database.Group
-	groupMemberDB  database.GroupMember
-	groupRequestDB database.GroupRequest
-	ctxTx          tx.Tx
-	cache          cache.GroupCache
+	groupDB          database.Group
+	groupMemberDB    database.GroupMember
+	groupRequestDB   database.GroupRequest
+	groupPinnedMsgDB database.GroupPinnedMsg
+	ctxTx            tx.Tx
+	cache            cache.GroupCache
+}
+
+func (g *groupDatabase) PinGroupMessage(ctx context.Context, groupID string, msg *model.GroupPinnedMessage) ([]*model.GroupPinnedMessage, error) {
+	return g.groupPinnedMsgDB.Pin(ctx, groupID, msg)
+}
+
+func (g *groupDatabase) UnpinGroupMessage(ctx context.Context, groupID string, pinID string, seq int64) ([]*model.GroupPinnedMessage, error) {
+	return g.groupPinnedMsgDB.Unpin(ctx, groupID, pinID, seq)
+}
+
+func (g *groupDatabase) GetGroupPinnedMessages(ctx context.Context, groupID string) ([]*model.GroupPinnedMessage, error) {
+	return g.groupPinnedMsgDB.Get(ctx, groupID)
 }
 
 func (g *groupDatabase) FindJoinGroupID(ctx context.Context, userID string) ([]string, error) {

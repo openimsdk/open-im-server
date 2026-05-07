@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
@@ -48,6 +49,43 @@ type MessageRevoked struct {
 	SourceMessageSenderNickname string `json:"sourceMessageSenderNickname"`
 	SessionType                 int32  `json:"sessionType"`
 	Seq                         uint32 `json:"seq"`
+}
+
+// verifyUserStatus 校验发送方/接收方的全局账号状态。
+// 任意一方处于冻结(1)或黑名单(2)即拒绝消息发送/投递。
+// 通知类消息（NotificationBegin~NotificationEnd）和管理员发送方放行。
+func (m *msgServer) verifyUserStatus(ctx context.Context, data *msg.SendMsgReq) error {
+	if data == nil || data.MsgData == nil {
+		return nil
+	}
+	if data.MsgData.ContentType >= constant.NotificationBegin && data.MsgData.ContentType <= constant.NotificationEnd {
+		return nil
+	}
+	sendID := data.MsgData.SendID
+	if datautil.Contain(sendID, m.config.Share.IMAdminUserID...) {
+		return nil
+	}
+	if sendID != "" {
+		st, err := m.globalBlackDB.GetStatus(ctx, sendID)
+		if err != nil {
+			log.ZWarn(ctx, "verifyUserStatus: GetStatus(send) failed", err, "sendID", sendID)
+		} else if st == model.UserStatusFrozen || st == model.UserStatusBlacklist {
+			return servererrs.ErrUserBlocked.WithDetail("sender is restricted, status=" + strconv.Itoa(int(st)))
+		}
+	}
+	// 单聊：同时校验接收方状态；群聊接收方拦截在推送层处理
+	if data.MsgData.SessionType == constant.SingleChatType {
+		recvID := data.MsgData.RecvID
+		if recvID != "" && !datautil.Contain(recvID, m.config.Share.IMAdminUserID...) {
+			st, err := m.globalBlackDB.GetStatus(ctx, recvID)
+			if err != nil {
+				log.ZWarn(ctx, "verifyUserStatus: GetStatus(recv) failed", err, "recvID", recvID)
+			} else if st == model.UserStatusFrozen || st == model.UserStatusBlacklist {
+				return servererrs.ErrMsgReceiveNotAllowed.WrapMsg("receiver is restricted")
+			}
+		}
+	}
+	return nil
 }
 
 func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) error {

@@ -29,10 +29,14 @@ func NewUserGlobalBlackApi(blacklistDB controller.UserGlobalBlackDatabase, userD
 type addGlobalBlacklistReq struct {
 	UserIDs []string `json:"userIDs" binding:"required,min=1"`
 	Reason  string   `json:"reason"`
+	// Status 限制类型：1=冻结（可登录，不能收发消息）；2=黑名单（不可登录，自动踢下线）
+	Status int32 `json:"status" binding:"required,oneof=1 2"`
 }
 
 type removeGlobalBlacklistReq struct {
 	UserIDs []string `json:"userIDs" binding:"required,min=1"`
+	// Status 目标状态：0=恢复正常（同步从 blacklistDB 删除记录）；1=冻结；2=黑名单
+	Status int32 `json:"status" binding:"oneof=0 1 2"`
 }
 
 type getGlobalBlacklistReq struct {
@@ -45,6 +49,8 @@ type globalBlackItem struct {
 	OperatorID string `json:"operatorID"`
 	Reason     string `json:"reason"`
 	CreateTime int64  `json:"createTime"`
+	// Status 限制类型：1=冻结，2=黑名单
+	Status int32 `json:"status"`
 }
 
 type getGlobalBlacklistResp struct {
@@ -52,7 +58,8 @@ type getGlobalBlacklistResp struct {
 	Blacks []globalBlackItem `json:"blacks"`
 }
 
-// AddGlobalBlacklist 管理员将用户加入全局黑名单，并立即踢下线（所有平台 token 标记 KickedToken）
+// AddGlobalBlacklist 管理员设置用户限制状态。
+// Status=1（冻结）：可登录，但不能收发消息；Status=2（黑名单）：不可登录，自动踢下线，不能收发消息。
 func (b *UserGlobalBlackApi) AddGlobalBlacklist(c *gin.Context) {
 	var req addGlobalBlacklistReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -85,31 +92,44 @@ func (b *UserGlobalBlackApi) AddGlobalBlacklist(c *gin.Context) {
 			Nickname:   u.Nickname,
 			OperatorID: operatorID,
 			Reason:     req.Reason,
+			Status:     req.Status,
 		})
 	}
 	if err := b.blacklistDB.AddBlack(c, blacks); err != nil {
 		apiresp.GinError(c, err)
 		return
 	}
-	// 黑名单写入成功后，对每个被封禁用户的所有非管理员平台执行 force_logout：
-	// 1. 断开 WS 长连接（msggateway.KickUserOffline）
-	// 2. 将 Redis 中该平台的所有 token 标记为 KickedToken
-	for _, black := range blacks {
-		for platformID := range constant.PlatformID2Name {
-			if int32(platformID) == constant.AdminPlatformID {
-				continue
-			}
-			if err := b.authClient.ForceLogout(c, black.UserID, int32(platformID)); err != nil {
-				// 踢下线失败不阻断主流程，记录警告即可
-				log.ZWarn(c, "AddGlobalBlacklist: ForceLogout failed", err,
-					"userID", black.UserID, "platformID", platformID)
+	// 同步更新 user 集合中的状态字段
+	for _, userID := range req.UserIDs {
+		if err := b.userDB.UpdateByMap(c, userID, map[string]any{"status": req.Status}); err != nil {
+			log.ZWarn(c, "AddGlobalBlacklist: UpdateByMap status failed", err,
+				"userID", userID, "status", req.Status)
+		}
+	}
+	// 仅黑名单（Status=2）需要踢下线：断开 WS 长连接并将 token 标记为 KickedToken
+	if req.Status == model.UserStatusBlacklist {
+		for _, black := range blacks {
+			for platformID := range constant.PlatformID2Name {
+				if int32(platformID) == constant.AdminPlatformID {
+					continue
+				}
+				if err := b.authClient.ForceLogout(c, black.UserID, int32(platformID)); err != nil {
+					log.ZWarn(c, "AddGlobalBlacklist: ForceLogout failed", err,
+						"userID", black.UserID, "platformID", platformID)
+				}
 			}
 		}
 	}
 	apiresp.GinSuccess(c, nil)
 }
 
-// RemoveGlobalBlacklist 管理员从全局黑名单移除用户
+// RemoveGlobalBlacklist 管理员更新用户账号状态。
+// 执行顺序：
+//  1. 将 user 集合中的 status 字段更新为请求值
+//  2. 仅当 status == 0（恢复正常）时，才从 blacklistDB 删除该用户的限制记录
+//
+// 说明：blacklistDB 是 auth/msg 层的拦截依据；状态先落 user 集合，
+// 只有确认目标状态为"正常"时才清除黑名单记录，避免状态写入成功但记录未删导致仍被拦截。
 func (b *UserGlobalBlackApi) RemoveGlobalBlacklist(c *gin.Context) {
 	var req removeGlobalBlacklistReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -120,9 +140,19 @@ func (b *UserGlobalBlackApi) RemoveGlobalBlacklist(c *gin.Context) {
 		apiresp.GinError(c, err)
 		return
 	}
-	if err := b.blacklistDB.RemoveBlack(c, req.UserIDs); err != nil {
-		apiresp.GinError(c, err)
-		return
+	for _, userID := range req.UserIDs {
+		if err := b.userDB.UpdateByMap(c, userID, map[string]any{"status": req.Status}); err != nil {
+			log.ZError(c, "RemoveGlobalBlacklist: UpdateByMap status failed", err, "userID", userID, "status", req.Status)
+			apiresp.GinError(c, err)
+			return
+		}
+	}
+	// 只有目标状态为 0（正常）时才删除 blacklistDB 中的限制记录
+	if req.Status == model.UserStatusNormal {
+		if err := b.blacklistDB.RemoveBlack(c, req.UserIDs); err != nil {
+			apiresp.GinError(c, err)
+			return
+		}
 	}
 	apiresp.GinSuccess(c, nil)
 }
@@ -151,6 +181,7 @@ func (b *UserGlobalBlackApi) GetGlobalBlacklist(c *gin.Context) {
 			OperatorID: blk.OperatorID,
 			Reason:     blk.Reason,
 			CreateTime: blk.CreateTime.UnixMilli(),
+			Status:     blk.Status,
 		})
 	}
 	apiresp.GinSuccess(c, getGlobalBlacklistResp{Total: total, Blacks: items})
