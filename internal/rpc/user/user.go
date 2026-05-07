@@ -389,17 +389,15 @@ func (s *userServer) SetMsgReceiveSetting(ctx context.Context, req *pbuser.SetMs
 			"msgReceiveSetting", req.MsgReceiveSetting)
 		return nil, err
 	}
-	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	//s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
 	return &pbuser.SetMsgReceiveSettingResp{}, nil
 }
 
 // GetUserByPhone 根据精确手机号查询用户。
 //
-// phoneSearchVisibility=false（默认）时忽略 phone_visibility，任何人均可搜到。
-// phoneSearchVisibility=true 时按 phone_visibility 过滤：
-//   - Hidden(2)  → 非管理员不可搜到
-//   - Friends(1) → 仅好友/管理员可搜到
-//   - Public(0)  → 任何人均可搜到
+// phone_visibility 仅控制用户资料中手机号字段是否展示，不影响搜索本身：
+// 无论目标用户将手机号设置为何种可见性，只要手机号匹配就能找到该用户。
+// 返回的 UserInfo 中 phone 字段仍按 applyPhoneVisibility 规则处理。
 //
 // 返回空 userInfo 并不代表错误，调用方应以 nil userInfo 判断"未找到"。
 func (s *userServer) GetUserByPhone(ctx context.Context, req *pbuser.GetUserByPhoneReq) (*pbuser.GetUserByPhoneResp, error) {
@@ -413,7 +411,7 @@ func (s *userServer) GetUserByPhone(ctx context.Context, req *pbuser.GetUserByPh
 	dbUser, err := s.db.FindByPhone(ctx, req.Phone)
 	if err != nil {
 		if errs.ErrRecordNotFound.Is(err) {
-			// 手机号未注册，返回空响应而非错误，避免枚举攻击
+			// 手机号未注册，返回空响应而非错误
 			return &pbuser.GetUserByPhoneResp{}, nil
 		}
 		log.ZError(ctx, "GetUserByPhone: FindByPhone failed", err,
@@ -421,34 +419,14 @@ func (s *userServer) GetUserByPhone(ctx context.Context, req *pbuser.GetUserByPh
 		return nil, err
 	}
 
-	// 仅在 phoneSearchVisibility=true 时才按 phone_visibility 过滤，默认跳过
-	if s.config.RpcConfig.PhoneSearchVisibility {
-		callerID := mcontext.GetOpUserID(ctx)
-		isAdmin := datautil.Contain(callerID, s.config.Share.IMAdminUserID...)
-
-		switch dbUser.PhoneVisibility {
-		case tablerelation.PhoneVisibilityHidden:
-			// 完全隐藏：非管理员无法通过手机号搜到该用户
-			if !isAdmin {
-				return &pbuser.GetUserByPhoneResp{}, nil
-			}
-		case tablerelation.PhoneVisibilityFriends:
-			// 仅好友可搜索
-			if !isAdmin && callerID != dbUser.UserID {
-				isFriend, err := s.relationClient.IsFriend(ctx, callerID, dbUser.UserID)
-				if err != nil {
-					log.ZError(ctx, "GetUserByPhone: IsFriend failed", err,
-						"callerID", callerID, "targetUserID", dbUser.UserID)
-					return nil, err
-				}
-				if !isFriend {
-					return &pbuser.GetUserByPhoneResp{}, nil
-				}
-			}
-		}
-	}
-
 	pbUser := convert.UserDB2Pb(dbUser)
+	// 搜索者已知手机号（主动输入），仍对返回的资料字段应用可见性规则
+	viewerID := mcontext.GetOpUserID(ctx)
+	if err := s.applyPhoneVisibility(ctx, viewerID, []*sdkws.UserInfo{pbUser}, []*tablerelation.User{dbUser}); err != nil {
+		log.ZError(ctx, "GetUserByPhone: applyPhoneVisibility failed", err,
+			"opUserID", viewerID, "targetUserID", dbUser.UserID)
+		return nil, err
+	}
 	return &pbuser.GetUserByPhoneResp{UserInfo: pbUser}, nil
 }
 
