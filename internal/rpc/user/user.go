@@ -424,6 +424,37 @@ func (s *userServer) SetGroupInviteSetting(ctx context.Context, req *pbuser.SetG
 	return &pbuser.SetGroupInviteSettingResp{}, nil
 }
 
+// SetUserMsgBurnDuration 设置用户全局消息阅后即焚时长（秒）；0 表示关闭，要求 >=0。
+// 只允许本人或管理员操作。
+func (s *userServer) SetUserMsgBurnDuration(ctx context.Context, req *pbuser.SetUserMsgBurnDurationReq) (*pbuser.SetUserMsgBurnDurationResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("userID is required")
+	}
+	if req.MsgBurnDuration < 0 {
+		return nil, errs.ErrArgs.WrapMsg("msgBurnDuration must be >= 0 (seconds)")
+	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		log.ZWarn(ctx, "SetUserMsgBurnDuration: access denied", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		log.ZError(ctx, "SetUserMsgBurnDuration: user not found or db error", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if err := s.db.UpdateByMap(ctx, req.UserID, map[string]any{
+		"msg_burn_duration": req.MsgBurnDuration,
+	}); err != nil {
+		log.ZError(ctx, "SetUserMsgBurnDuration: UpdateByMap failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
+			"msgBurnDuration", req.MsgBurnDuration)
+		return nil, err
+	}
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	return &pbuser.SetUserMsgBurnDurationResp{}, nil
+}
+
 // GetUserByPhone 根据精确手机号查询用户。
 //
 // phone_visibility 仅控制用户资料中手机号字段是否展示，不影响搜索本身：
