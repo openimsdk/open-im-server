@@ -375,6 +375,14 @@ func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, 
 	return res, nil
 }
 
+func (u *UserMgo) Delete(ctx context.Context, userIDs []string) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+	_, err := u.coll.DeleteMany(ctx, bson.M{"user_id": bson.M{"$in": userIDs}})
+	return errs.Wrap(err)
+}
+
 func (u *UserMgo) SortQuery(ctx context.Context, userIDName map[string]string, asc bool) ([]*model.User, error) {
 	if len(userIDName) == 0 {
 		return nil, nil
