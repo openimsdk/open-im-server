@@ -95,13 +95,13 @@ func (d *DeleteUserApi) DeleteUser(c *gin.Context) {
 					"ownerUserID", req.UserID, "friendUserID", friendID)
 			}
 			// Remove from the friend's friend list
-			if _, err := d.friendClient.DeleteFriend(c, &relation.DeleteFriendReq{
-				OwnerUserID:  friendID,
-				FriendUserID: req.UserID,
-			}); err != nil {
-				log.ZWarn(c, "DeleteUser: DeleteFriend (friend→owner) failed", err,
-					"ownerUserID", friendID, "friendUserID", req.UserID)
-			}
+			//if _, err := d.friendClient.DeleteFriend(c, &relation.DeleteFriendReq{
+			//	OwnerUserID:  friendID,
+			//	FriendUserID: req.UserID,
+			//}); err != nil {
+			//	log.ZWarn(c, "DeleteUser: DeleteFriend (friend→owner) failed", err,
+			//		"ownerUserID", friendID, "friendUserID", req.UserID)
+			//}
 		}
 	}
 
