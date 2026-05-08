@@ -84,6 +84,9 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	if err := srv.registerClearUserMsg(); err != nil {
 		return err
 	}
+	if err := srv.registerClearBurnExpiredMsgs(); err != nil {
+		return err
+	}
 	log.ZDebug(ctx, "start cron task", "CronExecuteTime", config.CronTask.CronExecuteTime)
 	srv.cron.Start()
 	<-ctx.Done()
@@ -120,4 +123,9 @@ func (c *cronServer) registerDeleteMsg() error {
 func (c *cronServer) registerClearUserMsg() error {
 	_, err := c.cron.AddFunc(c.config.CronTask.CronExecuteTime, c.clearUserMsg)
 	return errs.WrapMsg(err, "failed to register clear user msg cron task")
+}
+
+func (c *cronServer) registerClearBurnExpiredMsgs() error {
+	_, err := c.cron.AddFunc(c.config.CronTask.CronExecuteTime, c.clearBurnExpiredMsgs)
+	return errs.WrapMsg(err, "failed to register clear burn expired msgs cron task")
 }

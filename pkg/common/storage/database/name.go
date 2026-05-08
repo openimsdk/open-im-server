@@ -23,4 +23,5 @@ const (
 	SignalInvitationName    = "signal_invitation"
 	SignalRecordName        = "signal_record"
 	SpamReportName          = "spam_report"
+	MsgBurnDeadlineName     = "msg_burn_deadline"
 )

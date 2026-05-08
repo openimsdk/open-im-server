@@ -17,9 +17,12 @@ package msg
 import (
 	"context"
 	"errors"
+	"time"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
@@ -126,6 +129,7 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 		ContentType:    conversation.ConversationType,
 	}
 	m.webhookAfterSingleMsgRead(ctx, &m.config.WebhooksConfig.AfterSingleMsgRead, reqCallback)
+	m.recordBurnDeadlines(ctx, conversation, req.UserID, req.Seqs)
 	m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID,
 		m.conversationAndGetRecvID(conversation, req.UserID), req.Seqs, hasReadSeq)
 	return &msg.MarkMsgsAsReadResp{}, nil
@@ -166,6 +170,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 			}
 			hasReadSeq = req.HasReadSeq
 		}
+		m.recordBurnDeadlines(ctx, conversation, req.UserID, seqs)
 		m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID,
 			m.conversationAndGetRecvID(conversation, req.UserID), seqs, hasReadSeq)
 	} else if conversation.ConversationType == constant.ReadGroupChatType ||
@@ -199,6 +204,52 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		m.webhookAfterGroupMsgRead(ctx, &m.config.WebhooksConfig.AfterGroupMsgRead, reqCall)
 	}
 	return &msg.MarkConversationAsReadResp{}, nil
+}
+
+// recordBurnDeadlines 在「单聊」场景下，根据对端的 MsgBurnDuration 为本次已读的每条消息
+// 记录一份「阅后即焚」截止时间到 mongo。后续由 cron 推进 min_seq 让消息从该用户视图消失。
+//
+// 设计要点：
+//  1. 仅单聊：群聊有自己的不同语义（多接收方 + 仅 watermark 已读），暂不在此实现。
+//  2. 仅当对端 MsgBurnDuration > 0 时才记录；为 0 表示对端未开启该功能。
+//  3. 同一 (UserID, ConversationID, Seq) 已存在则不覆盖：保证以「首次阅读时刻」为基准，
+//     避免多端重复 MarkAsRead 导致 deadline 被往后推。
+//  4. 失败仅记录日志，不影响主流程的已读语义。
+func (m *msgServer) recordBurnDeadlines(ctx context.Context, conv *conversation.Conversation, readerUserID string, seqs []int64) {
+	if len(seqs) == 0 {
+		return
+	}
+	if conv.ConversationType != constant.SingleChatType {
+		return
+	}
+	peerID := m.conversationAndGetRecvID(conv, readerUserID)
+	if peerID == "" || peerID == readerUserID {
+		return
+	}
+	peerInfo, err := m.UserLocalCache.GetUserInfo(ctx, peerID)
+	if err != nil {
+		log.ZWarn(ctx, "recordBurnDeadlines GetUserInfo failed", err, "peerID", peerID)
+		return
+	}
+	if peerInfo == nil || peerInfo.MsgBurnDuration <= 0 {
+		return
+	}
+	now := time.Now().UnixMilli()
+	deadline := now + int64(peerInfo.MsgBurnDuration)*1000
+	items := make([]*model.MsgBurnDeadline, 0, len(seqs))
+	for _, seq := range seqs {
+		items = append(items, &model.MsgBurnDeadline{
+			UserID:         readerUserID,
+			ConversationID: conv.ConversationID,
+			Seq:            seq,
+			DeadlineMs:     deadline,
+			CreateTime:     now,
+		})
+	}
+	if err := m.msgBurnDeadlineDB.UpsertIfAbsent(ctx, items); err != nil {
+		log.ZError(ctx, "recordBurnDeadlines UpsertIfAbsent failed", err,
+			"userID", readerUserID, "conversationID", conv.ConversationID, "seqs", seqs)
+	}
 }
 
 func (m *msgServer) sendMarkAsReadNotification(ctx context.Context, conversationID string, sessionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) {
