@@ -206,15 +206,16 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 	return &msg.MarkConversationAsReadResp{}, nil
 }
 
-// recordBurnDeadlines 在「单聊」场景下，根据对端的 MsgBurnDuration 为本次已读的每条消息
-// 记录一份「阅后即焚」截止时间到 mongo。后续由 cron 推进 min_seq 让消息从该用户视图消失。
+// recordBurnDeadlines 在「单聊」场景下，根据对端（发送者）的 MsgBurnDuration
+// 为本次已读的每条消息同时给接收者和发送者各记录一份「阅后即焚」截止时间。
+// cron 到期后会分别推进两人各自的 min_seq，双方都看不到该消息。
 //
 // 设计要点：
-//  1. 仅单聊：群聊有自己的不同语义（多接收方 + 仅 watermark 已读），暂不在此实现。
-//  2. 仅当对端 MsgBurnDuration > 0 时才记录；为 0 表示对端未开启该功能。
-//  3. 同一 (UserID, ConversationID, Seq) 已存在则不覆盖：保证以「首次阅读时刻」为基准，
-//     避免多端重复 MarkAsRead 导致 deadline 被往后推。
-//  4. 失败仅记录日志，不影响主流程的已读语义。
+//  1. 仅单聊。
+//  2. 仅当发送者 MsgBurnDuration > 0 时才记录；0 表示未开启。
+//  3. $setOnInsert 确保同一 (UserID, ConversationID, Seq) 已存在时不覆盖，
+//     以「首次阅读时刻」为 deadline 基准，多端重复 MarkAsRead 不会往后推。
+//  4. 失败仅记录日志，不影响已读主流程。
 func (m *msgServer) recordBurnDeadlines(ctx context.Context, conv *conversation.Conversation, readerUserID string, seqs []int64) {
 	if len(seqs) == 0 {
 		return
@@ -236,19 +237,30 @@ func (m *msgServer) recordBurnDeadlines(ctx context.Context, conv *conversation.
 	}
 	now := time.Now().UnixMilli()
 	deadline := now + int64(peerInfo.MsgBurnDuration)*1000
-	items := make([]*model.MsgBurnDeadline, 0, len(seqs))
+	// 每条消息同时为接收者和发送者各写一条 deadline，双方消息同步焚毁。
+	items := make([]*model.MsgBurnDeadline, 0, len(seqs)*2)
 	for _, seq := range seqs {
-		items = append(items, &model.MsgBurnDeadline{
-			UserID:         readerUserID,
-			ConversationID: conv.ConversationID,
-			Seq:            seq,
-			DeadlineMs:     deadline,
-			CreateTime:     now,
-		})
+		items = append(items,
+			&model.MsgBurnDeadline{
+				UserID:         readerUserID,
+				ConversationID: conv.ConversationID,
+				Seq:            seq,
+				DeadlineMs:     deadline,
+				CreateTime:     now,
+			},
+			&model.MsgBurnDeadline{
+				UserID:         peerID,
+				ConversationID: conv.ConversationID,
+				Seq:            seq,
+				DeadlineMs:     deadline,
+				CreateTime:     now,
+			},
+		)
 	}
 	if err := m.msgBurnDeadlineDB.UpsertIfAbsent(ctx, items); err != nil {
 		log.ZError(ctx, "recordBurnDeadlines UpsertIfAbsent failed", err,
-			"userID", readerUserID, "conversationID", conv.ConversationID, "seqs", seqs)
+			"readerUserID", readerUserID, "peerID", peerID,
+			"conversationID", conv.ConversationID, "seqs", seqs)
 	}
 }
 
