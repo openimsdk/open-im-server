@@ -359,6 +359,10 @@ func (u *UserApi) SetUserMsgBurnDuration(c *gin.Context) {
 	a2r.Call(c, user.UserClient.SetUserMsgBurnDuration, u.Client)
 }
 
+func (u *UserApi) SetDeleteAccountInterval(c *gin.Context) {
+	a2r.Call(c, user.UserClient.SetDeleteAccountInterval, u.Client)
+}
+
 func (u *UserApi) GetUserPrivacySettings(c *gin.Context) {
 	a2r.Call(c, user.UserClient.GetUserPrivacySettings, u.Client)
 }

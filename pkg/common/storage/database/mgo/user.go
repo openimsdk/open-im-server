@@ -57,6 +57,11 @@ type UserMgo struct {
 }
 
 func (u *UserMgo) Create(ctx context.Context, users []*model.User) error {
+	for _, user := range users {
+		if user.DeleteAccountInterval == 0 {
+			user.DeleteAccountInterval = model.DefaultDeleteAccountIntervalSec
+		}
+	}
 	return mongoutil.InsertMany(ctx, u.coll, users)
 }
 

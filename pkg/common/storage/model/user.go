@@ -58,6 +58,10 @@ const (
 	UserStatusBlacklist int32 = 2
 )
 
+// DefaultDeleteAccountIntervalSec 删除账号等待间隔的系统默认值（18 个月，按 30 天/月折算）。
+// 注册时写入 MongoDB 的初始值；用户未显式修改时即为此值。
+const DefaultDeleteAccountIntervalSec int32 = 18 * 30 * 24 * 3600
+
 type User struct {
 	UserID             string    `bson:"user_id"`
 	Nickname           string    `bson:"nickname"`
@@ -81,6 +85,8 @@ type User struct {
 	Status int32 `bson:"status"`
 	// MsgBurnDuration 用户全局消息阅后即焚时长（秒）；0 表示关闭
 	MsgBurnDuration int32 `bson:"msg_burn_duration"`
+	// DeleteAccountInterval 删除账号间隔（秒）；0 表示关闭
+	DeleteAccountInterval int32 `bson:"delete_account_interval"`
 }
 
 func (u *User) GetNickname() string {

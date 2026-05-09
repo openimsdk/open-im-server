@@ -173,6 +173,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		userRouterGroup.POST("/set_group_invite_setting", u.SetGroupInviteSetting)
 		// 设置用户全局阅后即焚时长（秒），0 表示关闭
 		userRouterGroup.POST("/set_user_msg_burn_duration", u.SetUserMsgBurnDuration)
+		// 设置删除账号等待间隔（秒），0 表示使用系统默认（18个月）
+		userRouterGroup.POST("/set_delete_account_interval", u.SetDeleteAccountInterval)
 		// 批量查询阅后即焚、手机号可见性、音视频接收、全局/会话消息接收、群邀请等设置
 		userRouterGroup.POST("/get_user_privacy_settings", u.GetUserPrivacySettings)
 		// 根据手机号精确查找用户（phoneSearchVisibility=true 时遵守 phone_visibility 设置）

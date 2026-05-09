@@ -455,6 +455,36 @@ func (s *userServer) SetUserMsgBurnDuration(ctx context.Context, req *pbuser.Set
 	return &pbuser.SetUserMsgBurnDurationResp{}, nil
 }
 
+// SetDeleteAccountInterval 设置用户删除账号等待间隔（秒）；
+// 0 表示重置为系统默认（18个月），要求 >= 0。只允许本人或管理员操作。
+func (s *userServer) SetDeleteAccountInterval(ctx context.Context, req *pbuser.SetDeleteAccountIntervalReq) (*pbuser.SetDeleteAccountIntervalResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("userID is required")
+	}
+	if req.DeleteAccountInterval < 0 {
+		return nil, errs.ErrArgs.WrapMsg("deleteAccountInterval must be >= 0 (seconds)")
+	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		log.ZWarn(ctx, "SetDeleteAccountInterval: access denied", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		log.ZError(ctx, "SetDeleteAccountInterval: user not found or db error", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if err := s.db.UpdateByMap(ctx, req.UserID, map[string]any{
+		"delete_account_interval": req.DeleteAccountInterval,
+	}); err != nil {
+		log.ZError(ctx, "SetDeleteAccountInterval: UpdateByMap failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
+			"deleteAccountInterval", req.DeleteAccountInterval)
+		return nil, err
+	}
+	return &pbuser.SetDeleteAccountIntervalResp{}, nil
+}
+
 // GetUserPrivacySettings 返回当前登录用户（ctx opUserID）的隐私与接收相关设置。
 func (s *userServer) GetUserPrivacySettings(ctx context.Context, req *pbuser.GetUserPrivacySettingsReq) (*pbuser.GetUserPrivacySettingsResp, error) {
 	userID := mcontext.GetOpUserID(ctx)
@@ -468,13 +498,15 @@ func (s *userServer) GetUserPrivacySettings(ctx context.Context, req *pbuser.Get
 		return nil, err
 	}
 	u := users[0]
+
 	return &pbuser.GetUserPrivacySettingsResp{
-		MsgBurnDuration:    u.MsgBurnDuration,
-		PhoneVisibility:    u.PhoneVisibility,
-		CallAcceptSetting:  u.CallAcceptSetting,
-		GlobalRecvMsgOpt:   u.GlobalRecvMsgOpt,
-		MsgReceiveSetting:  u.MsgReceiveSetting,
-		GroupInviteSetting: u.GroupInviteSetting,
+		MsgBurnDuration:       u.MsgBurnDuration,
+		PhoneVisibility:       u.PhoneVisibility,
+		CallAcceptSetting:     u.CallAcceptSetting,
+		GlobalRecvMsgOpt:      u.GlobalRecvMsgOpt,
+		MsgReceiveSetting:     u.MsgReceiveSetting,
+		GroupInviteSetting:    u.GroupInviteSetting,
+		DeleteAccountInterval: u.DeleteAccountInterval,
 	}, nil
 }
 
