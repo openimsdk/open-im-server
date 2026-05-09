@@ -59,28 +59,32 @@ const (
 )
 
 type User struct {
-	UserID            string    `bson:"user_id"`
-	Nickname          string    `bson:"nickname"`
-	FaceURL           string    `bson:"face_url"`
-	Ex                string    `bson:"ex"`
-	AppMangerLevel    int32     `bson:"app_manger_level"`
-	GlobalRecvMsgOpt  int32     `bson:"global_recv_msg_opt"`
-	CreateTime        time.Time `bson:"create_time"`
-	FirstName         string    `bson:"first_name"`
-	LastName          string    `bson:"last_name"`
-	FullName          string    `bson:"full_name"`
-	Phone             string    `bson:"phone"`
-	AreaCode          string    `bson:"area_code"`
-	PhoneVisibility   int32     `bson:"phone_visibility"`
-	CallAcceptSetting int32     `bson:"call_accept_setting"`
-	MsgReceiveSetting int32     `bson:"msg_receive_setting"`
-	GroupInviteSetting int32    `bson:"group_invite_setting"`
+	UserID             string    `bson:"user_id"`
+	Nickname           string    `bson:"nickname"`
+	FaceURL            string    `bson:"face_url"`
+	Ex                 string    `bson:"ex"`
+	AppMangerLevel     int32     `bson:"app_manger_level"`
+	GlobalRecvMsgOpt   int32     `bson:"global_recv_msg_opt"`
+	CreateTime         time.Time `bson:"create_time"`
+	FirstName          string    `bson:"first_name"`
+	LastName           string    `bson:"last_name"`
+	FullName           string    `bson:"full_name"`
+	Phone              string    `bson:"phone"`
+	AreaCode           string    `bson:"area_code"`
+	PhoneVisibility    int32     `bson:"phone_visibility"`
+	CallAcceptSetting  int32     `bson:"call_accept_setting"`
+	MsgReceiveSetting  int32     `bson:"msg_receive_setting"`
+	GroupInviteSetting int32     `bson:"group_invite_setting"`
 	// CallRingtoneURL 用户自定义来电铃声 URL；对方来电时播放此铃声
 	CallRingtoneURL string `bson:"call_ringtone_url"`
 	// Status 账号状态：0=正常，1=冻结，2=黑名单
 	Status int32 `bson:"status"`
 	// MsgBurnDuration 用户全局消息阅后即焚时长（秒）；0 表示关闭
 	MsgBurnDuration int32 `bson:"msg_burn_duration"`
+	// CurLoginTime 当前（最近一次）登录时间；nil 表示从未登录
+	CurLoginTime *time.Time `bson:"cur_login_time"`
+	// LastLogoutTime 最近一次登出时间；nil 表示从未登出
+	LastLogoutTime *time.Time `bson:"last_logout_time"`
 }
 
 func (u *User) GetNickname() string {

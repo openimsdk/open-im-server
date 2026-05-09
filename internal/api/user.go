@@ -370,3 +370,13 @@ func (u *UserApi) GetUserByPhone(c *gin.Context) {
 func (u *UserApi) GetUsersByNickname(c *gin.Context) {
 	a2r.Call(c, user.UserClient.GetUsersByNickname, u.Client)
 }
+
+// UserLogin 记录当前用户的登录时间。
+func (u *UserApi) UserLogin(c *gin.Context) {
+	a2r.Call(c, user.UserClient.UserLogin, u.Client)
+}
+
+// UserLogout 记录当前用户的登出时间。
+func (u *UserApi) UserLogout(c *gin.Context) {
+	a2r.Call(c, user.UserClient.UserLogout, u.Client)
+}
