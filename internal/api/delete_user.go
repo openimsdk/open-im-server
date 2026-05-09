@@ -18,6 +18,7 @@ import (
 // It follows the same direct-DB pattern as UserGlobalBlackApi.
 type DeleteUserApi struct {
 	userDB         database.User
+	phoneSNDB      database.PhoneSN
 	authClient     *rpcli.AuthClient
 	groupClient    group.GroupClient
 	friendClient   relation.FriendClient
@@ -26,6 +27,7 @@ type DeleteUserApi struct {
 
 func NewDeleteUserApi(
 	userDB database.User,
+	phoneSNDB database.PhoneSN,
 	authClient *rpcli.AuthClient,
 	groupClient group.GroupClient,
 	friendClient relation.FriendClient,
@@ -33,6 +35,7 @@ func NewDeleteUserApi(
 ) *DeleteUserApi {
 	return &DeleteUserApi{
 		userDB:         userDB,
+		phoneSNDB:      phoneSNDB,
 		authClient:     authClient,
 		groupClient:    groupClient,
 		friendClient:   friendClient,
@@ -131,7 +134,14 @@ func (d *DeleteUserApi) DeleteUser(c *gin.Context) {
 		pageNumber++
 	}
 
-	// 5. Hard-delete user document from MongoDB.
+	// 5. Delete phone_sn_info record bound to this user's phone number.
+	if phone := users[0].Phone; phone != "" {
+		if err := d.phoneSNDB.DeleteByPhone(c, phone); err != nil {
+			log.ZWarn(c, "DeleteUser: DeleteByPhone failed", err, "userID", req.UserID, "phone", phone)
+		}
+	}
+
+	// 6. Hard-delete user document from MongoDB.
 	// Redis cache will become stale and expire via TTL; the user can no longer
 	// authenticate because their tokens were already invalidated in step 2.
 	if err := d.userDB.Delete(c, []string{req.UserID}); err != nil {

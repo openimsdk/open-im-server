@@ -17,4 +17,6 @@ type PhoneSN interface {
 	GetByPhone(ctx context.Context, phone string) (*model.PhoneSNInfo, error)
 	// Upsert 写入或更新 is_snd 与 user_id
 	Upsert(ctx context.Context, phone string, userID int64, isSnd bool) error
+	// DeleteByPhone 按手机号删除记录；记录不存在时不报错
+	DeleteByPhone(ctx context.Context, phone string) error
 }
