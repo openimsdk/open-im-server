@@ -81,10 +81,6 @@ type User struct {
 	Status int32 `bson:"status"`
 	// MsgBurnDuration 用户全局消息阅后即焚时长（秒）；0 表示关闭
 	MsgBurnDuration int32 `bson:"msg_burn_duration"`
-	// CurLoginTime 当前（最近一次）登录时间；nil 表示从未登录
-	CurLoginTime *time.Time `bson:"cur_login_time"`
-	// LastLogoutTime 最近一次登出时间；nil 表示从未登出
-	LastLogoutTime *time.Time `bson:"last_logout_time"`
 }
 
 func (u *User) GetNickname() string {
