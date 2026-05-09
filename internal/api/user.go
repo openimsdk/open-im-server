@@ -359,6 +359,10 @@ func (u *UserApi) SetUserMsgBurnDuration(c *gin.Context) {
 	a2r.Call(c, user.UserClient.SetUserMsgBurnDuration, u.Client)
 }
 
+func (u *UserApi) GetUserPrivacySettings(c *gin.Context) {
+	a2r.Call(c, user.UserClient.GetUserPrivacySettings, u.Client)
+}
+
 func (u *UserApi) GetUserByPhone(c *gin.Context) {
 	a2r.Call(c, user.UserClient.GetUserByPhone, u.Client)
 }

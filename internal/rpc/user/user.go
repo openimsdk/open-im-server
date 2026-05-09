@@ -455,6 +455,29 @@ func (s *userServer) SetUserMsgBurnDuration(ctx context.Context, req *pbuser.Set
 	return &pbuser.SetUserMsgBurnDurationResp{}, nil
 }
 
+// GetUserPrivacySettings 返回当前登录用户（ctx opUserID）的隐私与接收相关设置。
+func (s *userServer) GetUserPrivacySettings(ctx context.Context, req *pbuser.GetUserPrivacySettingsReq) (*pbuser.GetUserPrivacySettingsResp, error) {
+	userID := mcontext.GetOpUserID(ctx)
+	if userID == "" {
+		return nil, errs.ErrArgs.WrapMsg("opUserID is required")
+	}
+	users, err := s.db.FindWithError(ctx, []string{userID})
+	if err != nil {
+		log.ZError(ctx, "GetUserPrivacySettings: user not found or db error", err,
+			"opUserID", userID)
+		return nil, err
+	}
+	u := users[0]
+	return &pbuser.GetUserPrivacySettingsResp{
+		MsgBurnDuration:    u.MsgBurnDuration,
+		PhoneVisibility:    u.PhoneVisibility,
+		CallAcceptSetting:  u.CallAcceptSetting,
+		GlobalRecvMsgOpt:   u.GlobalRecvMsgOpt,
+		MsgReceiveSetting:  u.MsgReceiveSetting,
+		GroupInviteSetting: u.GroupInviteSetting,
+	}, nil
+}
+
 // GetUserByPhone 根据精确手机号查询用户。
 //
 // phone_visibility 仅控制用户资料中手机号字段是否展示，不影响搜索本身：
