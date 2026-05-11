@@ -29,6 +29,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
@@ -71,6 +72,7 @@ type userServer struct {
 	groupClient              *rpcli.GroupClient
 	relationClient           *rpcli.RelationClient
 	globalBlackDB            controller.UserGlobalBlackDatabase
+	userOfflineRecord        database.UserOfflineRecord
 }
 
 type Config struct {
@@ -122,6 +124,10 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	if err != nil {
 		return err
 	}
+	userOfflineRecordDB, err := mgo.NewUserOfflineRecordMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	u := &userServer{
 		online:                   redis.NewUserOnline(rdb),
@@ -132,9 +138,10 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 		config:                   config,
 		webhookClient:            webhook.NewWebhookClient(config.WebhooksConfig.URL),
 
-		groupClient:    rpcli.NewGroupClient(groupConn),
-		relationClient: rpcli.NewRelationClient(friendConn),
-		globalBlackDB:  controller.NewUserGlobalBlackDatabase(globalBlackMgo),
+		groupClient:       rpcli.NewGroupClient(groupConn),
+		relationClient:    rpcli.NewRelationClient(friendConn),
+		globalBlackDB:     controller.NewUserGlobalBlackDatabase(globalBlackMgo),
+		userOfflineRecord: userOfflineRecordDB,
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.db.InitOnce(context.Background(), users)
@@ -481,6 +488,18 @@ func (s *userServer) SetDeleteAccountInterval(ctx context.Context, req *pbuser.S
 			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
 			"deleteAccountInterval", req.DeleteAccountInterval)
 		return nil, err
+	}
+	// 若用户当前处于离线状态（user_offline_record 中有记录），将 offline_time 与
+	// delete_user_deadline 刷新为当前时刻及新截止时间，使倒计时从本次设置时刻重新起算。
+	now := time.Now()
+	interval := req.DeleteAccountInterval
+	if interval == 0 {
+		interval = tablerelation.DefaultDeleteAccountIntervalSec
+	}
+	newDeadline := now.Add(time.Duration(interval) * time.Second)
+	if err := s.userOfflineRecord.RefreshOfflineTime(ctx, req.UserID, now, newDeadline); err != nil {
+		log.ZWarn(ctx, "SetDeleteAccountInterval: RefreshOfflineTime failed", err,
+			"userID", req.UserID)
 	}
 	return &pbuser.SetDeleteAccountIntervalResp{}, nil
 }

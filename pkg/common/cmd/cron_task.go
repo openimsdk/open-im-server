@@ -33,10 +33,16 @@ type CronTaskCmd struct {
 func NewCronTaskCmd() *CronTaskCmd {
 	var cronTaskConfig tools.CronTaskConfig
 	ret := &CronTaskCmd{cronTaskConfig: &cronTaskConfig}
+	// ChatAPI 配置内嵌在 openim-crontask.yml 的 chatAPI 字段中，无需单独文件。
+	// 示例：
+	//   chatAPI:
+	//     address: "http://127.0.0.1:10008"
+	// adminToken 由 crontask 通过 IM auth-rpc GetAdminToken 自动获取，无需额外配置。
 	ret.configMap = map[string]any{
 		OpenIMCronTaskCfgFileName: &cronTaskConfig.CronTask,
 		ShareFileName:             &cronTaskConfig.Share,
 		DiscoveryConfigFilename:   &cronTaskConfig.Discovery,
+		MongodbConfigFileName:     &cronTaskConfig.MongodbConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

@@ -69,6 +69,9 @@ type UserDatabase interface {
 
 	SortQuery(ctx context.Context, userIDName map[string]string, asc bool) ([]*model.User, error)
 
+	// Delete permanently removes users and invalidates their cache entries.
+	Delete(ctx context.Context, userIDs []string) error
+
 	// CRUD user command
 	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error
 	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error
@@ -220,6 +223,18 @@ func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.T
 
 func (u *userDatabase) SortQuery(ctx context.Context, userIDName map[string]string, asc bool) ([]*model.User, error) {
 	return u.userDB.SortQuery(ctx, userIDName, asc)
+}
+
+func (u *userDatabase) Delete(ctx context.Context, userIDs []string) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+	return u.tx.Transaction(ctx, func(ctx context.Context) error {
+		if err := u.userDB.Delete(ctx, userIDs); err != nil {
+			return err
+		}
+		return u.cache.DelUsersInfo(userIDs...).ChainExecDel(ctx)
+	})
 }
 
 func (u *userDatabase) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error {
