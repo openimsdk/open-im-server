@@ -117,6 +117,44 @@ func (s *signalMgo) GetInvitationsByRoomIDs(ctx context.Context, roomIDs []strin
 	return mongoutil.Find[*model.SignalInvitation](ctx, s.invColl, bson.M{"room_id": bson.M{"$in": roomIDs}})
 }
 
+func (s *signalMgo) GetBusyUserIDs(ctx context.Context, userIDs []string) ([]string, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
+	filter := bson.M{
+		"$or": bson.A{
+			bson.M{"inviter_user_id": bson.M{"$in": userIDs}},
+			bson.M{"invitee_user_id_list": bson.M{"$in": userIDs}},
+		},
+	}
+	invitations, err := mongoutil.Find[*model.SignalInvitation](ctx, s.invColl, filter,
+		options.Find().SetProjection(bson.M{"inviter_user_id": 1, "invitee_user_id_list": 1}),
+	)
+	if err != nil {
+		return nil, err
+	}
+	requested := make(map[string]struct{}, len(userIDs))
+	for _, uid := range userIDs {
+		requested[uid] = struct{}{}
+	}
+	busySet := make(map[string]struct{})
+	for _, inv := range invitations {
+		if _, ok := requested[inv.InviterUserID]; ok {
+			busySet[inv.InviterUserID] = struct{}{}
+		}
+		for _, uid := range inv.InviteeUserIDList {
+			if _, ok := requested[uid]; ok {
+				busySet[uid] = struct{}{}
+			}
+		}
+	}
+	busy := make([]string, 0, len(busySet))
+	for uid := range busySet {
+		busy = append(busy, uid)
+	}
+	return busy, nil
+}
+
 func (s *signalMgo) CreateRecord(ctx context.Context, record *model.SignalRecord) error {
 	return mongoutil.InsertMany(ctx, s.recColl, []*model.SignalRecord{record})
 }
