@@ -627,6 +627,7 @@ func signalingMsgOptions() map[string]bool {
 	// IsNotNotification=false 表示"这是通知消息"，让 IsNotificationByMsg 返回 true
 	// 从而跳过 modifyMessageByUserMessageReceiveOpt 中的黑名单/好友关系等校验
 	datautil.SetSwitchFromOptions(opts, constant.IsNotNotification, false)
+	datautil.SetSwitchFromOptions(opts, constant.IsSendMsg, false)
 	datautil.SetSwitchFromOptions(opts, constant.IsHistory, false)
 	datautil.SetSwitchFromOptions(opts, constant.IsPersistent, false)
 	datautil.SetSwitchFromOptions(opts, constant.IsUnreadCount, false)
