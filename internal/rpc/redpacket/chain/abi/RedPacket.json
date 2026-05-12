@@ -1,0 +1,66 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "name": "packetId", "type": "uint256" },
+      { "indexed": true, "name": "creator", "type": "address" },
+      { "indexed": true, "name": "packetType", "type": "uint8" },
+      { "indexed": false, "name": "token", "type": "address" },
+      { "indexed": false, "name": "totalAmount", "type": "uint256" },
+      { "indexed": false, "name": "totalShares", "type": "uint256" },
+      { "indexed": false, "name": "expiryAt", "type": "uint256" }
+    ],
+    "name": "PacketCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "name": "packetId", "type": "uint256" },
+      { "indexed": true, "name": "claimer", "type": "address" },
+      { "indexed": false, "name": "amount", "type": "uint256" },
+      { "indexed": false, "name": "remainingAmount", "type": "uint256" },
+      { "indexed": false, "name": "remainingShares", "type": "uint256" },
+      { "indexed": false, "name": "authNonce", "type": "uint256" }
+    ],
+    "name": "PacketClaimed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "name": "packetId", "type": "uint256" },
+      { "indexed": true, "name": "operator", "type": "address" },
+      { "indexed": true, "name": "refundTo", "type": "address" },
+      { "indexed": false, "name": "amount", "type": "uint256" }
+    ],
+    "name": "PacketRefunded",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      { "name": "packetId", "type": "uint256" },
+      { "name": "claimer", "type": "address" },
+      { "name": "authNonce", "type": "uint256" },
+      { "name": "randomSeed", "type": "uint256" },
+      { "name": "deadline", "type": "uint256" }
+    ],
+    "name": "getSignMessage",
+    "outputs": [{ "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "name": "packetId", "type": "uint256" },
+      { "name": "authNonce", "type": "uint256" },
+      { "name": "randomSeed", "type": "uint256" },
+      { "name": "deadline", "type": "uint256" },
+      { "name": "signature", "type": "bytes" }
+    ],
+    "name": "claim",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
