@@ -11,6 +11,7 @@ serviceBinaries:
   openim-rpc-group: 1
   openim-rpc-friend: 1
   openim-rpc-msg: 1
+  openim-rpc-redpacket: 1
   openim-rpc-rtc: 1
   openim-rpc-third: 1
 toolBinaries:
