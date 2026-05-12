@@ -25,4 +25,5 @@ const (
 	SpamReportName          = "spam_report"
 	MsgBurnDeadlineName     = "msg_burn_deadline"
 	UserOfflineRecordName   = "user_offline_record"
+	UserMuteName            = "user_mute"
 )

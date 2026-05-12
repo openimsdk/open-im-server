@@ -221,6 +221,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		friendRouterGroup.POST("/get_self_unhandled_apply_count", f.GetSelfUnhandledApplyCount)
 		friendRouterGroup.POST("/get_pinned_friend_ids", f.GetPinnedFriendIDs)
 		friendRouterGroup.POST("/add_oneway_friend", f.AddOnewayFriend)
+		friendRouterGroup.POST("/set_mute", f.SetMute)
+		friendRouterGroup.POST("/get_mute", f.GetMute)
 	}
 
 	g := NewGroupApi(group.NewGroupClient(groupConn))

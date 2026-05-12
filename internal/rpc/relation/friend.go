@@ -16,6 +16,7 @@ package relation
 
 import (
 	"context"
+	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/notification/common_user"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
@@ -56,6 +57,7 @@ type friendServer struct {
 	db                 controller.FriendDatabase
 	blackDatabase      controller.BlackDatabase
 	globalBlackDB      controller.UserGlobalBlackDatabase
+	userMuteDB         controller.UserMuteDatabase
 	notificationSender *FriendNotificationSender
 	RegisterCenter     discovery.SvcDiscoveryRegistry
 	config             *Config
@@ -107,6 +109,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 
+	userMuteMongoDB, err := mgo.NewUserMuteMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+
 	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
@@ -144,6 +151,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 			redis.NewBlackCacheRedis(rdb, &config.LocalCacheConfig, blackMongoDB, redis.GetRocksCacheOptions()),
 		),
 		globalBlackDB:      controller.NewUserGlobalBlackDatabase(globalBlackMongoDB),
+		userMuteDB:         controller.NewUserMuteDatabase(userMuteMongoDB),
 		notificationSender: notificationSender,
 		RegisterCenter:     client,
 		config:             config,
@@ -716,6 +724,43 @@ func (s *friendServer) AddOnewayFriend(ctx context.Context, req *relation.ApplyT
 	//}
 	//s.notificationSender.Notification(ctx, req.FromUserID, req.FromUserID, constant.FriendApplicationApprovedNotification, &tips)
 	return &relation.ApplyToAddFriendResp{}, nil
+}
+
+func (s *friendServer) SetMute(ctx context.Context, req *relation.SetMuteReq) (*relation.SetMuteResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	if req.Duration == 0 {
+		return &relation.SetMuteResp{}, s.userMuteDB.Delete(ctx, req.OwnerUserID, req.TargetUserID)
+	}
+	var muteEndTime int64
+	if req.Duration != -1 {
+		muteEndTime = time.Now().Unix() + req.Duration
+	}
+	return &relation.SetMuteResp{}, s.userMuteDB.Upsert(ctx, &model.UserMute{
+		OwnerUserID: req.OwnerUserID,
+		MutedUserID: req.TargetUserID,
+		MuteEndTime: muteEndTime,
+		CreateTime:  time.Now(),
+	})
+}
+
+func (s *friendServer) GetMute(ctx context.Context, req *relation.GetMuteReq) (*relation.GetMuteResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	rec, err := s.userMuteDB.Get(ctx, req.OwnerUserID, req.TargetUserID)
+	if err != nil {
+		return nil, err
+	}
+	if rec == nil {
+		return &relation.GetMuteResp{Muted: false, MuteEndTime: 0}, nil
+	}
+	now := time.Now().Unix()
+	if rec.MuteEndTime != 0 && rec.MuteEndTime <= now {
+		return &relation.GetMuteResp{Muted: false, MuteEndTime: 0}, nil
+	}
+	return &relation.GetMuteResp{Muted: true, MuteEndTime: rec.MuteEndTime}, nil
 }
 
 func (s *friendServer) getCommonUserMap(ctx context.Context, userIDs []string) (map[string]common_user.CommonUser, error) {

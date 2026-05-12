@@ -126,3 +126,11 @@ func (o *FriendApi) GetPinnedFriendIDs(c *gin.Context) {
 func (o *FriendApi) AddOnewayFriend(c *gin.Context) {
 	a2r.Call(c, relation.FriendClient.AddOnewayFriend, o.Client)
 }
+
+func (o *FriendApi) SetMute(c *gin.Context) {
+	a2r.Call(c, relation.FriendClient.SetMute, o.Client)
+}
+
+func (o *FriendApi) GetMute(c *gin.Context) {
+	a2r.Call(c, relation.FriendClient.GetMute, o.Client)
+}

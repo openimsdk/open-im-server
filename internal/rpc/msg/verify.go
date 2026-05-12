@@ -304,25 +304,38 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, us
 
 	// 第三优先级：会话级接收偏好
 	singleOpt, err := m.ConversationLocalCache.GetSingleConversationRecvMsgOpt(ctx, userID, conversationID)
-	if errs.ErrRecordNotFound.Is(err) {
-		return true, nil
-	} else if err != nil {
+	if err != nil && !errs.ErrRecordNotFound.Is(err) {
 		return false, err
 	}
-	switch singleOpt {
-	case constant.ReceiveMessage:
-		return true, nil
-	case constant.NotReceiveMessage:
-		if datautil.Contain(int(pb.MsgData.ContentType), ExcludeContentType...) {
+	if err == nil {
+		switch singleOpt {
+		case constant.NotReceiveMessage:
+			if datautil.Contain(int(pb.MsgData.ContentType), ExcludeContentType...) {
+				return true, nil
+			}
+			return false, nil
+		case constant.ReceiveNotNotifyMessage:
+			if pb.MsgData.Options == nil {
+				pb.MsgData.Options = make(map[string]bool, 10)
+			}
+			datautil.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
 			return true, nil
 		}
-		return false, nil
-	case constant.ReceiveNotNotifyMessage:
-		if pb.MsgData.Options == nil {
-			pb.MsgData.Options = make(map[string]bool, 10)
+	}
+
+	// 第四优先级：用户静音设置（user_mute 集合，支持好友与非好友）
+	// 无论会话记录是否存在均检查，以支持对非好友的静音
+	if m.userMuteDB != nil {
+		muted, err := m.userMuteDB.IsMuted(ctx, userID, pb.MsgData.SendID)
+		if err != nil {
+			return false, err
 		}
-		datautil.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
-		return true, nil
+		if muted {
+			if pb.MsgData.Options == nil {
+				pb.MsgData.Options = make(map[string]bool, 10)
+			}
+			datautil.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
+		}
 	}
 	return true, nil
 }
