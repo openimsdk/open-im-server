@@ -38,6 +38,7 @@ type ConsumerHandler struct {
 	offlinePusher          offlinepush.OfflinePusher
 	onlinePusher           OnlinePusher
 	pushDatabase           controller.PushDatabase
+	groupMuteDB            controller.GroupMuteDatabase
 	onlineCache            *rpccache.OnlineCache
 	groupLocalCache        *rpccache.GroupLocalCache
 	conversationLocalCache *rpccache.ConversationLocalCache
@@ -50,7 +51,7 @@ type ConsumerHandler struct {
 }
 
 func NewConsumerHandler(ctx context.Context, config *Config, database controller.PushDatabase, offlinePusher offlinepush.OfflinePusher, rdb redis.UniversalClient,
-	client discovery.SvcDiscoveryRegistry) (*ConsumerHandler, error) {
+	client discovery.SvcDiscoveryRegistry, groupMuteDB controller.GroupMuteDatabase) (*ConsumerHandler, error) {
 	var consumerHandler ConsumerHandler
 	var err error
 	consumerHandler.pushConsumerGroup, err = kafka.NewMConsumerGroup(config.KafkaConfig.Build(), config.KafkaConfig.ToPushGroupID,
@@ -78,6 +79,7 @@ func NewConsumerHandler(ctx context.Context, config *Config, database controller
 	consumerHandler.groupClient = rpcli.NewGroupClient(groupConn)
 	consumerHandler.msgClient = rpcli.NewMsgClient(msgConn)
 	consumerHandler.conversationClient = rpcli.NewConversationClient(conversationConn)
+	consumerHandler.groupMuteDB = groupMuteDB
 
 	consumerHandler.offlinePusher = offlinePusher
 	consumerHandler.onlinePusher = NewOnlinePusher(client, config)
@@ -377,7 +379,27 @@ func (c *ConsumerHandler) filterGroupMessageOfflinePush(ctx context.Context, gro
 	if err != nil {
 		return nil, err
 	}
-	return needOfflinePushUserIDs, nil
+	if c.groupMuteDB == nil || len(needOfflinePushUserIDs) == 0 {
+		return needOfflinePushUserIDs, nil
+	}
+	muted, err := c.groupMuteDB.ListActiveMutedUserIDs(ctx, groupID, needOfflinePushUserIDs)
+	if err != nil {
+		return nil, err
+	}
+	if len(muted) == 0 {
+		return needOfflinePushUserIDs, nil
+	}
+	mutedSet := make(map[string]struct{}, len(muted))
+	for _, u := range muted {
+		mutedSet[u] = struct{}{}
+	}
+	out := make([]string, 0, len(needOfflinePushUserIDs))
+	for _, u := range needOfflinePushUserIDs {
+		if _, ok := mutedSet[u]; !ok {
+			out = append(out, u)
+		}
+	}
+	return out, nil
 }
 
 func (c *ConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (title, content string, opts *options.Opts, err error) {

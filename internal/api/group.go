@@ -185,3 +185,11 @@ func (o *GroupApi) UnpinGroupMessage(c *gin.Context) {
 func (o *GroupApi) GetGroupPinnedMessages(c *gin.Context) {
 	a2r.Call(c, group.GroupClient.GetGroupPinnedMessages, o.Client)
 }
+
+func (o *GroupApi) SetGroupMute(c *gin.Context) {
+	a2r.Call(c, group.GroupClient.SetGroupMute, o.Client)
+}
+
+func (o *GroupApi) GetGroupMute(c *gin.Context) {
+	a2r.Call(c, group.GroupClient.GetGroupMute, o.Client)
+}

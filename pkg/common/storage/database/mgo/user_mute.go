@@ -41,7 +41,8 @@ func (u *UserMuteMgo) Upsert(ctx context.Context, mute *model.UserMute) error {
 	}
 	update := bson.M{
 		"$set": bson.M{
-			"mute_end_time": mute.MuteEndTime,
+			"mute_end_time":   mute.MuteEndTime,
+			"mute_duration": mute.MuteDuration,
 		},
 		"$setOnInsert": bson.M{
 			"owner_user_id": mute.OwnerUserID,

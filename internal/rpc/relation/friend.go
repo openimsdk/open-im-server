@@ -738,10 +738,11 @@ func (s *friendServer) SetMute(ctx context.Context, req *relation.SetMuteReq) (*
 		muteEndTime = time.Now().Unix() + req.Duration
 	}
 	return &relation.SetMuteResp{}, s.userMuteDB.Upsert(ctx, &model.UserMute{
-		OwnerUserID: req.OwnerUserID,
-		MutedUserID: req.TargetUserID,
-		MuteEndTime: muteEndTime,
-		CreateTime:  time.Now(),
+		OwnerUserID:   req.OwnerUserID,
+		MutedUserID:   req.TargetUserID,
+		MuteEndTime:   muteEndTime,
+		MuteDuration:  req.Duration,
+		CreateTime:    time.Now(),
 	})
 }
 
@@ -754,13 +755,17 @@ func (s *friendServer) GetMute(ctx context.Context, req *relation.GetMuteReq) (*
 		return nil, err
 	}
 	if rec == nil {
-		return &relation.GetMuteResp{Muted: false, MuteEndTime: 0}, nil
+		return &relation.GetMuteResp{Muted: false, MuteEndTime: 0, Duration: 0}, nil
 	}
 	now := time.Now().Unix()
 	if rec.MuteEndTime != 0 && rec.MuteEndTime <= now {
-		return &relation.GetMuteResp{Muted: false, MuteEndTime: 0}, nil
+		return &relation.GetMuteResp{Muted: false, MuteEndTime: 0, Duration: 0}, nil
 	}
-	return &relation.GetMuteResp{Muted: true, MuteEndTime: rec.MuteEndTime}, nil
+	duration := rec.MuteDuration
+	if duration == 0 && rec.MuteEndTime == 0 {
+		duration = -1
+	}
+	return &relation.GetMuteResp{Muted: true, MuteEndTime: rec.MuteEndTime, Duration: duration}, nil
 }
 
 func (s *friendServer) getCommonUserMap(ctx context.Context, userIDs []string) (map[string]common_user.CommonUser, error) {

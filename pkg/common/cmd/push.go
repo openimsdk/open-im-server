@@ -43,6 +43,7 @@ func NewPushRpcCmd() *PushRpcCmd {
 		WebhooksConfigFileName:   &pushConfig.WebhooksConfig,
 		LocalCacheConfigFileName: &pushConfig.LocalCacheConfig,
 		DiscoveryConfigFilename:  &pushConfig.Discovery,
+		MongodbConfigFileName:    &pushConfig.MongodbConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

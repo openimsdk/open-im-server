@@ -7,7 +7,9 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	pbpush "github.com/openimsdk/protocol/push"
+	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery"
 	"google.golang.org/grpc"
@@ -32,6 +34,7 @@ type Config struct {
 	LocalCacheConfig   config.LocalCache
 	Discovery          config.Discovery
 	FcmConfigPath      string
+	MongodbConfig      config.Mongo `mapstructure:"mongodb"`
 
 	runTimeEnv string
 }
@@ -57,7 +60,17 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 
 	database := controller.NewPushDatabase(cacheModel, &config.KafkaConfig)
 
-	consumer, err := NewConsumerHandler(ctx, config, database, offlinePusher, rdb, client)
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
+	if err != nil {
+		return err
+	}
+	groupMuteMongo, err := mgo.NewGroupMuteMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	groupMuteDB := controller.NewGroupMuteDatabase(groupMuteMongo)
+
+	consumer, err := NewConsumerHandler(ctx, config, database, offlinePusher, rdb, client, groupMuteDB)
 	if err != nil {
 		return err
 	}

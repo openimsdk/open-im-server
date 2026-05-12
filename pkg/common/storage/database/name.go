@@ -13,6 +13,7 @@ const (
 	ConversationVersionName = "conversation_version"
 	GroupRequestName        = "group_request"
 	GroupPinnedMsgName      = "group_pinned_msg"
+	GroupMuteName           = "group_mute"
 	LogName                 = "log"
 	ObjectName              = "s3"
 	UserName                = "user"

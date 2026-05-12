@@ -264,6 +264,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		groupRouterGroup.POST("/pin_group_message", g.PinGroupMessage)
 		groupRouterGroup.POST("/unpin_group_message", g.UnpinGroupMessage)
 		groupRouterGroup.POST("/get_group_pinned_messages", g.GetGroupPinnedMessages)
+		groupRouterGroup.POST("/set_mute", g.SetGroupMute)
+		groupRouterGroup.POST("/get_mute", g.GetGroupMute)
 	}
 	// certificate
 	{
