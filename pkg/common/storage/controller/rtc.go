@@ -31,6 +31,8 @@ type RtcDatabase interface {
 	RemoveInvitee(ctx context.Context, roomID string, userID string) error
 	GetInvitationByGroupID(ctx context.Context, groupID string) (*model.SignalInvitation, error)
 	GetInvitationsByRoomIDs(ctx context.Context, roomIDs []string) ([]*model.SignalInvitation, error)
+	// GetBusyUserIDs returns the subset of userIDs that are currently in an active call.
+	GetBusyUserIDs(ctx context.Context, userIDs []string) ([]string, error)
 
 	CreateRecord(ctx context.Context, record *model.SignalRecord) error
 	SearchRecords(ctx context.Context, sendID, recvID string, sessionType int32, startTime, endTime int64, pagination pagination.Pagination) (int64, []*model.SignalRecord, error)
@@ -71,6 +73,10 @@ func (r *rtcDatabase) GetInvitationByGroupID(ctx context.Context, groupID string
 
 func (r *rtcDatabase) GetInvitationsByRoomIDs(ctx context.Context, roomIDs []string) ([]*model.SignalInvitation, error) {
 	return r.db.GetInvitationsByRoomIDs(ctx, roomIDs)
+}
+
+func (r *rtcDatabase) GetBusyUserIDs(ctx context.Context, userIDs []string) ([]string, error) {
+	return r.db.GetBusyUserIDs(ctx, userIDs)
 }
 
 func (r *rtcDatabase) CreateRecord(ctx context.Context, record *model.SignalRecord) error {

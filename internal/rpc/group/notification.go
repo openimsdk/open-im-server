@@ -852,6 +852,32 @@ func (g *NotificationSender) GroupMemberSetToAdminNotification(ctx context.Conte
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberSetToAdminNotification, tips)
 }
 
+// GroupMessagePinnedNotification 通知群成员有消息被置顶或取消置顶
+// pinType: 1=置顶, 2=取消置顶
+func (g *NotificationSender) GroupMessagePinnedNotification(ctx context.Context, groupID string, pinType int32,
+	pinned *sdkws.GroupPinnedMsgInfo, pinnedList []*sdkws.GroupPinnedMsgInfo) {
+	var err error
+	defer func() {
+		if err != nil {
+			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
+		}
+	}()
+	groupInfo, err := g.getGroupInfo(ctx, groupID)
+	if err != nil {
+		return
+	}
+	tips := &sdkws.GroupMessagePinnedTips{
+		Group:      groupInfo,
+		Type:       pinType,
+		PinnedMsg:  pinned,
+		PinnedList: pinnedList,
+	}
+	if err = g.fillOpUser(ctx, &tips.OpUser, groupID); err != nil {
+		return
+	}
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), groupID, constant.GroupMessagePinnedNotification, tips)
+}
+
 func (g *NotificationSender) GroupMemberSetToOrdinaryUserNotification(ctx context.Context, groupID, groupMemberUserID string) {
 	var err error
 	defer func() {

@@ -48,6 +48,14 @@ func (p *phoneSNMgo) GetByPhone(ctx context.Context, phone string) (*model.Phone
 	return doc, nil
 }
 
+func (p *phoneSNMgo) DeleteByPhone(ctx context.Context, phone string) error {
+	if phone == "" {
+		return nil
+	}
+	_, err := p.coll.DeleteOne(ctx, bson.M{"phone": phone})
+	return errs.Wrap(err)
+}
+
 func (p *phoneSNMgo) Upsert(ctx context.Context, phone string, userID int64, isSnd bool) error {
 	if phone == "" {
 		return errs.ErrArgs.WrapMsg("phone is empty")

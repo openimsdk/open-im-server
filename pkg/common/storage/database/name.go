@@ -12,6 +12,7 @@ const (
 	GroupJoinVersionName    = "group_join_version"
 	ConversationVersionName = "conversation_version"
 	GroupRequestName        = "group_request"
+	GroupPinnedMsgName      = "group_pinned_msg"
 	LogName                 = "log"
 	ObjectName              = "s3"
 	UserName                = "user"
@@ -22,4 +23,6 @@ const (
 	SignalInvitationName    = "signal_invitation"
 	SignalRecordName        = "signal_record"
 	SpamReportName          = "spam_report"
+	MsgBurnDeadlineName     = "msg_burn_deadline"
+	UserOfflineRecordName   = "user_offline_record"
 )

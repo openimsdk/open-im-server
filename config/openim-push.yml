@@ -18,7 +18,7 @@ prometheus:
 
 maxConcurrentWorkers: 3
 #Use geTui for offline push notifications, or choose fcm or jpush; corresponding configuration settings must be specified.
-enable: geTui
+enable: fcm
 geTui:
   pushUrl: https://restapi.getui.com/v2/$appId
   masterSecret:
@@ -28,7 +28,7 @@ geTui:
   channelName:
 fcm:
   # Prioritize using file paths. If the file path is empty, use URL
-  filePath:   # File path is concatenated with the parameters passed in through - c(`mage` default pass in `config/`) and filePath.
+  filePath: sokim-firebase-adminsdk.json  # File path is concatenated with the parameters passed in through - c(`mage` default pass in `config/`) and filePath.
   authURL:   #  Must start with https or http.
 jpush:
   appKey:

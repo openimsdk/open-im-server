@@ -78,6 +78,8 @@ func FriendsDB2Pb(ctx context.Context, friendsDB []*model.Friend, getUsers func(
 		friendPb.FriendUser.Nickname = users[friend.FriendUserID].Nickname
 		friendPb.FriendUser.FaceURL = users[friend.FriendUserID].FaceURL
 		friendPb.FriendUser.Ex = users[friend.FriendUserID].Ex
+		friendPb.FriendUser.FirstName = users[friend.FriendUserID].FirstName
+		friendPb.FriendUser.LastName = users[friend.FriendUserID].LastName
 		friendPb.CreateTime = friend.CreateTime.Unix()
 		friendPb.IsPinned = friend.IsPinned
 		friendPb.IsMute = friend.IsMuted
@@ -88,9 +90,9 @@ func FriendsDB2Pb(ctx context.Context, friendsDB []*model.Friend, getUsers func(
 	return friendsPb, nil
 }
 
-func FriendOnlyDB2PbOnly(friendsDB []*model.Friend) []*relation.FriendInfoOnly {
+func FriendOnlyDB2PbOnly(friendsDB []*model.Friend, users map[string]*sdkws.UserInfo) []*relation.FriendInfoOnly {
 	return datautil.Slice(friendsDB, func(f *model.Friend) *relation.FriendInfoOnly {
-		return &relation.FriendInfoOnly{
+		info := &relation.FriendInfoOnly{
 			OwnerUserID:    f.OwnerUserID,
 			FriendUserID:   f.FriendUserID,
 			Remark:         f.Remark,
@@ -103,6 +105,11 @@ func FriendOnlyDB2PbOnly(friendsDB []*model.Friend) []*relation.FriendInfoOnly {
 			MuteDuration:   f.MuteDuration,
 			MuteEndTime:    f.MuteEndTime,
 		}
+		if u, ok := users[f.FriendUserID]; ok {
+			info.FirstName = u.FirstName
+			info.LastName = u.LastName
+		}
+		return info
 	})
 }
 

@@ -38,6 +38,9 @@ type SignalDatabase interface {
 	GetInvitationByGroupID(ctx context.Context, groupID string) (*model.SignalInvitation, error)
 	// GetInvitationsByRoomIDs retrieves invitations for the given room IDs.
 	GetInvitationsByRoomIDs(ctx context.Context, roomIDs []string) ([]*model.SignalInvitation, error)
+	// GetBusyUserIDs returns the subset of userIDs that are currently involved in an active call
+	// (either as inviter or as invitee in a pending invitation).
+	GetBusyUserIDs(ctx context.Context, userIDs []string) ([]string, error)
 
 	// CreateRecord stores a completed call record.
 	CreateRecord(ctx context.Context, record *model.SignalRecord) error

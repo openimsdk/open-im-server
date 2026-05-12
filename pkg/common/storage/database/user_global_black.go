@@ -17,6 +17,8 @@ type UserGlobalBlack interface {
 	Find(ctx context.Context, userIDs []string) ([]*model.UserGlobalBlack, error)
 	// IsBlocked 检查单个用户是否在黑名单
 	IsBlocked(ctx context.Context, userID string) (bool, error)
+	// GetStatus 返回用户限制状态：0=正常，1=冻结，2=黑名单
+	GetStatus(ctx context.Context, userID string) (int32, error)
 	// Page 分页查询黑名单列表
 	Page(ctx context.Context, pagination pagination.Pagination) (count int64, blacks []*model.UserGlobalBlack, err error)
 }

@@ -42,22 +42,51 @@ const (
 	MsgReceiveSettingNobody  int32 = 2
 )
 
+// GroupInviteSetting 群邀请权限枚举。
+// 0=所有人可邀请, 1=仅好友可邀请, 2=所有人不可邀请
+const (
+	GroupInviteSettingPublic  int32 = 0
+	GroupInviteSettingFriends int32 = 1
+	GroupInviteSettingNobody  int32 = 2
+)
+
+// UserStatus 用户账号状态枚举。
+// 0=正常；1=冻结（可登录，不能收发消息）；2=黑名单（不可登录，自动踢下线，不能收发消息）
+const (
+	UserStatusNormal    int32 = 0
+	UserStatusFrozen    int32 = 1
+	UserStatusBlacklist int32 = 2
+)
+
+// DefaultDeleteAccountIntervalSec 删除账号等待间隔的系统默认值（18 个月，按 30 天/月折算）。
+// 注册时写入 MongoDB 的初始值；用户未显式修改时即为此值。
+const DefaultDeleteAccountIntervalSec int32 = 18 * 30 * 24 * 3600
+
 type User struct {
-	UserID           string    `bson:"user_id"`
-	Nickname         string    `bson:"nickname"`
-	FaceURL          string    `bson:"face_url"`
-	Ex               string    `bson:"ex"`
-	AppMangerLevel   int32     `bson:"app_manger_level"`
-	GlobalRecvMsgOpt int32     `bson:"global_recv_msg_opt"`
-	CreateTime       time.Time `bson:"create_time"`
-	// Phone 用户手机号（明文，仅服务端留存，下发时按 PhoneVisibility 过滤）
-	Phone string `bson:"phone"`
-	// PhoneVisibility 0=所有人可见 1=仅好友可见 2=隐藏
-	PhoneVisibility int32 `bson:"phone_visibility"`
-	// CallAcceptSetting 0=所有人可发起 1=仅好友可发起 2=不接受任何通话
-	CallAcceptSetting int32 `bson:"call_accept_setting"`
-	// MsgReceiveSetting 0=所有人可发送 1=仅好友可发送 2=所有人不可发送
-	MsgReceiveSetting int32 `bson:"msg_receive_setting"`
+	UserID             string    `bson:"user_id"`
+	Nickname           string    `bson:"nickname"`
+	FaceURL            string    `bson:"face_url"`
+	Ex                 string    `bson:"ex"`
+	AppMangerLevel     int32     `bson:"app_manger_level"`
+	GlobalRecvMsgOpt   int32     `bson:"global_recv_msg_opt"`
+	CreateTime         time.Time `bson:"create_time"`
+	FirstName          string    `bson:"first_name"`
+	LastName           string    `bson:"last_name"`
+	FullName           string    `bson:"full_name"`
+	Phone              string    `bson:"phone"`
+	AreaCode           string    `bson:"area_code"`
+	PhoneVisibility    int32     `bson:"phone_visibility"`
+	CallAcceptSetting  int32     `bson:"call_accept_setting"`
+	MsgReceiveSetting  int32     `bson:"msg_receive_setting"`
+	GroupInviteSetting int32     `bson:"group_invite_setting"`
+	// CallRingtoneURL 用户自定义来电铃声 URL；对方来电时播放此铃声
+	CallRingtoneURL string `bson:"call_ringtone_url"`
+	// Status 账号状态：0=正常，1=冻结，2=黑名单
+	Status int32 `bson:"status"`
+	// MsgBurnDuration 用户全局消息阅后即焚时长（秒）；0 表示关闭
+	MsgBurnDuration int32 `bson:"msg_burn_duration"`
+	// DeleteAccountInterval 删除账号间隔（秒）；0 表示关闭
+	DeleteAccountInterval int32 `bson:"delete_account_interval"`
 }
 
 func (u *User) GetNickname() string {

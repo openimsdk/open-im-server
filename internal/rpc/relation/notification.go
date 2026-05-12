@@ -282,6 +282,19 @@ func (f *FriendNotificationSender) FriendsInfoUpdateNotification(ctx context.Con
 	f.Notification(ctx, toUserID, toUserID, constant.FriendsInfoUpdateNotification, &tips)
 }
 
+// FriendAddedOnewayNotification silently notifies ownerUserID that friendUserID has been added
+// to their friend list (one-way, no consent from friendUserID required).
+// isSendMsg=false ensures no visible message appears in either user's conversation list.
+func (f *FriendNotificationSender) FriendAddedOnewayNotification(ctx context.Context, ownerUserID, friendUserID string) {
+	tips := sdkws.FriendsInfoUpdateTips{
+		FromToUserID: &sdkws.FromToUserID{ToUserID: ownerUserID},
+		FriendIDs:    []string{friendUserID},
+	}
+	f.setSortVersion(ctx, &tips.FriendVersion, &tips.FriendVersionID,
+		database.FriendVersionName, ownerUserID, &tips.FriendSortVersion)
+	f.Notification(ctx, ownerUserID, ownerUserID, constant.FriendsInfoUpdateNotification, &tips)
+}
+
 func (f *FriendNotificationSender) BlackAddedNotification(ctx context.Context, req *relation.AddBlackReq) {
 	tips := sdkws.BlackAddedTips{FromToUserID: &sdkws.FromToUserID{}}
 	tips.FromToUserID.FromUserID = req.OwnerUserID

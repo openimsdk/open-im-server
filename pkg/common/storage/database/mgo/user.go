@@ -16,9 +16,10 @@ package mgo
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"time"
 
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/db/mongoutil"
@@ -56,6 +57,11 @@ type UserMgo struct {
 }
 
 func (u *UserMgo) Create(ctx context.Context, users []*model.User) error {
+	for _, user := range users {
+		if user.DeleteAccountInterval == 0 {
+			user.DeleteAccountInterval = model.DefaultDeleteAccountIntervalSec
+		}
+	}
 	return mongoutil.InsertMany(ctx, u.coll, users)
 }
 
@@ -63,7 +69,38 @@ func (u *UserMgo) UpdateByMap(ctx context.Context, userID string, args map[strin
 	if len(args) == 0 {
 		return nil
 	}
-	return mongoutil.UpdateOne(ctx, u.coll, bson.M{"user_id": userID}, bson.M{"$set": args}, true)
+	filter := bson.M{"user_id": userID}
+	update := bson.M{"$set": args}
+	if err := mongoutil.UpdateOne(ctx, u.coll, filter, update, true); err != nil {
+		return err
+	}
+	// Keep user attributes in sync for consumers that read from the "attribute" collection.
+	// Only sync the allowed attribute fields.
+	attributeSet := make(map[string]any)
+	for _, key := range []string{
+		"nickname",
+		"first_name",
+		"last_name",
+		"full_name",
+		"remark",
+		"face_url",
+		"phone_number",
+		"area_code",
+	} {
+		if v, ok := args[key]; ok {
+			attributeSet[key] = v
+		}
+	}
+	//// user collection uses "phone"; attribute collection uses "phone_number".
+	if v, ok := args["phone"]; ok {
+		attributeSet["phone_number"] = v
+	}
+	if len(attributeSet) == 0 {
+		return nil
+	}
+
+	attributeColl := u.coll.Database().Collection("attribute")
+	return mongoutil.UpdateOne(ctx, attributeColl, filter, bson.M{"$set": attributeSet}, true)
 }
 
 func (u *UserMgo) Find(ctx context.Context, userIDs []string) (users []*model.User, err error) {
@@ -341,6 +378,14 @@ func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, 
 		res[item.Date] = item.Count
 	}
 	return res, nil
+}
+
+func (u *UserMgo) Delete(ctx context.Context, userIDs []string) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+	_, err := u.coll.DeleteMany(ctx, bson.M{"user_id": bson.M{"$in": userIDs}})
+	return errs.Wrap(err)
 }
 
 func (u *UserMgo) SortQuery(ctx context.Context, userIDName map[string]string, asc bool) ([]*model.User, error) {

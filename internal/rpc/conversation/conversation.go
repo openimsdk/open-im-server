@@ -23,6 +23,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	dbModel "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
@@ -47,6 +48,7 @@ import (
 type conversationServer struct {
 	pbconversation.UnimplementedConversationServer
 	conversationDatabase controller.ConversationDatabase
+	msgBurnDeadlineDB    database.MsgBurnDeadline
 
 	conversationNotificationSender *ConversationNotificationSender
 	config                         *Config
@@ -79,6 +81,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	msgBurnDeadlineDB, err := mgo.NewMsgBurnDeadlineMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
@@ -97,9 +103,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		conversationNotificationSender: NewConversationNotificationSender(&config.NotificationConfig, msgClient),
 		conversationDatabase: controller.NewConversationDatabase(conversationDB,
 			redis.NewConversationRedis(rdb, &config.LocalCacheConfig, redis.GetRocksCacheOptions(), conversationDB), mgocli.GetTx()),
-		userClient:  rpcli.NewUserClient(userConn),
-		groupClient: rpcli.NewGroupClient(groupConn),
-		msgClient:   msgClient,
+		msgBurnDeadlineDB: msgBurnDeadlineDB,
+		userClient:        rpcli.NewUserClient(userConn),
+		groupClient:       rpcli.NewGroupClient(groupConn),
+		msgClient:         msgClient,
 	})
 	return nil
 }
@@ -822,4 +829,52 @@ func (c *conversationServer) setConversationMinSeqAndLatestMsgDestructTime(ctx c
 	}
 	c.conversationNotificationSender.ConversationChangeNotification(ctx, ownerUserID, []string{conversationID})
 	return nil
+}
+
+// ClearBurnExpiredMsgs 处理「阅后即焚」过期消息：
+//  1. 从 msg_burn_deadline 中拉取一批过期分组（按 user/conversation 聚合，含每组最大 seq）。
+//  2. 对每个分组把用户在该会话上的 min_seq 推进到 max(过期 seq) + 1。
+//  3. 同步更新 conversation 文档的 min_seq 字段并下发会话变更通知。
+//  4. 删除已处理的 deadline 记录。
+//
+// 单次最多处理 req.Limit 个分组；若返回的 count == limit，cron 可继续触发。
+func (c *conversationServer) ClearBurnExpiredMsgs(ctx context.Context, req *pbconversation.ClearBurnExpiredMsgsReq) (*pbconversation.ClearBurnExpiredMsgsResp, error) {
+	if c.msgBurnDeadlineDB == nil {
+		return &pbconversation.ClearBurnExpiredMsgsResp{Count: 0}, nil
+	}
+	limit := int(req.Limit)
+	if limit <= 0 {
+		limit = 100
+	}
+	groups, err := c.msgBurnDeadlineDB.FindExpiredGroups(ctx, req.Timestamp, limit)
+	if err != nil {
+		return nil, err
+	}
+	var processed int32
+	for _, g := range groups {
+		if g.UserID == "" || g.ConversationID == "" || g.MaxSeq <= 0 {
+			continue
+		}
+		newMinSeq := g.MaxSeq + 1
+		if err := c.msgClient.SetUserConversationMin(ctx, g.ConversationID, []string{g.UserID}, newMinSeq); err != nil {
+			log.ZError(ctx, "ClearBurnExpiredMsgs SetUserConversationMin failed", err,
+				"userID", g.UserID, "conversationID", g.ConversationID, "minSeq", newMinSeq)
+			continue
+		}
+		if err := c.conversationDatabase.UpdateUsersConversationField(ctx, []string{g.UserID}, g.ConversationID,
+			map[string]any{"min_seq": newMinSeq}); err != nil {
+			log.ZError(ctx, "ClearBurnExpiredMsgs UpdateUsersConversationField failed", err,
+				"userID", g.UserID, "conversationID", g.ConversationID, "minSeq", newMinSeq)
+			continue
+		}
+		c.conversationNotificationSender.ConversationChangeNotification(ctx, g.UserID, []string{g.ConversationID})
+		if err := c.msgBurnDeadlineDB.DeleteByUserConversationSeqs(ctx, g.UserID, g.ConversationID, g.Seqs); err != nil {
+			log.ZError(ctx, "ClearBurnExpiredMsgs DeleteByUserConversationSeqs failed", err,
+				"userID", g.UserID, "conversationID", g.ConversationID, "seqs", g.Seqs)
+		}
+		log.ZDebug(ctx, "ClearBurnExpiredMsgs advanced min_seq", "userID", g.UserID,
+			"conversationID", g.ConversationID, "minSeq", newMinSeq, "seqs", g.Seqs)
+		processed++
+	}
+	return &pbconversation.ClearBurnExpiredMsgsResp{Count: processed}, nil
 }
