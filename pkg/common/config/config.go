@@ -798,11 +798,11 @@ func FillCronTaskDefaults(ct *CronTask) {
 	if strings.TrimSpace(ct.BurnCronExecuteTime) == "" {
 		ct.BurnCronExecuteTime = "*/1 * * * *"
 	}
-	if strings.TrimSpace(ct.BurnClearLimit) == "" {
+	if ct.BurnClearLimit <= 0 {
 		ct.BurnClearLimit = 100
 	}
-	if strings.TrimSpace(ct.BurnClearMaxLoop) == "" {
-		ct.BurnClearMaxLoop = 10000
+	if ct.BurnClearMaxLoop <= 0 {
+		ct.BurnClearMaxLoop = 100
 	}
 	if ct.ChatAPI.Address == "" {
 		ct.ChatAPI.Address = "http://127.0.0.1:10008"
