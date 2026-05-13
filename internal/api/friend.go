@@ -134,3 +134,11 @@ func (o *FriendApi) SetMute(c *gin.Context) {
 func (o *FriendApi) GetMute(c *gin.Context) {
 	a2r.Call(c, relation.FriendClient.GetMute, o.Client)
 }
+
+func (o *FriendApi) PinFriend(c *gin.Context) {
+	a2r.Call(c, relation.FriendClient.PinFriend, o.Client)
+}
+
+func (o *FriendApi) UnpinFriend(c *gin.Context) {
+	a2r.Call(c, relation.FriendClient.UnpinFriend, o.Client)
+}

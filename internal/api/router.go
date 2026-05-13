@@ -223,6 +223,9 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		friendRouterGroup.POST("/add_oneway_friend", f.AddOnewayFriend)
 		friendRouterGroup.POST("/set_mute", f.SetMute)
 		friendRouterGroup.POST("/get_mute", f.GetMute)
+		// 好友会话置顶 / 取消置顶（同步写入 friend.is_pinned 与 conversation.isPinned）
+		friendRouterGroup.POST("/pin", f.PinFriend)
+		friendRouterGroup.POST("/unpin", f.UnpinFriend)
 	}
 
 	g := NewGroupApi(group.NewGroupClient(groupConn))
@@ -266,6 +269,9 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		groupRouterGroup.POST("/get_group_pinned_messages", g.GetGroupPinnedMessages)
 		groupRouterGroup.POST("/set_mute", g.SetGroupMute)
 		groupRouterGroup.POST("/get_mute", g.GetGroupMute)
+		// 群会话置顶 / 取消置顶（同步写入 conversation.isPinned）
+		groupRouterGroup.POST("/pin", g.PinGroup)
+		groupRouterGroup.POST("/unpin", g.UnpinGroup)
 	}
 	// certificate
 	{
