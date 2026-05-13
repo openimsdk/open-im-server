@@ -74,6 +74,7 @@ type msgServer struct {
 	globalBlackDB          controller.UserGlobalBlackDatabase
 	userMuteDB             controller.UserMuteDatabase
 	msgBurnDeadlineDB      database.MsgBurnDeadline
+	groupMsgBurnRecordDB   database.GroupMsgBurnRecord
 }
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
@@ -138,6 +139,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	groupMsgBurnRecordDB, err := mgo.NewGroupMsgBurnRecordMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	userMuteMgo, err := mgo.NewUserMuteMongo(mgocli.GetDB())
 	if err != nil {
 		return err
@@ -156,6 +161,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		globalBlackDB:          controller.NewUserGlobalBlackDatabase(globalBlackMgo),
 		userMuteDB:             controller.NewUserMuteDatabase(userMuteMgo),
 		msgBurnDeadlineDB:      msgBurnDeadlineDB,
+		groupMsgBurnRecordDB:   groupMsgBurnRecordDB,
 	}
 
 	s.notificationSender = notification.NewNotificationSender(&config.NotificationConfig, notification.WithLocalSendMsg(s.SendMsg))

@@ -45,6 +45,7 @@ func Db2PbGroupInfo(m *model.Group, ownerUserID string, memberCount uint32) *sdk
 		AllowPinMsg:            m.AllowPinMsg,
 		AllowAddMember:         m.AllowAddMember,
 		AllowEditGroupInfo:     m.AllowEditGroupInfo,
+		MsgBurnDuration:        m.MsgBurnDuration,
 	}
 }
 

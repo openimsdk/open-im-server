@@ -175,12 +175,21 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 			m.conversationAndGetRecvID(conversation, req.UserID), seqs, hasReadSeq)
 	} else if conversation.ConversationType == constant.ReadGroupChatType ||
 		conversation.ConversationType == constant.NotificationChatType {
+		var oldHasReadSeq int64 = hasReadSeq
 		if req.HasReadSeq > hasReadSeq {
 			err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
 			if err != nil {
 				return nil, err
 			}
 			hasReadSeq = req.HasReadSeq
+		}
+		// 计算本次新增已读的 seq 范围，用于阅后即焚计数
+		if conversation.ConversationType == constant.ReadGroupChatType && req.HasReadSeq > oldHasReadSeq {
+			var groupSeqs []int64
+			for i := oldHasReadSeq + 1; i <= req.HasReadSeq; i++ {
+				groupSeqs = append(groupSeqs, i)
+			}
+			m.recordGroupBurnReadCount(ctx, conversation, groupSeqs)
 		}
 		m.sendMarkAsReadNotification(ctx, req.ConversationID, constant.SingleChatType, req.UserID,
 			req.UserID, seqs, hasReadSeq)
@@ -261,6 +270,30 @@ func (m *msgServer) recordBurnDeadlines(ctx context.Context, conv *conversation.
 		log.ZError(ctx, "recordBurnDeadlines UpsertIfAbsent failed", err,
 			"readerUserID", readerUserID, "peerID", peerID,
 			"conversationID", conv.ConversationID, "seqs", seqs)
+	}
+}
+
+// recordGroupBurnReadCount 在群聊阅读时记录「阅后即焚」进度。
+// 每次已读触发 $inc read_count；首次写入时记录 member_count 与 burn_end_time。
+// 仅在群的 MsgBurnDuration > 0 时生效；失败只记日志，不影响主流程。
+func (m *msgServer) recordGroupBurnReadCount(ctx context.Context, conv *conversation.Conversation, seqs []int64) {
+	if len(seqs) == 0 || m.groupMsgBurnRecordDB == nil {
+		return
+	}
+	groupInfo, err := m.GroupLocalCache.GetGroupInfo(ctx, conv.GroupID)
+	if err != nil {
+		log.ZWarn(ctx, "recordGroupBurnReadCount GetGroupInfo failed", err, "groupID", conv.GroupID)
+		return
+	}
+	if groupInfo.MsgBurnDuration <= 0 {
+		return
+	}
+	now := time.Now().UnixMilli()
+	burnEndTimeMs := now + int64(groupInfo.MsgBurnDuration)*1000
+	memberCount := int32(groupInfo.MemberCount)
+	if err := m.groupMsgBurnRecordDB.UpsertOnRead(ctx, conv.GroupID, seqs, memberCount, burnEndTimeMs); err != nil {
+		log.ZError(ctx, "recordGroupBurnReadCount UpsertOnRead failed", err,
+			"groupID", conv.GroupID, "seqs", seqs)
 	}
 }
 

@@ -108,6 +108,9 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	if err := srv.registerClearBurnExpiredMsgs(); err != nil {
 		return err
 	}
+	if err := srv.registerClearGroupBurnExpiredMsgs(); err != nil {
+		return err
+	}
 	if err := srv.registerDeleteExpiredOfflineUsers(); err != nil {
 		return err
 	}
@@ -155,6 +158,11 @@ func (c *cronServer) registerClearUserMsg() error {
 func (c *cronServer) registerClearBurnExpiredMsgs() error {
 	_, err := c.cron.AddFunc(c.config.CronTask.CronExecuteTime, c.clearBurnExpiredMsgs)
 	return errs.WrapMsg(err, "failed to register clear burn expired msgs cron task")
+}
+
+func (c *cronServer) registerClearGroupBurnExpiredMsgs() error {
+	_, err := c.cron.AddFunc(c.config.CronTask.CronExecuteTime, c.clearGroupBurnExpiredMsgs)
+	return errs.WrapMsg(err, "failed to register clear group burn expired msgs cron task")
 }
 
 // registerDeleteExpiredOfflineUsers 注册每小时执行一次的用户自动删除任务。

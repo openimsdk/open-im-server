@@ -295,6 +295,35 @@ func (o *GroupApi) GetEditSetting(c *gin.Context) {
 	})
 }
 
+// SetMsgBurnDuration 设置群消息阅后即焚时长（秒）；burnDuration=0 表示关闭。
+func (o *GroupApi) SetMsgBurnDuration(c *gin.Context) {
+	var req struct {
+		GroupID         string `json:"groupID"`
+		BurnDuration    int32  `json:"burnDuration"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WrapMsg(err.Error()))
+		return
+	}
+	if req.GroupID == "" {
+		apiresp.GinError(c, errs.ErrArgs.WrapMsg("groupID is empty"))
+		return
+	}
+	if req.BurnDuration < 0 {
+		apiresp.GinError(c, errs.ErrArgs.WrapMsg("burnDuration must be >= 0"))
+		return
+	}
+	resp, err := o.Client.SetGroupInfoEx(c.Request.Context(), &group.SetGroupInfoExReq{
+		GroupID:         req.GroupID,
+		MsgBurnDuration: wrapperspb.Int32(req.BurnDuration),
+	})
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+	apiresp.GinSuccess(c, resp)
+}
+
 func (o *GroupApi) JoinGroup(c *gin.Context) {
 	a2r.Call(c, group.GroupClient.JoinGroup, o.Client)
 }

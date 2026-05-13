@@ -49,4 +49,6 @@ type Group struct {
 	AllowAddMember int32 `bson:"allow_add_member"`
 	// AllowEditGroupInfo 0=全员可编辑群资料 1=仅群主/管理员可编辑群资料
 	AllowEditGroupInfo int32 `bson:"allow_edit_group_info"`
+	// MsgBurnDuration 群消息阅后即焚时长（秒）；0 表示未开启
+	MsgBurnDuration int32 `bson:"msg_burn_duration"`
 }
