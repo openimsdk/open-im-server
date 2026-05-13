@@ -223,7 +223,6 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		friendRouterGroup.POST("/add_oneway_friend", f.AddOnewayFriend)
 		friendRouterGroup.POST("/set_mute", f.SetMute)
 		friendRouterGroup.POST("/get_mute", f.GetMute)
-		// 好友会话置顶 / 取消置顶（同步写入 friend.is_pinned 与 conversation.isPinned）
 		friendRouterGroup.POST("/pin", f.PinFriend)
 		friendRouterGroup.POST("/unpin", f.UnpinFriend)
 	}
@@ -234,6 +233,14 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		groupRouterGroup.POST("/create_group", g.CreateGroup)
 		groupRouterGroup.POST("/set_group_info", g.SetGroupInfo)
 		groupRouterGroup.POST("/set_group_info_ex", g.SetGroupInfoEx)
+		groupRouterGroup.POST("/set_send_message_setting", g.SetSendMessageSetting)
+		groupRouterGroup.POST("/get_send_message_setting", g.GetSendMessageSetting)
+		groupRouterGroup.POST("/set_invite_setting", g.SetInviteSetting)
+		groupRouterGroup.POST("/get_invite_setting", g.GetInviteSetting)
+		groupRouterGroup.POST("/set_pin_setting", g.SetPinSetting)
+		groupRouterGroup.POST("/get_pin_setting", g.GetPinSetting)
+		groupRouterGroup.POST("/set_edit_setting", g.SetEditSetting)
+		groupRouterGroup.POST("/get_edit_setting", g.GetEditSetting)
 		groupRouterGroup.POST("/join_group", g.JoinGroup)
 		groupRouterGroup.POST("/quit_group", g.QuitGroup)
 		groupRouterGroup.POST("/group_application_response", g.ApplicationGroupResponse)
@@ -269,7 +276,6 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		groupRouterGroup.POST("/get_group_pinned_messages", g.GetGroupPinnedMessages)
 		groupRouterGroup.POST("/set_mute", g.SetGroupMute)
 		groupRouterGroup.POST("/get_mute", g.GetGroupMute)
-		// 群会话置顶 / 取消置顶（同步写入 conversation.isPinned）
 		groupRouterGroup.POST("/pin", g.PinGroup)
 		groupRouterGroup.POST("/unpin", g.UnpinGroup)
 	}
