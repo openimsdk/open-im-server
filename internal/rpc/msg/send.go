@@ -164,18 +164,16 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 	isNotification := msgprocessor.IsNotificationByMsg(req.MsgData)
 	log.ZInfo(ctx, "sendMsgSingleChat", "isNotification", isNotification, "msgdata", req.MsgData)
 
-	if !isNotification {
-		// 非通知类消息：执行发送权限校验 + 接收偏好校验（含 blacklist / MsgReceiveSetting / webhook / FriendVerify / globalOpt / convOpt）
-		isSend, err = m.modifyMessageByUserMessageReceiveOpt(
-			ctx,
-			req.MsgData.RecvID,
-			conversationutil.GenConversationIDForSingle(req.MsgData.SendID, req.MsgData.RecvID),
-			constant.SingleChatType,
-			req,
-		)
-		if err != nil {
-			return nil, err
-		}
+	// 单聊一律校验接收方消息设置（含「仅好友可发」）、黑名单、会话接收偏好等；不再因通知类 Options 跳过
+	isSend, err = m.modifyMessageByUserMessageReceiveOpt(
+		ctx,
+		req.MsgData.RecvID,
+		conversationutil.GenConversationIDForSingle(req.MsgData.SendID, req.MsgData.RecvID),
+		constant.SingleChatType,
+		req,
+	)
+	if err != nil {
+		return nil, err
 	}
 	if !isSend {
 		prommetrics.SingleChatMsgProcessFailedCounter.Inc()
