@@ -24,6 +24,9 @@ type MsgBurnDeadline struct {
 	UserID         string `bson:"user_id"`
 	ConversationID string `bson:"conversation_id"`
 	Seq            int64  `bson:"seq"`
+	// PeerID 单聊中的对端用户 ID。
+	// cron 处理时可直接获取对端，无需额外查询 conversation 表。
+	PeerID string `bson:"peer_id"`
 	// DeadlineMs 截止时间戳（毫秒）；超过即可被 cron 收走推进 min_seq。
 	DeadlineMs int64 `bson:"deadline_ms"`
 	// CreateTime 写入时刻（毫秒）；用于排查/审计。

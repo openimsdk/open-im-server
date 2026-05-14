@@ -24,6 +24,8 @@ import (
 type ExpiredBurnGroup struct {
 	UserID         string
 	ConversationID string
+	// PeerID 单聊中的对端用户 ID，直接从 deadline 记录读取，无需额外查 conversation 表。
+	PeerID string
 	// MaxSeq 当前批次中最大的过期 seq；推进 min_seq 时使用 MaxSeq + 1。
 	MaxSeq int64
 	// Seqs 当前批次实际涉及的所有过期 seq，便于精确删除已处理的 deadline 记录。

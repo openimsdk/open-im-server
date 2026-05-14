@@ -833,9 +833,11 @@ func (c *conversationServer) setConversationMinSeqAndLatestMsgDestructTime(ctx c
 
 // ClearBurnExpiredMsgs 处理「阅后即焚」过期消息：
 //  1. 从 msg_burn_deadline 中拉取一批过期分组（按 user/conversation 聚合，含每组最大 seq）。
-//  2. 对每个分组把用户在该会话上的 min_seq 推进到 max(过期 seq) + 1。
-//  3. 同步更新 conversation 文档的 min_seq 字段并下发会话变更通知。
-//  4. 删除已处理的 deadline 记录。
+//  2. 对每个分组把用户在该会话上的 min_seq 推进到 max(过期 seq) + 1，更新 conversation 文档。
+//  3. 向阅读方发 ConversationChangeNotification + DeleteMsgsNotification（含精确 seqs）。
+//  4. 单聊场景（si_ 前缀）：利用 deadline 记录中的 PeerID 直接推进对端 min_seq，
+//     并向对端也发两条通知，保证双方客户端都删本地消息。
+//  5. 物理删除 msg 存储中的焚毁消息；清理 deadline 记录。
 //
 // 单次最多处理 req.Limit 个分组；若返回的 count == limit，cron 可继续触发。
 func (c *conversationServer) ClearBurnExpiredMsgs(ctx context.Context, req *pbconversation.ClearBurnExpiredMsgsReq) (*pbconversation.ClearBurnExpiredMsgsResp, error) {
@@ -856,6 +858,8 @@ func (c *conversationServer) ClearBurnExpiredMsgs(ctx context.Context, req *pbco
 			continue
 		}
 		newMinSeq := g.MaxSeq + 1
+
+		// 推进阅读方 min_seq。
 		if err := c.msgClient.SetUserConversationMin(ctx, g.ConversationID, []string{g.UserID}, newMinSeq); err != nil {
 			log.ZError(ctx, "ClearBurnExpiredMsgs SetUserConversationMin failed", err,
 				"userID", g.UserID, "conversationID", g.ConversationID, "minSeq", newMinSeq)
@@ -867,7 +871,18 @@ func (c *conversationServer) ClearBurnExpiredMsgs(ctx context.Context, req *pbco
 				"userID", g.UserID, "conversationID", g.ConversationID, "minSeq", newMinSeq)
 			continue
 		}
+		// 通知 g.UserID 客户端：会话变更 + 精确删除指定 seqs。
+		// 对端用户在 msg_burn_deadline 中有独立记录，cron 处理其分组时会自行通知，
+		// 无需在此重复推进对端 min_seq 或发送额外通知。
 		c.conversationNotificationSender.ConversationChangeNotification(ctx, g.UserID, []string{g.ConversationID})
+		c.conversationNotificationSender.BurnMsgsDeleteNotification(ctx, g.UserID, g.UserID, g.ConversationID, g.Seqs)
+
+		// 物理删除 msg 存储中的焚毁消息（best-effort，失败不中断流程）。
+		if err := c.msgClient.DeleteMsgPhysicalBySeqs(ctx, g.ConversationID, g.Seqs); err != nil {
+			log.ZError(ctx, "ClearBurnExpiredMsgs DeleteMsgPhysicalBySeqs failed", err,
+				"conversationID", g.ConversationID, "seqs", g.Seqs)
+		}
+
 		if err := c.msgBurnDeadlineDB.DeleteByUserConversationSeqs(ctx, g.UserID, g.ConversationID, g.Seqs); err != nil {
 			log.ZError(ctx, "ClearBurnExpiredMsgs DeleteByUserConversationSeqs failed", err,
 				"userID", g.UserID, "conversationID", g.ConversationID, "seqs", g.Seqs)
@@ -878,3 +893,4 @@ func (c *conversationServer) ClearBurnExpiredMsgs(ctx context.Context, req *pbco
 	}
 	return &pbconversation.ClearBurnExpiredMsgsResp{Count: processed}, nil
 }
+

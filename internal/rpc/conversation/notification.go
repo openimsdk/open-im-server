@@ -73,3 +73,19 @@ func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(
 
 	c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, tips)
 }
+
+// BurnMsgsDeleteNotification 通知 recvUserID 按 seqs 删除本地消息。
+// sendUserID 为触发焚烧的一方（阅读方），recvUserID 为需要执行删除的一方。
+// 双方各调用一次，保证单聊两端客户端都删除本地缓存。
+func (c *ConversationNotificationSender) BurnMsgsDeleteNotification(
+	ctx context.Context,
+	sendUserID, recvUserID, conversationID string,
+	seqs []int64,
+) {
+	tips := &sdkws.DeleteMsgsTips{
+		UserID:         sendUserID,
+		ConversationID: conversationID,
+		Seqs:           seqs,
+	}
+	c.Notification(ctx, sendUserID, recvUserID, constant.DeleteMsgsNotification, tips)
+}

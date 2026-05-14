@@ -113,3 +113,13 @@ func (x *MsgClient) SetUserConversationsMinSeq(ctx context.Context, conversation
 	req := &msg.SetUserConversationsMinSeqReq{ConversationID: conversationID, UserIDs: userIDs, Seq: seq}
 	return ignoreResp(x.MsgClient.SetUserConversationsMinSeq(ctx, req))
 }
+
+// DeleteMsgPhysicalBySeqs 按 seq 物理删除会话内的消息（无鉴权）。
+// 用于阅后即焚、系统级消息清理等场景。
+func (x *MsgClient) DeleteMsgPhysicalBySeqs(ctx context.Context, conversationID string, seqs []int64) error {
+	if len(seqs) == 0 {
+		return nil
+	}
+	req := &msg.DeleteMsgPhysicalBySeqReq{ConversationID: conversationID, Seqs: seqs}
+	return ignoreResp(x.MsgClient.DeleteMsgPhysicalBySeq(ctx, req))
+}

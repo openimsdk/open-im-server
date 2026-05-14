@@ -66,6 +66,7 @@ func (m *msgBurnDeadlineMgo) UpsertIfAbsent(ctx context.Context, items []*model.
 			"user_id":         item.UserID,
 			"conversation_id": item.ConversationID,
 			"seq":             item.Seq,
+			"peer_id":         item.PeerID,
 			"deadline_ms":     item.DeadlineMs,
 			"create_time":     item.CreateTime,
 		}
@@ -91,6 +92,7 @@ func (m *msgBurnDeadlineMgo) FindExpiredGroups(ctx context.Context, nowMs int64,
 				"user_id":         "$user_id",
 				"conversation_id": "$conversation_id",
 			},
+			"peer_id": bson.M{"$first": "$peer_id"},
 			"max_seq": bson.M{"$max": "$seq"},
 			"seqs":    bson.M{"$push": "$seq"},
 		}}},
@@ -101,6 +103,7 @@ func (m *msgBurnDeadlineMgo) FindExpiredGroups(ctx context.Context, nowMs int64,
 			UserID         string `bson:"user_id"`
 			ConversationID string `bson:"conversation_id"`
 		} `bson:"_id"`
+		PeerID string  `bson:"peer_id"`
 		MaxSeq int64   `bson:"max_seq"`
 		Seqs   []int64 `bson:"seqs"`
 	}
@@ -113,6 +116,7 @@ func (m *msgBurnDeadlineMgo) FindExpiredGroups(ctx context.Context, nowMs int64,
 		res = append(res, &database.ExpiredBurnGroup{
 			UserID:         r.ID.UserID,
 			ConversationID: r.ID.ConversationID,
+			PeerID:         r.PeerID,
 			MaxSeq:         r.MaxSeq,
 			Seqs:           r.Seqs,
 		})
