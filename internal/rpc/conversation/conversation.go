@@ -49,6 +49,7 @@ type conversationServer struct {
 	pbconversation.UnimplementedConversationServer
 	conversationDatabase controller.ConversationDatabase
 	msgBurnDeadlineDB    database.MsgBurnDeadline
+	userMuteDB           controller.UserMuteDatabase
 
 	conversationNotificationSender *ConversationNotificationSender
 	config                         *Config
@@ -85,6 +86,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	userMuteMongoDB, err := mgo.NewUserMuteMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
@@ -104,6 +109,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		conversationDatabase: controller.NewConversationDatabase(conversationDB,
 			redis.NewConversationRedis(rdb, &config.LocalCacheConfig, redis.GetRocksCacheOptions(), conversationDB), mgocli.GetTx()),
 		msgBurnDeadlineDB: msgBurnDeadlineDB,
+		userMuteDB:        controller.NewUserMuteDatabase(userMuteMongoDB),
 		userClient:        rpcli.NewUserClient(userConn),
 		groupClient:       rpcli.NewGroupClient(groupConn),
 		msgClient:         msgClient,
@@ -121,6 +127,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbconvers
 	}
 	resp := &pbconversation.GetConversationResp{Conversation: &pbconversation.Conversation{}}
 	resp.Conversation = convert.ConversationDB2Pb(conversations[0])
+	c.fillConversationUserMute(ctx, resp.Conversation)
 	return resp, nil
 }
 
@@ -195,6 +202,15 @@ func (c *conversationServer) GetSortedConversationList(ctx context.Context, req 
 		}
 		conversation_notPinTime[time] = conversationID
 	}
+	if c.userMuteDB != nil {
+		for _, v := range conversations {
+			elem, ok := conversationMsg[v.ConversationID]
+			if !ok {
+				continue
+			}
+			c.fillConversationElemUserMute(ctx, c.userMuteDB, req.UserID, elem, v.ConversationType, v.UserID)
+		}
+	}
 	resp = &pbconversation.GetSortedConversationListResp{
 		ConversationTotal: int64(len(chatLogs)),
 		ConversationElems: []*pbconversation.ConversationElem{},
@@ -215,6 +231,7 @@ func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbcon
 	}
 	resp := &pbconversation.GetAllConversationsResp{Conversations: []*pbconversation.Conversation{}}
 	resp.Conversations = convert.ConversationsDB2Pb(conversations)
+	c.fillConversationsUserMute(ctx, resp.Conversations)
 	return resp, nil
 }
 
@@ -233,9 +250,9 @@ func (c *conversationServer) getConversations(ctx context.Context, ownerUserID s
 	if err != nil {
 		return nil, err
 	}
-	resp := &pbconversation.GetConversationsResp{Conversations: []*pbconversation.Conversation{}}
-	resp.Conversations = convert.ConversationsDB2Pb(conversations)
-	return convert.ConversationsDB2Pb(conversations), nil
+	list := convert.ConversationsDB2Pb(conversations)
+	c.fillConversationsUserMute(ctx, list)
+	return list, nil
 }
 
 // Deprecated
@@ -523,7 +540,9 @@ func (c *conversationServer) GetConversationsByConversationID(
 	if err != nil {
 		return nil, err
 	}
-	return &pbconversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
+	list := convert.ConversationsDB2Pb(conversations)
+	c.fillConversationsUserMute(ctx, list)
+	return &pbconversation.GetConversationsByConversationIDResp{Conversations: list}, nil
 }
 
 func (c *conversationServer) GetConversationOfflinePushUserIDs(ctx context.Context, req *pbconversation.GetConversationOfflinePushUserIDsReq) (*pbconversation.GetConversationOfflinePushUserIDsResp, error) {
@@ -711,9 +730,11 @@ func (c *conversationServer) GetOwnerConversation(ctx context.Context, req *pbco
 	if err != nil {
 		return nil, err
 	}
+	list := convert.ConversationsDB2Pb(conversations)
+	c.fillConversationsUserMute(ctx, list)
 	return &pbconversation.GetOwnerConversationResp{
 		Total:         total,
-		Conversations: convert.ConversationsDB2Pb(conversations),
+		Conversations: list,
 	}, nil
 }
 
@@ -764,7 +785,9 @@ func (c *conversationServer) GetConversationsNeedClearMsg(ctx context.Context, _
 		}
 	}
 
-	return &pbconversation.GetConversationsNeedClearMsgResp{Conversations: convert.ConversationsDB2Pb(temp)}, nil
+	list := convert.ConversationsDB2Pb(temp)
+	c.fillConversationsUserMute(ctx, list)
+	return &pbconversation.GetConversationsNeedClearMsgResp{Conversations: list}, nil
 }
 
 func (c *conversationServer) GetNotNotifyConversationIDs(ctx context.Context, req *pbconversation.GetNotNotifyConversationIDsReq) (*pbconversation.GetNotNotifyConversationIDsResp, error) {
