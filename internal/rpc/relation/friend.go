@@ -749,6 +749,7 @@ func (s *friendServer) AddOnewayFriend(ctx context.Context, req *relation.ApplyT
 	return &relation.ApplyToAddFriendResp{}, nil
 }
 
+// SetMute 设置用户对另一用户的静音：duration 为秒；0=取消静音；-1=永久静音；>0=从现在起持续 duration 秒后自动解除。
 func (s *friendServer) SetMute(ctx context.Context, req *relation.SetMuteReq) (*relation.SetMuteResp, error) {
 	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
@@ -756,19 +757,23 @@ func (s *friendServer) SetMute(ctx context.Context, req *relation.SetMuteReq) (*
 	if req.Duration == 0 {
 		return &relation.SetMuteResp{}, s.userMuteDB.Delete(ctx, req.OwnerUserID, req.TargetUserID)
 	}
+	if req.Duration < 0 && req.Duration != -1 {
+		return nil, errs.ErrArgs.WrapMsg("duration must be 0 (unmute), -1 (permanent), or positive seconds")
+	}
 	var muteEndTime int64
 	if req.Duration != -1 {
 		muteEndTime = time.Now().Unix() + req.Duration
 	}
 	return &relation.SetMuteResp{}, s.userMuteDB.Upsert(ctx, &model.UserMute{
-		OwnerUserID:   req.OwnerUserID,
-		MutedUserID:   req.TargetUserID,
-		MuteEndTime:   muteEndTime,
-		MuteDuration:  req.Duration,
-		CreateTime:    time.Now(),
+		OwnerUserID:  req.OwnerUserID,
+		MutedUserID:  req.TargetUserID,
+		MuteEndTime:  muteEndTime,
+		MuteDuration: req.Duration,
+		CreateTime:   time.Now(),
 	})
 }
 
+// GetMute 查询静音状态：未静音或已过期时 muted=false、duration=0；永久静音为 duration=-1 且 muteEndTime=0。
 func (s *friendServer) GetMute(ctx context.Context, req *relation.GetMuteReq) (*relation.GetMuteResp, error) {
 	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
@@ -782,7 +787,7 @@ func (s *friendServer) GetMute(ctx context.Context, req *relation.GetMuteReq) (*
 	}
 	now := time.Now().Unix()
 	if rec.MuteEndTime != 0 && rec.MuteEndTime <= now {
-		return &relation.GetMuteResp{Muted: false, MuteEndTime: 0, Duration: 0}, nil
+		return &relation.GetMuteResp{Muted: false, MuteEndTime: 0, Duration: rec.MuteDuration}, nil
 	}
 	duration := rec.MuteDuration
 	if duration == 0 && rec.MuteEndTime == 0 {
