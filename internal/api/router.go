@@ -198,6 +198,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		f := NewFriendApi(relation.NewFriendClient(friendConn))
 		friendRouterGroup := r.Group("/friend")
 		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)
+		friendRouterGroup.POST("/delete_friend_oneway", f.DeleteFriendOneway)
 		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)
 		friendRouterGroup.POST("/get_designated_friend_apply", f.GetDesignatedFriendsApply)
 		friendRouterGroup.POST("/get_self_friend_apply_list", f.GetSelfApplyList)

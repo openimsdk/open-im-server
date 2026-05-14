@@ -41,6 +41,10 @@ func (o *FriendApi) DeleteFriend(c *gin.Context) {
 	a2r.Call(c, relation.FriendClient.DeleteFriend, o.Client)
 }
 
+func (o *FriendApi) DeleteFriendOneway(c *gin.Context) {
+	a2r.Call(c, relation.FriendClient.DeleteFriendOneway, o.Client)
+}
+
 func (o *FriendApi) GetFriendApplyList(c *gin.Context) {
 	a2r.Call(c, relation.FriendClient.GetPaginationFriendsApplyTo, o.Client)
 }

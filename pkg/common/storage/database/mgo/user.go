@@ -82,7 +82,6 @@ func (u *UserMgo) UpdateByMap(ctx context.Context, userID string, args map[strin
 		"first_name",
 		"last_name",
 		"full_name",
-		"remark",
 		"face_url",
 		"phone_number",
 		"area_code",

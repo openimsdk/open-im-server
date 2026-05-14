@@ -286,6 +286,29 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *relation.DeleteFri
 	return &relation.DeleteFriendResp{}, nil
 }
 
+// DeleteFriendOneway 单向删除好友：只删除 ownerUserID 侧的 friend 文档；
+// 对端 friend 文档保留；仅向 owner 下发 FriendsInfoUpdateNotification 以刷新本地好友列表，
+// 不向对端发送 FriendDeletedNotification。
+func (s *friendServer) DeleteFriendOneway(ctx context.Context, req *relation.DeleteFriendReq) (resp *relation.DeleteFriendResp, err error) {
+	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+
+	_, err = s.db.FindFriendsWithError(ctx, req.OwnerUserID, []string{req.FriendUserID})
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.db.Delete(ctx, req.OwnerUserID, []string{req.FriendUserID}); err != nil {
+		return nil, err
+	}
+
+	s.notificationSender.FriendDeletedOnewayNotification(ctx, req.OwnerUserID, req.FriendUserID)
+	s.webhookAfterDeleteFriend(ctx, &s.config.WebhooksConfig.AfterDeleteFriend, req)
+
+	return &relation.DeleteFriendResp{}, nil
+}
+
 // ok.
 func (s *friendServer) SetFriendRemark(ctx context.Context, req *relation.SetFriendRemarkReq) (resp *relation.SetFriendRemarkResp, err error) {
 	if err = s.webhookBeforeSetFriendRemark(ctx, &s.config.WebhooksConfig.BeforeSetFriendRemark, req); err != nil && err != servererrs.ErrCallbackContinue {
