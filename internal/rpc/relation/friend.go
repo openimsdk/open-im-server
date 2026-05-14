@@ -789,11 +789,7 @@ func (s *friendServer) GetMute(ctx context.Context, req *relation.GetMuteReq) (*
 	if rec.MuteEndTime != 0 && rec.MuteEndTime <= now {
 		return &relation.GetMuteResp{Muted: false, MuteEndTime: 0, Duration: rec.MuteDuration}, nil
 	}
-	duration := rec.MuteDuration
-	if duration == 0 && rec.MuteEndTime == 0 {
-		duration = -1
-	}
-	return &relation.GetMuteResp{Muted: true, MuteEndTime: rec.MuteEndTime, Duration: duration}, nil
+	return &relation.GetMuteResp{Muted: true, MuteEndTime: rec.MuteEndTime, Duration: rec.MuteDuration}, nil
 }
 
 func (s *friendServer) getCommonUserMap(ctx context.Context, userIDs []string) (map[string]common_user.CommonUser, error) {
