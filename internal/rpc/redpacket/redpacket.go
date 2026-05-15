@@ -138,7 +138,7 @@ func Start(ctx context.Context, conf *Config, registry discovery.SvcDiscoveryReg
 	pbredpacket.RegisterRedPacketServer(server, srv)
 
 	if chainClient != nil {
-		ethIndexer := chain.NewIndexer(chainClient, repo, conf.RpcConfig.Indexer.PollInterval, 0)
+		ethIndexer := chain.NewIndexer(chainClient, repo, conf.RpcConfig.Indexer.PollInterval, 0, conf.RpcConfig.Indexer.MaxBlocksPerPoll)
 		ethIndexer.Start(ctx)
 	}
 	if tronClient != nil {

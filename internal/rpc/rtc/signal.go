@@ -97,6 +97,10 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 	inv.InviterUserID = req.UserID
 	inv.InitiateTime = time.Now().UnixMilli()
 
+	if len(inv.InviteeUserIDList) == 0 {
+		return nil, errs.ErrArgs.WrapMsg("no invitees", "inviteeUserIDList", inv.InviteeUserIDList)
+	}
+
 	for _, inviteeID := range inv.InviteeUserIDList {
 		allowed, err := s.isCallAllowed(ctx, req.UserID, inviteeID)
 		if err != nil {
@@ -118,6 +122,10 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 		busySet[uid] = struct{}{}
 	}
 	inv.BusyLineUserIDList = busyUserIDs
+
+	if len(inv.InviteeUserIDList) == len(busyUserIDs) {
+		return nil, errs.ErrNoPermission.WrapMsg("all invitees are busy", "inviteeUserIDList", inv.InviteeUserIDList)
+	}
 
 	// 从主叫用户资料获取铃声 URL，注入到邀请信息中，被叫方收到后播放主叫方铃声
 	if inviterInfo, err := s.userClient.GetUserInfo(ctx, req.UserID); err == nil && inviterInfo.CallRingtoneURL != "" {

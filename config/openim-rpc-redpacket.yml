@@ -29,3 +29,5 @@ tron:
 # Indexer polling interval (in seconds). Used by both EVM and TRON event indexers.
 indexer:
   pollInterval: 5
+  # EVM only: max block span per eth_getLogs request (0 = default 2000). Increase if your node allows larger ranges.
+  maxBlocksPerPoll: 2000

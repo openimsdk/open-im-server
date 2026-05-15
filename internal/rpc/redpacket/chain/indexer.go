@@ -14,25 +14,48 @@ import (
 	"github.com/openimsdk/tools/log"
 )
 
+const defaultIndexerMaxBlocksPerPoll uint64 = 2000
+
 type Indexer struct {
-	client       *ChainClient
-	db           controller.RedPacketDatabase
-	pollInterval time.Duration
-	lastBlock    uint64
-	contractAddr common.Address
+	client             *ChainClient
+	db                 controller.RedPacketDatabase
+	pollInterval       time.Duration
+	lastBlock          uint64
+	contractAddr       common.Address
+	maxBlocksPerPoll   uint64 // 0 => defaultIndexerMaxBlocksPerPoll
 }
 
-func NewIndexer(client *ChainClient, db controller.RedPacketDatabase, pollInterval int, startBlock uint64) *Indexer {
+func NewIndexer(client *ChainClient, db controller.RedPacketDatabase, pollInterval int, startBlock uint64, maxBlocksPerPoll int) *Indexer {
 	if pollInterval <= 0 {
 		pollInterval = 5
 	}
-	return &Indexer{
-		client:       client,
-		db:           db,
-		pollInterval: time.Duration(pollInterval) * time.Second,
-		lastBlock:    startBlock,
-		contractAddr: client.contractAddr,
+	var maxB uint64
+	if maxBlocksPerPoll > 0 {
+		maxB = uint64(maxBlocksPerPoll)
 	}
+	return &Indexer{
+		client:           client,
+		db:               db,
+		pollInterval:     time.Duration(pollInterval) * time.Second,
+		lastBlock:        startBlock,
+		contractAddr:     client.contractAddr,
+		maxBlocksPerPoll: maxB,
+	}
+}
+
+func (i *Indexer) chunkEndBlock(chainTip uint64) uint64 {
+	maxSpan := i.maxBlocksPerPoll
+	if maxSpan == 0 {
+		maxSpan = defaultIndexerMaxBlocksPerPoll
+	}
+	if chainTip <= i.lastBlock {
+		return i.lastBlock
+	}
+	span := chainTip - i.lastBlock
+	if span > maxSpan {
+		return i.lastBlock + maxSpan
+	}
+	return chainTip
 }
 
 func (i *Indexer) Start(ctx context.Context) {
@@ -105,20 +128,25 @@ func (i *Indexer) poll(ctx context.Context) error {
 		return fmt.Errorf("get header failed: %w", err)
 	}
 
-	currentBlock := header.Number.Uint64()
-	if currentBlock <= i.lastBlock {
+	chainTip := header.Number.Uint64()
+	if chainTip <= i.lastBlock {
+		return nil
+	}
+
+	toBlock := i.chunkEndBlock(chainTip)
+	if toBlock <= i.lastBlock {
 		return nil
 	}
 
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(int64(i.lastBlock + 1)),
-		ToBlock:   big.NewInt(int64(currentBlock)),
+		ToBlock:   big.NewInt(int64(toBlock)),
 		Addresses: []common.Address{i.contractAddr},
 	}
 
 	logs, err := i.client.client.FilterLogs(ctx, query)
 	if err != nil {
-		return fmt.Errorf("filter logs failed: %w", err)
+		return fmt.Errorf("filter logs failed (blocks %d-%d): %w", i.lastBlock+1, toBlock, err)
 	}
 
 	logPtrs := make([]*types.Log, len(logs))
@@ -137,8 +165,12 @@ func (i *Indexer) poll(ctx context.Context) error {
 		}
 	}
 
-	i.lastBlock = currentBlock
-	log.ZInfo(ctx, "redpacket eth indexed", "block", currentBlock, "events", len(events))
+	i.lastBlock = toBlock
+	if toBlock < chainTip {
+		log.ZDebug(ctx, "redpacket eth indexer chunk done, catching up", "indexedTo", toBlock, "chainTip", chainTip, "events", len(events))
+	} else {
+		log.ZInfo(ctx, "redpacket eth indexed", "block", toBlock, "events", len(events))
+	}
 	return nil
 }
 

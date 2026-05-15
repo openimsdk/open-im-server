@@ -532,6 +532,9 @@ type RedPacketTron struct {
 
 type RedPacketIndexer struct {
 	PollInterval int `mapstructure:"pollInterval"`
+	// MaxBlocksPerPoll limits each eth_getLogs range (lastBlock+1 .. toBlock). Many public RPCs
+	// reject large ranges; 0 means use default 2000.
+	MaxBlocksPerPoll int `mapstructure:"maxBlocksPerPoll"`
 }
 
 // FullConfig stores all configurations for before and after events
