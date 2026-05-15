@@ -139,7 +139,7 @@ func Start(ctx context.Context, conf *Config, registry discovery.SvcDiscoveryReg
 
 	if conf.RpcConfig.Indexer.PollInterval > 0 {
 		if chainClient != nil {
-			ethIndexer := chain.NewIndexer(chainClient, repo, conf.RpcConfig.Indexer.PollInterval, 0)
+			ethIndexer := chain.NewIndexer(chainClient, repo, conf.RpcConfig.Indexer.PollInterval, 0, conf.RpcConfig.Indexer.MaxBlocksPerPoll)
 			ethIndexer.Start(ctx)
 		}
 		if tronClient != nil {
