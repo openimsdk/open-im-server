@@ -12,11 +12,11 @@ prometheus:
 # Leave rpcURL empty to disable the EVM client; the RPC service will then
 # only expose TRON-related functionality (or the offchain code paths).
 chain:
-  rpcURL: ""
-  contractAddress: ""
-  chainID: 0
-  signerPrivateKey: ""
-  configAdminPrivateKey: ""
+  rpcURL: "https://data-seed-prebsc-1-s1.bnbchain.org:8545"
+  contractAddress: "0x9f2e22F5D0cf8d8127E319D38b3EDDaE43bb4DC0"
+  chainID: 97
+  signerPrivateKey: "e9f6a5f3a3c3a97099ca31e7f44151e529c0a4f8a91d5d4232c7282f2b798df4"
+  configAdminPrivateKey: "e9f6a5f3a3c3a97099ca31e7f44151e529c0a4f8a91d5d4232c7282f2b798df4"
 
 # TRON full-node configuration. Leave fullNodeURL empty to disable TRON.
 tron:
@@ -27,5 +27,6 @@ tron:
   feeLimit: 100000000
 
 # Indexer polling interval (in seconds). Used by both EVM and TRON event indexers.
+# Set to 0 or negative to disable block scanning completely and rely on tx-hash parsing paths.
 indexer:
-  pollInterval: 5
+  pollInterval: 0
