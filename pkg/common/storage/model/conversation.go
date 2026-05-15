@@ -37,4 +37,6 @@ type Conversation struct {
 	IsMsgDestruct         bool      `bson:"is_msg_destruct"`
 	MsgDestructTime       int64     `bson:"msg_destruct_time"`
 	LatestMsgDestructTime time.Time `bson:"latest_msg_destruct_time"`
+	MuteDuration          int32     `bson:"mute_duration"`
+	MuteEndTime           int64     `bson:"mute_end_time"`
 }

@@ -222,8 +222,6 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		friendRouterGroup.POST("/get_self_unhandled_apply_count", f.GetSelfUnhandledApplyCount)
 		friendRouterGroup.POST("/get_pinned_friend_ids", f.GetPinnedFriendIDs)
 		friendRouterGroup.POST("/add_oneway_friend", f.AddOnewayFriend)
-		friendRouterGroup.POST("/set_mute", f.SetMute)
-		friendRouterGroup.POST("/get_mute", f.GetMute)
 		friendRouterGroup.POST("/pin", f.PinFriend)
 		friendRouterGroup.POST("/unpin", f.UnpinFriend)
 	}
@@ -358,6 +356,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		conversationGroup.POST("/get_owner_conversation", c.GetOwnerConversation)
 		conversationGroup.POST("/get_not_notify_conversation_ids", c.GetNotNotifyConversationIDs)
 		conversationGroup.POST("/get_pinned_conversation_ids", c.GetPinnedConversationIDs)
+		conversationGroup.POST("/set_mute", c.SetMute)
 	}
 
 	{

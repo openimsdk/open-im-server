@@ -325,14 +325,20 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, us
 		}
 	}
 
-	// 第四优先级：用户静音设置（user_mute 集合，支持好友与非好友）
-	// 无论会话记录是否存在均检查，以支持对非好友的静音
-	if m.userMuteDB != nil {
-		muted, err := m.userMuteDB.IsMuted(ctx, userID, pb.MsgData.SendID)
-		if err != nil {
-			return false, err
+	// 第四优先级：会话静音设置（存储于 conversations 集合的 mute_duration/mute_end_time）
+	conv, convErr := m.ConversationLocalCache.GetConversation(ctx, userID, conversationID)
+	if convErr != nil && !errs.ErrRecordNotFound.Is(convErr) {
+		return false, convErr
+	}
+	if convErr == nil && conv != nil {
+		var isMuted bool
+		switch {
+		case conv.MuteDuration == -1 && conv.MuteEndTime == 0:
+			isMuted = true
+		case conv.MuteEndTime > 0:
+			isMuted = conv.MuteEndTime > time.Now().Unix()
 		}
-		if muted {
+		if isMuted {
 			if pb.MsgData.Options == nil {
 				pb.MsgData.Options = make(map[string]bool, 10)
 			}
