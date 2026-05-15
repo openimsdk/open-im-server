@@ -49,7 +49,6 @@ type conversationServer struct {
 	pbconversation.UnimplementedConversationServer
 	conversationDatabase controller.ConversationDatabase
 	msgBurnDeadlineDB    database.MsgBurnDeadline
-	userMuteDB           controller.UserMuteDatabase
 
 	conversationNotificationSender *ConversationNotificationSender
 	config                         *Config
@@ -86,10 +85,6 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	userMuteMongoDB, err := mgo.NewUserMuteMongo(mgocli.GetDB())
-	if err != nil {
-		return err
-	}
 	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
@@ -109,7 +104,6 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		conversationDatabase: controller.NewConversationDatabase(conversationDB,
 			redis.NewConversationRedis(rdb, &config.LocalCacheConfig, redis.GetRocksCacheOptions(), conversationDB), mgocli.GetTx()),
 		msgBurnDeadlineDB: msgBurnDeadlineDB,
-		userMuteDB:        controller.NewUserMuteDatabase(userMuteMongoDB),
 		userClient:        rpcli.NewUserClient(userConn),
 		groupClient:       rpcli.NewGroupClient(groupConn),
 		msgClient:         msgClient,
@@ -202,14 +196,14 @@ func (c *conversationServer) GetSortedConversationList(ctx context.Context, req 
 		}
 		conversation_notPinTime[time] = conversationID
 	}
-	if c.userMuteDB != nil {
-		for _, v := range conversations {
-			elem, ok := conversationMsg[v.ConversationID]
-			if !ok {
-				continue
-			}
-			c.fillConversationElemUserMute(ctx, c.userMuteDB, req.UserID, elem, v.ConversationType, v.UserID)
+	for _, v := range conversations {
+		elem, ok := conversationMsg[v.ConversationID]
+		if !ok {
+			continue
 		}
+		elem.MuteDuration = v.MuteDuration
+		elem.MuteEndTime = v.MuteEndTime
+		elem.IsMuted = computeIsMuted(v.MuteDuration, v.MuteEndTime)
 	}
 	resp = &pbconversation.GetSortedConversationListResp{
 		ConversationTotal: int64(len(chatLogs)),
@@ -915,4 +909,35 @@ func (c *conversationServer) ClearBurnExpiredMsgs(ctx context.Context, req *pbco
 		processed++
 	}
 	return &pbconversation.ClearBurnExpiredMsgsResp{Count: processed}, nil
+}
+
+func (c *conversationServer) SetConversationMute(ctx context.Context, req *pbconversation.SetConversationMuteReq) (*pbconversation.SetConversationMuteResp, error) {
+	var (
+		muteDuration int32
+		muteEndTime  int64
+	)
+	switch {
+	case req.Duration == 0:
+		// 取消静音：清零所有静音字段
+	case req.Duration == -1:
+		// 永久静音
+		muteDuration = -1
+	default:
+		// 定时静音
+		muteDuration = req.Duration
+		muteEndTime = time.Now().Unix() + int64(req.Duration)
+	}
+	if err := c.conversationDatabase.UpdateUsersConversationField(
+		ctx,
+		[]string{req.OwnerUserID},
+		req.ConversationID,
+		map[string]any{
+			"mute_duration": muteDuration,
+			"mute_end_time": muteEndTime,
+		},
+	); err != nil {
+		return nil, err
+	}
+	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID, []string{req.ConversationID})
+	return &pbconversation.SetConversationMuteResp{}, nil
 }
