@@ -1,8 +1,9 @@
 # RedPacket 前端对接文档
 
-本文档面向前端 / 网关 / App 对接方，说明红包领取和钱包绑定的真实接入方式，重点覆盖：
+本文档面向前端 / 网关 / App 对接方，说明红包创建、领取和钱包绑定的真实接入方式，重点覆盖：
 
 - 如何把当前登录用户传递给红包服务
+- 如何创建红包（业务单 + 链上创建 + 回写激活）
 - 如何绑定钱包
 - 如何申请领取签名
 - 前端何时发链、何时回写后端
@@ -97,7 +98,111 @@ Content-Type: application/json
 
 已经在后端建立了有效绑定关系。
 
-## 3. 领取签名流程
+## 3. 创建红包流程
+
+### 4.1 流程图
+
+```text
+前端 -> 红包服务: POST /api/redpacket/create-order
+红包服务 -> 前端: biz_id (状态 PENDING)
+前端 -> 钱包/链上: createFixedPacket/createRandomPacket/createTransfer
+链上 -> 前端: tx_hash + packet_id(从事件或回执解析)
+前端 -> 红包服务: POST /api/redpacket/created-callback
+红包服务 -> 红包服务: 校验创建参数并激活红包
+红包服务 -> 前端: 回写成功 (状态 ACTIVE)
+前端 -> 红包服务: POST /api/redpacket/detail (可选)
+```
+
+### 3.2 创建业务单（发链前必调）
+
+请求：
+
+```http
+POST /api/redpacket/create-order
+token: <user token>
+Content-Type: application/json
+```
+
+```json
+{
+  "chain_type": "EVM",
+  "chain_id": 1,
+  "contract_address": "0xA1f42567559aBA5Ff0aac84cdE1AaF1F9DbB888F",
+  "creator_wallet": "0x1111111111111111111111111111111111111111",
+  "group_id": "g001",
+  "scope_type": "GROUP",
+  "receiver_user_id": "",
+  "receiver_user_ids": [],
+  "packet_type": 1,
+  "token": "0x2222222222222222222222222222222222222222",
+  "total_amount": "1000000000000000000",
+  "total_shares": 10,
+  "expiry_at": 0,
+  "remark": "happy new year"
+}
+```
+
+关键说明：
+
+- 不需要传 `user_id`，创建人从上下文 `opUserID` 取
+- `total_amount` 必须是链上最小单位十进制字符串（例如 wei）
+- `packet_type`: `0` 固定红包，`1` 拼手气红包，`2` 转账
+- `scope_type=GROUP` 时必须传 `group_id`
+- `scope_type=DIRECT` 时必须传 `receiver_user_id` 或 `receiver_user_ids`
+
+成功响应里最关键的是：
+
+- `biz_id`: 业务红包单号（后续回写必须带上）
+
+### 3.3 链上创建红包
+
+前端拿到 `biz_id` 后，再调用链上创建方法：
+
+- 固定红包：`createFixedPacket(...)`
+- 拼手气红包：`createRandomPacket(...)`
+- 转账红包：`createTransfer(...)`
+
+链上交易成功后，前端需要得到：
+
+- `tx_hash`
+- `packet_id`（优先从 `PacketCreated` 事件解析）
+
+### 3.4 创建回写（激活红包）
+
+请求：
+
+```http
+POST /api/redpacket/created-callback
+token: <user token>
+Content-Type: application/json
+```
+
+```json
+{
+  "biz_id": "f8a0f87e-d9cb-4d4a-8350-7bd43ab2e9a4",
+  "tx_hash": "0xabc123...",
+  "packet_id": "10001",
+  "group_id": "g001",
+  "scope_type": "GROUP",
+  "receiver_user_id": "",
+  "receiver_user_ids": []
+}
+```
+
+说明：
+
+- `biz_id`、`tx_hash` 必填
+- 推荐传 `packet_id`（可减少后端 fallback 分支）
+- 回写成功后红包状态从 `PENDING` 变为 `ACTIVE`
+- 回写后可调 `/api/redpacket/detail` 刷新页面状态
+
+### 3.5 创建流程常见坑
+
+- 先发链再 `create_order`：会导致回写阶段缺少有效 `biz_id`
+- `create_order` 的 `creator_wallet` 与实际发链钱包不一致：可能被后端校验拦截
+- 未调用 `created_callback`：红包会一直停留在 `PENDING`，领取侧会失败
+
+## 4. 领取签名流程
 
 ### 3.1 流程图
 
@@ -111,7 +216,7 @@ Content-Type: application/json
 链监听器 -> 红包服务: 最终确认领取结果
 ```
 
-### 3.2 申请领取签名
+### 4.2 申请领取签名
 
 请求：
 
@@ -159,7 +264,7 @@ Content-Type: application/json
 }
 ```
 
-### 3.3 前端拿到响应后要做什么
+### 4.3 前端拿到响应后要做什么
 
 前端必须原样把这些参数传给链上：
 
@@ -182,7 +287,7 @@ claim(packetId, authNonce, randomSeed, deadline, signature)
 - 不要对摘要再次做 `signMessage`
 - 后端返回的 `signature` 已经是最终可上链签名
 
-## 4. 领取结果回写
+## 5. 领取结果回写
 
 `claim-result` 是可选的，主要作用是让业务侧尽快看到一条 `PENDING` 领取记录。
 
@@ -210,29 +315,38 @@ Content-Type: application/json
 - 如果不能，会先记成 `PENDING`
 - 最终仍以链监听器为准
 
-## 5. 前端推荐调用顺序
+## 6. 前端推荐调用顺序
 
-### 5.1 首次使用钱包领取
+### 6.1 创建红包
 
 1. 用户登录业务系统
-2. 前端请求 `/wallet-bind/challenge`
+2. 前端请求 `/api/redpacket/create-order`
+3. 拿到 `biz_id` 后，钱包调用链上创建红包方法
+4. 从交易回执/事件拿到 `tx_hash`、`packet_id`
+5. 前端请求 `/api/redpacket/created-callback`
+6. 前端请求 `/api/redpacket/detail` 刷新状态（确认 `ACTIVE`）
+
+### 6.2 首次使用钱包领取
+
+1. 用户登录业务系统
+2. 前端请求 `/api/redpacket/wallet-bind/challenge`
 3. 钱包对 `message` 签名
-4. 前端请求 `/wallet-bind/confirm`
+4. 前端请求 `/api/redpacket/wallet-bind/confirm`
 5. 绑定成功后再进入领取流程
 
-### 5.2 正常领取
+### 6.3 正常领取
 
 1. 前端拿到红包 `packet_id`
 2. 用户连接钱包，得到本次 `claimer` 地址
-3. 前端请求 `/claim-sign`
+3. 前端请求 `/api/redpacket/claim-sign`
 4. 拿到 `auth_nonce + random_seed + deadline + signature`
 5. 前端调用链上 `claim(...)`
-6. 前端可选请求 `/claim-result`
+6. 前端可选请求 `/api/redpacket/claim-result`
 7. 页面轮询详情页或等待业务侧状态同步
 
-## 6. 常见错误和排查
+## 7. 常见错误和排查
 
-### 6.1 `op user id missing in context`
+### 7.1 `op user id missing in context`
 
 原因：
 
@@ -240,7 +354,7 @@ Content-Type: application/json
 - 网关没有把 `opUserID` 注入上下文
 - 直接绕过网关调用了红包服务
 
-### 6.2 `wallet is not bound to user`
+### 7.2 `wallet is not bound to user`
 
 原因：
 
@@ -248,20 +362,20 @@ Content-Type: application/json
 - 当前钱包绑定的是别的业务用户
 - 链类型不一致
 
-### 6.3 `already claimed`
+### 7.3 `already claimed`
 
 原因：
 
 - 同一个钱包地址已经领过该红包
 
-### 6.4 `user already claimed`
+### 7.4 `user already claimed`
 
 原因：
 
 - 同一个业务用户已经领取过该红包
 - 即使换钱包地址，也会被后端拦截
 
-## 7. 后端接口与代码位置
+## 8. 后端接口与代码位置
 
 - 接口契约文档：
   [backend-api.md](/Users/panda/aiCode/red_packet/open-im-server-origin/cmd/openim-rpc/openim-rpc-redpacket/backend-api.md)
