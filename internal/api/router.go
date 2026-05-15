@@ -9,11 +9,11 @@ import (
 	pbAuth "github.com/openimsdk/protocol/auth"
 	pbcaptcha "github.com/openimsdk/protocol/captcha"
 	"github.com/openimsdk/protocol/conversation"
+	pbcrypto "github.com/openimsdk/protocol/crypto"
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/msg"
-	"github.com/openimsdk/protocol/relation"
-	pbcrypto "github.com/openimsdk/protocol/crypto"
 	pbredpacket "github.com/openimsdk/protocol/redpacket"
+	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/rtc"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/protocol/user"
@@ -141,6 +141,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), config.Share.IMAdminUserID)
 	cp := NewCaptchaApi(pbcaptcha.NewCaptchaClient(captchaConn))
 	bl := NewUserGlobalBlackApi(blacklistCtrl, userDB, config.Share.IMAdminUserID, rpcli.NewAuthClient(authConn))
+	du := NewDeleteUserApi(userDB, phoneSNDB, rpcli.NewAuthClient(authConn), group.NewGroupClient(groupConn), relation.NewFriendClient(friendConn), config.Share.IMAdminUserID)
 	phoneSN := NewPhoneSNApi(phoneSNDB)
 	userRouterGroup := r.Group("/user")
 	{
@@ -173,6 +174,13 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		userRouterGroup.POST("/set_phone_visibility", u.SetPhoneVisibility)
 		userRouterGroup.POST("/set_call_accept_setting", u.SetCallAcceptSetting)
 		userRouterGroup.POST("/set_msg_receive_setting", u.SetMsgReceiveSetting)
+		userRouterGroup.POST("/set_group_invite_setting", u.SetGroupInviteSetting)
+		// 设置用户全局阅后即焚时长（秒），0 表示关闭
+		userRouterGroup.POST("/set_user_msg_burn_duration", u.SetUserMsgBurnDuration)
+		// 设置删除账号等待间隔（秒），0 表示使用系统默认（18个月）
+		userRouterGroup.POST("/set_delete_account_interval", u.SetDeleteAccountInterval)
+		// 批量查询阅后即焚、手机号可见性、音视频接收、全局/会话消息接收、群邀请等设置
+		userRouterGroup.POST("/get_user_privacy_settings", u.GetUserPrivacySettings)
 		// 根据手机号精确查找用户（phoneSearchVisibility=true 时遵守 phone_visibility 设置）
 		userRouterGroup.POST("/get_user_by_phone", u.GetUserByPhone)
 		// 根据昵称精确查询用户（可多结果，与 getPaginationUsers 模糊搜索不同）
@@ -182,6 +190,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		userRouterGroup.POST("/add_global_blacklist", bl.AddGlobalBlacklist)
 		userRouterGroup.POST("/remove_global_blacklist", bl.RemoveGlobalBlacklist)
 		userRouterGroup.POST("/get_global_blacklist", bl.GetGlobalBlacklist)
+
+		userRouterGroup.POST("/delete_user", du.DeleteUser)
 	}
 	// friend routing group
 	{
@@ -193,7 +203,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		friendRouterGroup.POST("/get_self_friend_apply_list", f.GetSelfApplyList)
 		friendRouterGroup.POST("/get_friend_list", f.GetFriendList)
 		friendRouterGroup.POST("/get_designated_friends", f.GetDesignatedFriends)
-		friendRouterGroup.POST("/add_friend", f.ApplyToAddFriend)
+		friendRouterGroup.POST("/add_friend", f.AddOnewayFriend)
 		friendRouterGroup.POST("/add_friend_response", f.RespondFriendApply)
 		friendRouterGroup.POST("/set_friend_remark", f.SetFriendRemark)
 		friendRouterGroup.POST("/add_black", f.AddBlack)
@@ -210,6 +220,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		friendRouterGroup.POST("/get_full_friend_user_ids", f.GetFullFriendUserIDs)
 		friendRouterGroup.POST("/get_self_unhandled_apply_count", f.GetSelfUnhandledApplyCount)
 		friendRouterGroup.POST("/get_pinned_friend_ids", f.GetPinnedFriendIDs)
+		friendRouterGroup.POST("/add_oneway_friend", f.AddOnewayFriend)
 	}
 
 	g := NewGroupApi(group.NewGroupClient(groupConn))
@@ -248,6 +259,9 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		groupRouterGroup.POST("/get_full_join_group_ids", g.GetFullJoinGroupIDs)
 		groupRouterGroup.POST("/get_group_application_unhandled_count", g.GetGroupApplicationUnhandledCount)
 		groupRouterGroup.POST("/get_common_groups_with_friend", g.GetCommonGroupsWithFriend)
+		groupRouterGroup.POST("/pin_group_message", g.PinGroupMessage)
+		groupRouterGroup.POST("/unpin_group_message", g.UnpinGroupMessage)
+		groupRouterGroup.POST("/get_group_pinned_messages", g.GetGroupPinnedMessages)
 	}
 	// certificate
 	{
@@ -339,8 +353,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		phoneGroup := r.Group("/phone")
 		phoneGroup.POST("/get_sn_info", phoneSN.GetSNInfo)
 		phoneGroup.POST("/set_sn_info", phoneSN.SetSNInfo)
-  }
-  {
+	}
+	{
 		rc := NewRtcApi(rtc.NewRtcServiceClient(rtcConn))
 		rtcGroup := r.Group("/rtc")
 		rtcGroup.POST("/signal_message_assemble", rc.SignalMessageAssemble)

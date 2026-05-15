@@ -19,9 +19,13 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/third"
+	"github.com/openimsdk/tools/db/mongoutil"
 
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mw"
@@ -34,9 +38,10 @@ import (
 )
 
 type CronTaskConfig struct {
-	CronTask  config.CronTask
-	Share     config.Share
-	Discovery config.Discovery
+	CronTask      config.CronTask
+	Share         config.Share
+	Discovery     config.Discovery
+	MongodbConfig config.Mongo
 }
 
 func Start(ctx context.Context, config *CronTaskConfig) error {
@@ -55,24 +60,40 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	if err != nil {
 		return err
 	}
-
 	thirdConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
 	if err != nil {
 		return err
 	}
-
 	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
 	if err != nil {
 		return err
 	}
+	authConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Auth)
+	if err != nil {
+		return err
+	}
+
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
+	if err != nil {
+		return errs.WrapMsg(err, "crontask: connect mongodb failed")
+	}
+	db := mgocli.GetDB()
+
+	userOfflineRecordDB, err := mgo.NewUserOfflineRecordMongo(db)
+	if err != nil {
+		return errs.WrapMsg(err, "crontask: init user_offline_record collection failed")
+	}
 
 	srv := &cronServer{
-		ctx:                ctx,
-		config:             config,
-		cron:               cron.New(),
-		msgClient:          msg.NewMsgClient(msgConn),
-		conversationClient: pbconversation.NewConversationClient(conversationConn),
-		thirdClient:        third.NewThirdClient(thirdConn),
+		ctx:                 ctx,
+		config:              config,
+		cron:                cron.New(),
+		msgClient:           msg.NewMsgClient(msgConn),
+		conversationClient:  pbconversation.NewConversationClient(conversationConn),
+		thirdClient:         third.NewThirdClient(thirdConn),
+		authClient:          rpcli.NewAuthClient(authConn),
+		userOfflineRecordDB: userOfflineRecordDB,
+		chatAPIAddress:      config.CronTask.ChatAPI.Address,
 	}
 
 	if err := srv.registerClearS3(); err != nil {
@@ -84,6 +105,12 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	if err := srv.registerClearUserMsg(); err != nil {
 		return err
 	}
+	if err := srv.registerClearBurnExpiredMsgs(); err != nil {
+		return err
+	}
+	if err := srv.registerDeleteExpiredOfflineUsers(); err != nil {
+		return err
+	}
 	log.ZDebug(ctx, "start cron task", "CronExecuteTime", config.CronTask.CronExecuteTime)
 	srv.cron.Start()
 	<-ctx.Done()
@@ -91,12 +118,15 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 }
 
 type cronServer struct {
-	ctx                context.Context
-	config             *CronTaskConfig
-	cron               *cron.Cron
-	msgClient          msg.MsgClient
-	conversationClient pbconversation.ConversationClient
-	thirdClient        third.ThirdClient
+	ctx                 context.Context
+	config              *CronTaskConfig
+	cron                *cron.Cron
+	msgClient           msg.MsgClient
+	conversationClient  pbconversation.ConversationClient
+	thirdClient         third.ThirdClient
+	authClient          *rpcli.AuthClient
+	userOfflineRecordDB database.UserOfflineRecord
+	chatAPIAddress      string
 }
 
 func (c *cronServer) registerClearS3() error {
@@ -120,4 +150,21 @@ func (c *cronServer) registerDeleteMsg() error {
 func (c *cronServer) registerClearUserMsg() error {
 	_, err := c.cron.AddFunc(c.config.CronTask.CronExecuteTime, c.clearUserMsg)
 	return errs.WrapMsg(err, "failed to register clear user msg cron task")
+}
+
+func (c *cronServer) registerClearBurnExpiredMsgs() error {
+	_, err := c.cron.AddFunc(c.config.CronTask.CronExecuteTime, c.clearBurnExpiredMsgs)
+	return errs.WrapMsg(err, "failed to register clear burn expired msgs cron task")
+}
+
+// registerDeleteExpiredOfflineUsers 注册每小时执行一次的用户自动删除任务。
+// 固定使用 "@hourly" 表达式，与其他任务使用的 CronExecuteTime 独立。
+// chatAPI.address 未配置时跳过注册。
+func (c *cronServer) registerDeleteExpiredOfflineUsers() error {
+	if c.chatAPIAddress == "" {
+		log.ZInfo(c.ctx, "disable auto delete expired offline users: chatAPI.address not configured")
+		return nil
+	}
+	_, err := c.cron.AddFunc("@hourly", c.deleteExpiredOfflineUsers)
+	return errs.WrapMsg(err, "failed to register delete expired offline users cron task")
 }

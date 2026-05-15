@@ -37,7 +37,7 @@ func (u *UserGlobalBlackMgo) Add(ctx context.Context, blacks []*model.UserGlobal
 			b.CreateTime = time.Now()
 		}
 	}
-	// 使用 upsert 避免重复插入报错
+	// 使用 upsert 避免重复插入报错；status 也走 $set 以便升级/降级（冻结↔黑名单）时同步更新
 	for _, b := range blacks {
 		filter := bson.M{"user_id": b.UserID}
 		update := bson.M{
@@ -45,6 +45,7 @@ func (u *UserGlobalBlackMgo) Add(ctx context.Context, blacks []*model.UserGlobal
 				"nickname":    b.Nickname,
 				"operator_id": b.OperatorID,
 				"reason":      b.Reason,
+				"status":      b.Status,
 			},
 			"$setOnInsert": bson.M{
 				"user_id":     b.UserID,
@@ -57,6 +58,20 @@ func (u *UserGlobalBlackMgo) Add(ctx context.Context, blacks []*model.UserGlobal
 		}
 	}
 	return nil
+}
+
+// GetStatus 返回 userID 对应的限制状态：
+// 0=正常（无记录），1=冻结，2=黑名单
+func (u *UserGlobalBlackMgo) GetStatus(ctx context.Context, userID string) (int32, error) {
+	var doc model.UserGlobalBlack
+	err := u.coll.FindOne(ctx, bson.M{"user_id": userID}, options.FindOne().SetProjection(bson.M{"status": 1})).Decode(&doc)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return model.UserStatusNormal, nil
+		}
+		return model.UserStatusNormal, errs.Wrap(err)
+	}
+	return doc.Status, nil
 }
 
 func (u *UserGlobalBlackMgo) Remove(ctx context.Context, users []string) error {

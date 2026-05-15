@@ -119,6 +119,8 @@ type CronTask struct {
 	RetainChatRecords int      `mapstructure:"retainChatRecords"`
 	FileExpireTime    int      `mapstructure:"fileExpireTime"`
 	DeleteObjectType  []string `mapstructure:"deleteObjectType"`
+	// ChatAPI 是 chat HTTP API 服务的访问配置，用于调用 /account/del 等需要管理员权限的接口。
+	ChatAPI ChatAPI `mapstructure:"chatAPI"`
 }
 
 type OfflinePushConfig struct {
@@ -402,6 +404,13 @@ type Share struct {
 	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
 	MultiLogin      MultiLogin      `mapstructure:"multiLogin"`
 	RPCMaxBodySize  MaxRequestBody  `mapstructure:"rpcMaxBodySize"`
+}
+
+// ChatAPI 是 chat HTTP API 服务的访问配置。
+// Address 为 chat-api 根地址（如 http://127.0.0.1:10008），用于 POST /account/del。
+// token 由 crontask 通过 IM auth-rpc GetAdminToken 自动获取，无需手动填写。
+type ChatAPI struct {
+	Address string `mapstructure:"address"`
 }
 
 type MaxRequestBody struct {

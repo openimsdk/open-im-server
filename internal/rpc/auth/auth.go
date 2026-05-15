@@ -32,6 +32,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	pbauth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
@@ -140,13 +141,13 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 		return nil, errs.ErrArgs.WrapMsg("app account can`t get token")
 	}
 
-	blocked, _ := s.blacklistDB.IsBlocked(ctx, req.UserID)
-	if blocked {
-		// Blacklisted users should be actively kicked to invalidate existing sessions.
+	// 仅黑名单（status=2）禁止登录；冻结（status=1）允许获取 token，仅在收发消息层面拦截
+	status, _ := s.blacklistDB.GetStatus(ctx, req.UserID)
+	if status == model.UserStatusBlacklist {
 		if kickErr := s.forceKickOffAllPlatforms(ctx, req.UserID); kickErr != nil {
 			log.ZWarn(ctx, "GetUserToken forceKickOffAllPlatforms failed", kickErr, "userID", req.UserID)
 		}
-		log.ZWarn(ctx, "GetUserToken is blocked", errors.New("user is in global blacklist, userID="+req.UserID), "userID", req.UserID, "blocked", blocked)
+		log.ZWarn(ctx, "GetUserToken is blocked", errors.New("user is in global blacklist, userID="+req.UserID), "userID", req.UserID, "status", status)
 		return nil, servererrs.ErrUserBlocked.WithDetail("user is in global blacklist, userID=" + req.UserID)
 	}
 	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(req.PlatformID))
@@ -167,14 +168,13 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 	if isAdmin {
 		return claims, nil
 	}
-	// 非管理员用户检查全局黑名单
-	blocked, _ := s.blacklistDB.IsBlocked(ctx, claims.UserID)
-	if blocked {
-		// Blacklisted users should be actively kicked to invalidate existing sessions.
+	// 非管理员用户检查全局黑名单：仅 status=2（黑名单）拦截；status=1（冻结）允许通过 token 校验
+	status, _ := s.blacklistDB.GetStatus(ctx, claims.UserID)
+	if status == model.UserStatusBlacklist {
 		if kickErr := s.forceKickOffAllPlatforms(ctx, claims.UserID); kickErr != nil {
 			log.ZWarn(ctx, "parseToken forceKickOffAllPlatforms failed", kickErr, "userID", claims.UserID)
 		}
-		log.ZWarn(ctx, "parseToken is blocked", errors.New("user is in global blacklist, userID="+claims.UserID), "userID", claims.UserID, "blocked", blocked)
+		log.ZWarn(ctx, "parseToken is blocked", errors.New("user is in global blacklist, userID="+claims.UserID), "userID", claims.UserID, "status", status)
 		return nil, servererrs.ErrUserBlocked.WithDetail("user is in global blacklist, userID=" + claims.UserID)
 	}
 	m, err := s.authDatabase.GetTokensWithoutError(ctx, claims.UserID, claims.PlatformID)

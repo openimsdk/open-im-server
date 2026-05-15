@@ -67,6 +67,7 @@ type groupServer struct {
 	msgClient          *rpcli.MsgClient
 	conversationClient *rpcli.ConversationClient
 	cryptoClient       *rpcli.CryptoClient
+	relationClient     *rpcli.RelationClient
 }
 
 type Config struct {
@@ -101,6 +102,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	groupPinnedMsgDB, err := mgo.NewGroupPinnedMsgMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 
 	//userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
 	//msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
@@ -118,6 +123,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	friendConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Friend)
+	if err != nil {
+		return err
+	}
 	//cryptoConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Crypto)
 	//if err != nil {
 	//	return err
@@ -128,9 +137,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		userClient:         rpcli.NewUserClient(userConn),
 		msgClient:          rpcli.NewMsgClient(msgConn),
 		conversationClient: rpcli.NewConversationClient(conversationConn),
+		relationClient:     rpcli.NewRelationClient(friendConn),
 		//cryptoClient:       rpcli.NewCryptoClient(cryptoConn),
 	}
-	gs.db = controller.NewGroupDatabase(rdb, &config.LocalCacheConfig, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
+	gs.db = controller.NewGroupDatabase(rdb, &config.LocalCacheConfig, groupDB, groupMemberDB, groupRequestDB, groupPinnedMsgDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.notification = NewNotificationSender(gs.db, config, gs.userClient, gs.msgClient, gs.conversationClient)
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	pbgroup.RegisterGroupServer(server, &gs)
@@ -451,6 +461,31 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 
 	if len(userMap) != len(req.InvitedUserIDs) {
 		return nil, errs.ErrRecordNotFound.WrapMsg("user not found")
+	}
+
+	// 检查受邀用户的群邀请权限设置（管理员操作跳过）
+	if !authverify.IsAppManagerUid(ctx, s.config.Share.IMAdminUserID) {
+		inviterID := mcontext.GetOpUserID(ctx)
+		for _, userID := range req.InvitedUserIDs {
+			info, ok := userMap[userID]
+			if !ok {
+				continue
+			}
+			switch info.GroupInviteSetting {
+			case 2: // GroupInviteSettingNobody：所有人不可邀请
+				return nil, errs.ErrNoPermission.WrapMsg("user has disabled group invitations", "userID", userID)
+			case 1: // GroupInviteSettingFriends：仅好友可邀请
+				isFriend, err := s.relationClient.IsFriend(ctx, inviterID, userID)
+				if err != nil {
+					log.ZError(ctx, "InviteUserToGroup: IsFriend check failed", err,
+						"inviterID", inviterID, "invitedUserID", userID)
+					return nil, err
+				}
+				if !isFriend {
+					return nil, errs.ErrNoPermission.WrapMsg("user only allows friends to invite them to groups", "userID", userID)
+				}
+			}
+		}
 	}
 
 	var groupMember *model.GroupMember

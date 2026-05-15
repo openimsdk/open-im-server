@@ -108,6 +108,30 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 		}
 	}
 
+	// 检测哪些被叫用户正忙（已在通话中），记录到 BusyLineUserIDList
+	busyUserIDs, err := s.db.GetBusyUserIDs(ctx, inv.InviteeUserIDList)
+	if err != nil {
+		log.ZWarn(ctx, "handleInvite: GetBusyUserIDs failed (non-fatal)", err)
+	}
+	busySet := make(map[string]struct{}, len(busyUserIDs))
+	for _, uid := range busyUserIDs {
+		busySet[uid] = struct{}{}
+	}
+	inv.BusyLineUserIDList = busyUserIDs
+
+	// 从主叫用户资料获取铃声 URL，注入到邀请信息中，被叫方收到后播放主叫方铃声
+	if inviterInfo, err := s.userClient.GetUserInfo(ctx, req.UserID); err == nil && inviterInfo.CallRingtoneURL != "" {
+		inv.CallerRingtoneURL = inviterInfo.CallRingtoneURL
+	}
+
+	// 查询被叫方铃声 URL，供主叫方在等待时播放
+	var calleeRingtoneURL string
+	if len(inv.InviteeUserIDList) > 0 {
+		if inviteeInfo, err := s.userClient.GetUserInfo(ctx, inv.InviteeUserIDList[0]); err == nil {
+			calleeRingtoneURL = inviteeInfo.CallRingtoneURL
+		}
+	}
+
 	if _, err := s.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{Name: inv.RoomID}); err != nil {
 		log.ZError(ctx, "handleInvite", err, "r", err.Error())
 		return nil, errs.WrapMsg(err, "LiveKit CreateRoom failed", "roomID", inv.RoomID)
@@ -138,6 +162,10 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 	}
 
 	for _, inviteeID := range inv.InviteeUserIDList {
+		if _, busy := busySet[inviteeID]; busy {
+			log.ZInfo(ctx, "handleInvite: skip busy invitee", "inviteeID", inviteeID)
+			continue
+		}
 		log.ZInfo(ctx, "sendSignalingNotification to invitee", "sendID", req.UserID, "recvID", inviteeID)
 		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, int32(constant.SingleChatType), req.OfflinePushInfo, content); err != nil {
 			log.ZError(ctx, "sendSignalingNotification to invitee failed", err, "inviteeID", inviteeID)
@@ -147,9 +175,11 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 
 	log.ZDebug(ctx, "handleInvite", "token", token, "roomID", inv.RoomID, "liveURL", s.config.RpcConfig.LiveKit.ExternalAddress)
 	return &rtc.SignalInviteResp{
-		Token:   token,
-		RoomID:  inv.RoomID,
-		LiveURL: s.config.RpcConfig.LiveKit.ExternalAddress,
+		Token:              token,
+		RoomID:             inv.RoomID,
+		LiveURL:            s.config.RpcConfig.LiveKit.ExternalAddress,
+		BusyLineUserIDList: busyUserIDs,
+		CalleeRingtoneURL:  calleeRingtoneURL,
 	}, nil
 }
 
@@ -163,6 +193,30 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 	inv.RoomID = newRoomID()
 	inv.InviterUserID = req.UserID
 	inv.InitiateTime = time.Now().UnixMilli()
+
+	// 检测哪些被叫用户正忙（已在通话中），记录到 BusyLineUserIDList
+	busyUserIDs, err := s.db.GetBusyUserIDs(ctx, inv.InviteeUserIDList)
+	if err != nil {
+		log.ZWarn(ctx, "handleInviteInGroup: GetBusyUserIDs failed (non-fatal)", err)
+	}
+	busySet := make(map[string]struct{}, len(busyUserIDs))
+	for _, uid := range busyUserIDs {
+		busySet[uid] = struct{}{}
+	}
+	inv.BusyLineUserIDList = busyUserIDs
+
+	// 从主叫用户资料获取铃声 URL，注入到邀请信息中，被叫方收到后播放主叫方铃声
+	if inviterInfo, err := s.userClient.GetUserInfo(ctx, req.UserID); err == nil && inviterInfo.CallRingtoneURL != "" {
+		inv.CallerRingtoneURL = inviterInfo.CallRingtoneURL
+	}
+
+	// 查询第一位被叫的铃声 URL，供主叫方在等待时播放
+	var calleeRingtoneURL string
+	if len(inv.InviteeUserIDList) > 0 {
+		if inviteeInfo, err := s.userClient.GetUserInfo(ctx, inv.InviteeUserIDList[0]); err == nil {
+			calleeRingtoneURL = inviteeInfo.CallRingtoneURL
+		}
+	}
 
 	if _, err := s.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{Name: inv.RoomID}); err != nil {
 		return nil, errs.WrapMsg(err, "LiveKit CreateRoom failed", "roomID", inv.RoomID)
@@ -200,15 +254,21 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 			log.ZInfo(ctx, "handleInviteInGroup: skipping invitee (call setting blocked)", "inviteeID", inviteeID)
 			continue
 		}
+		if _, busy := busySet[inviteeID]; busy {
+			log.ZInfo(ctx, "handleInviteInGroup: skip busy invitee", "inviteeID", inviteeID)
+			continue
+		}
 		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, int32(constant.ReadGroupChatType), req.OfflinePushInfo, content); err != nil {
 			log.ZWarn(ctx, "sendSignalingNotification to group invitee failed", err, "inviteeID", inviteeID)
 		}
 	}
 
 	return &rtc.SignalInviteInGroupResp{
-		Token:   token,
-		RoomID:  inv.RoomID,
-		LiveURL: s.config.RpcConfig.LiveKit.ExternalAddress,
+		Token:              token,
+		RoomID:             inv.RoomID,
+		LiveURL:            s.config.RpcConfig.LiveKit.ExternalAddress,
+		BusyLineUserIDList: busyUserIDs,
+		CalleeRingtoneURL:  calleeRingtoneURL,
 	}, nil
 }
 
@@ -269,12 +329,12 @@ func (s *rtcServer) handleAccept(ctx context.Context, req *rtc.SignalAcceptReq, 
 		log.ZWarn(ctx, "sendSignalingNotification accept to inviter failed", err, "inviterID", dbInv.InviterUserID)
 	}
 
-	// TODO: 群通话可通过 RemoveInvitee 实现精细化状态管理
-	if dbInv.GroupID == "" {
-		if err := s.db.DeleteInvitation(ctx, dbInv.RoomID); err != nil {
-			log.ZWarn(ctx, "handleAccept: DeleteInvitation failed (non-fatal)", err, "roomID", dbInv.RoomID)
-		}
-	}
+	// 接受邀请后不删除 invitation：通话仍在进行，双方应被标记为忙线（BusyLineUserIDList）。
+	// invitation 的清理由以下路径负责：
+	//   - 主动挂断：handleHungUp → DeleteInvitation
+	//   - 主叫取消：handleCancel → DeleteInvitation
+	//   - 被叫拒绝：handleReject → DeleteInvitation / RemoveInvitee
+	//   - 异常中断：MongoDB TTL 索引（expire_at 字段）自动清理
 
 	return &rtc.SignalAcceptResp{
 		Token:   token,
@@ -599,6 +659,7 @@ func signalingMsgOptions() map[string]bool {
 	// IsNotNotification=false 表示"这是通知消息"，让 IsNotificationByMsg 返回 true
 	// 从而跳过 modifyMessageByUserMessageReceiveOpt 中的黑名单/好友关系等校验
 	datautil.SetSwitchFromOptions(opts, constant.IsNotNotification, false)
+	datautil.SetSwitchFromOptions(opts, constant.IsSendMsg, false)
 	datautil.SetSwitchFromOptions(opts, constant.IsHistory, false)
 	datautil.SetSwitchFromOptions(opts, constant.IsPersistent, false)
 	datautil.SetSwitchFromOptions(opts, constant.IsUnreadCount, false)

@@ -71,6 +71,8 @@ type msgServer struct {
 	webhookClient          *webhook.Client
 	conversationClient     *rpcli.ConversationClient
 	spamReportDB           database.SpamReport
+	globalBlackDB          controller.UserGlobalBlackDatabase
+	msgBurnDeadlineDB      database.MsgBurnDeadline
 }
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
@@ -127,6 +129,14 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	globalBlackMgo, err := mgo.NewUserGlobalBlackMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	msgBurnDeadlineDB, err := mgo.NewMsgBurnDeadlineMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	s := &msgServer{
 		MsgDatabase:            msgDatabase,
 		RegisterCenter:         client,
@@ -138,6 +148,8 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		webhookClient:          webhook.NewWebhookClient(config.WebhooksConfig.URL),
 		conversationClient:     conversationClient,
 		spamReportDB:           spamReportDB,
+		globalBlackDB:          controller.NewUserGlobalBlackDatabase(globalBlackMgo),
+		msgBurnDeadlineDB:      msgBurnDeadlineDB,
 	}
 
 	s.notificationSender = notification.NewNotificationSender(&config.NotificationConfig, notification.WithLocalSendMsg(s.SendMsg))

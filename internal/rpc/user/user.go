@@ -29,6 +29,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
@@ -71,6 +72,7 @@ type userServer struct {
 	groupClient              *rpcli.GroupClient
 	relationClient           *rpcli.RelationClient
 	globalBlackDB            controller.UserGlobalBlackDatabase
+	userOfflineRecord        database.UserOfflineRecord
 }
 
 type Config struct {
@@ -122,6 +124,10 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	if err != nil {
 		return err
 	}
+	userOfflineRecordDB, err := mgo.NewUserOfflineRecordMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	u := &userServer{
 		online:                   redis.NewUserOnline(rdb),
@@ -132,9 +138,10 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 		config:                   config,
 		webhookClient:            webhook.NewWebhookClient(config.WebhooksConfig.URL),
 
-		groupClient:    rpcli.NewGroupClient(groupConn),
-		relationClient: rpcli.NewRelationClient(friendConn),
-		globalBlackDB:  controller.NewUserGlobalBlackDatabase(globalBlackMgo),
+		groupClient:       rpcli.NewGroupClient(groupConn),
+		relationClient:    rpcli.NewRelationClient(friendConn),
+		globalBlackDB:     controller.NewUserGlobalBlackDatabase(globalBlackMgo),
+		userOfflineRecord: userOfflineRecordDB,
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.db.InitOnce(context.Background(), users)
@@ -389,18 +396,146 @@ func (s *userServer) SetMsgReceiveSetting(ctx context.Context, req *pbuser.SetMs
 			"msgReceiveSetting", req.MsgReceiveSetting)
 		return nil, err
 	}
-	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	//s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
 	return &pbuser.SetMsgReceiveSettingResp{}, nil
+}
+
+// SetGroupInviteSetting 设置群邀请权限（0=所有人可邀请，1=仅好友可邀请，2=所有人不可邀请）。
+// 只允许本人或管理员操作。
+func (s *userServer) SetGroupInviteSetting(ctx context.Context, req *pbuser.SetGroupInviteSettingReq) (*pbuser.SetGroupInviteSettingResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("userID is required")
+	}
+	if req.GroupInviteSetting < 0 || req.GroupInviteSetting > 2 {
+		return nil, errs.ErrArgs.WrapMsg("groupInviteSetting must be 0, 1 or 2")
+	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		log.ZWarn(ctx, "SetGroupInviteSetting: access denied", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		log.ZError(ctx, "SetGroupInviteSetting: user not found or db error", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if err := s.db.UpdateByMap(ctx, req.UserID, map[string]any{
+		"group_invite_setting": req.GroupInviteSetting,
+	}); err != nil {
+		log.ZError(ctx, "SetGroupInviteSetting: UpdateByMap failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
+			"groupInviteSetting", req.GroupInviteSetting)
+		return nil, err
+	}
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	return &pbuser.SetGroupInviteSettingResp{}, nil
+}
+
+// SetUserMsgBurnDuration 设置用户全局消息阅后即焚时长（秒）；0 表示关闭，要求 >=0。
+// 只允许本人或管理员操作。
+func (s *userServer) SetUserMsgBurnDuration(ctx context.Context, req *pbuser.SetUserMsgBurnDurationReq) (*pbuser.SetUserMsgBurnDurationResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("userID is required")
+	}
+	if req.MsgBurnDuration < 0 {
+		return nil, errs.ErrArgs.WrapMsg("msgBurnDuration must be >= 0 (seconds)")
+	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		log.ZWarn(ctx, "SetUserMsgBurnDuration: access denied", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		log.ZError(ctx, "SetUserMsgBurnDuration: user not found or db error", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if err := s.db.UpdateByMap(ctx, req.UserID, map[string]any{
+		"msg_burn_duration": req.MsgBurnDuration,
+	}); err != nil {
+		log.ZError(ctx, "SetUserMsgBurnDuration: UpdateByMap failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
+			"msgBurnDuration", req.MsgBurnDuration)
+		return nil, err
+	}
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	return &pbuser.SetUserMsgBurnDurationResp{}, nil
+}
+
+// SetDeleteAccountInterval 设置用户删除账号等待间隔（秒）；
+// 0 表示重置为系统默认（18个月），要求 >= 0。只允许本人或管理员操作。
+func (s *userServer) SetDeleteAccountInterval(ctx context.Context, req *pbuser.SetDeleteAccountIntervalReq) (*pbuser.SetDeleteAccountIntervalResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("userID is required")
+	}
+	if req.DeleteAccountInterval < 0 {
+		return nil, errs.ErrArgs.WrapMsg("deleteAccountInterval must be >= 0 (seconds)")
+	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		log.ZWarn(ctx, "SetDeleteAccountInterval: access denied", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		log.ZError(ctx, "SetDeleteAccountInterval: user not found or db error", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if err := s.db.UpdateByMap(ctx, req.UserID, map[string]any{
+		"delete_account_interval": req.DeleteAccountInterval,
+	}); err != nil {
+		log.ZError(ctx, "SetDeleteAccountInterval: UpdateByMap failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
+			"deleteAccountInterval", req.DeleteAccountInterval)
+		return nil, err
+	}
+	// 若用户当前处于离线状态（user_offline_record 中有记录），将 offline_time 与
+	// delete_user_deadline 刷新为当前时刻及新截止时间，使倒计时从本次设置时刻重新起算。
+	now := time.Now()
+	interval := req.DeleteAccountInterval
+	if interval == 0 {
+		interval = tablerelation.DefaultDeleteAccountIntervalSec
+	}
+	newDeadline := now.Add(time.Duration(interval) * time.Second)
+	if err := s.userOfflineRecord.RefreshOfflineTime(ctx, req.UserID, now, newDeadline); err != nil {
+		log.ZWarn(ctx, "SetDeleteAccountInterval: RefreshOfflineTime failed", err,
+			"userID", req.UserID)
+	}
+	return &pbuser.SetDeleteAccountIntervalResp{}, nil
+}
+
+// GetUserPrivacySettings 返回当前登录用户（ctx opUserID）的隐私与接收相关设置。
+func (s *userServer) GetUserPrivacySettings(ctx context.Context, req *pbuser.GetUserPrivacySettingsReq) (*pbuser.GetUserPrivacySettingsResp, error) {
+	userID := mcontext.GetOpUserID(ctx)
+	if userID == "" {
+		return nil, errs.ErrArgs.WrapMsg("opUserID is required")
+	}
+	users, err := s.db.FindWithError(ctx, []string{userID})
+	if err != nil {
+		log.ZError(ctx, "GetUserPrivacySettings: user not found or db error", err,
+			"opUserID", userID)
+		return nil, err
+	}
+	u := users[0]
+
+	return &pbuser.GetUserPrivacySettingsResp{
+		MsgBurnDuration:       u.MsgBurnDuration,
+		PhoneVisibility:       u.PhoneVisibility,
+		CallAcceptSetting:     u.CallAcceptSetting,
+		GlobalRecvMsgOpt:      u.GlobalRecvMsgOpt,
+		MsgReceiveSetting:     u.MsgReceiveSetting,
+		GroupInviteSetting:    u.GroupInviteSetting,
+		DeleteAccountInterval: u.DeleteAccountInterval,
+	}, nil
 }
 
 // GetUserByPhone 根据精确手机号查询用户。
 //
-// phoneSearchVisibility=false（默认）时忽略 phone_visibility，任何人均可搜到。
-// phoneSearchVisibility=true 时按 phone_visibility 过滤：
-//   - Hidden(2)  → 非管理员不可搜到
-//   - Friends(1) → 仅好友/管理员可搜到
-//   - Public(0)  → 任何人均可搜到
+// phone_visibility 仅控制用户资料中手机号字段是否展示，不影响搜索本身：
+// 无论目标用户将手机号设置为何种可见性，只要手机号匹配就能找到该用户。
+// 返回的 UserInfo 中 phone 字段仍按 applyPhoneVisibility 规则处理。
 //
+// 当目标用户 MsgReceiveSetting=2（不接受任何人消息）时，对非本人搜索者不可见。
 // 返回空 userInfo 并不代表错误，调用方应以 nil userInfo 判断"未找到"。
 func (s *userServer) GetUserByPhone(ctx context.Context, req *pbuser.GetUserByPhoneReq) (*pbuser.GetUserByPhoneResp, error) {
 	if req.Phone == "" {
@@ -413,7 +548,7 @@ func (s *userServer) GetUserByPhone(ctx context.Context, req *pbuser.GetUserByPh
 	dbUser, err := s.db.FindByPhone(ctx, req.Phone)
 	if err != nil {
 		if errs.ErrRecordNotFound.Is(err) {
-			// 手机号未注册，返回空响应而非错误，避免枚举攻击
+			// 手机号未注册，返回空响应而非错误
 			return &pbuser.GetUserByPhoneResp{}, nil
 		}
 		log.ZError(ctx, "GetUserByPhone: FindByPhone failed", err,
@@ -421,39 +556,25 @@ func (s *userServer) GetUserByPhone(ctx context.Context, req *pbuser.GetUserByPh
 		return nil, err
 	}
 
-	// 仅在 phoneSearchVisibility=true 时才按 phone_visibility 过滤，默认跳过
-	if s.config.RpcConfig.PhoneSearchVisibility {
-		callerID := mcontext.GetOpUserID(ctx)
-		isAdmin := datautil.Contain(callerID, s.config.Share.IMAdminUserID...)
-
-		switch dbUser.PhoneVisibility {
-		case tablerelation.PhoneVisibilityHidden:
-			// 完全隐藏：非管理员无法通过手机号搜到该用户
-			if !isAdmin {
-				return &pbuser.GetUserByPhoneResp{}, nil
-			}
-		case tablerelation.PhoneVisibilityFriends:
-			// 仅好友可搜索
-			if !isAdmin && callerID != dbUser.UserID {
-				isFriend, err := s.relationClient.IsFriend(ctx, callerID, dbUser.UserID)
-				if err != nil {
-					log.ZError(ctx, "GetUserByPhone: IsFriend failed", err,
-						"callerID", callerID, "targetUserID", dbUser.UserID)
-					return nil, err
-				}
-				if !isFriend {
-					return &pbuser.GetUserByPhoneResp{}, nil
-				}
-			}
-		}
+	viewerID := mcontext.GetOpUserID(ctx)
+	// MsgReceiveSetting=2 表示不接受任何人消息，对非本人搜索者隐藏该用户
+	if dbUser.MsgReceiveSetting == tablerelation.MsgReceiveSettingNobody && viewerID != dbUser.UserID {
+		return &pbuser.GetUserByPhoneResp{}, nil
 	}
 
 	pbUser := convert.UserDB2Pb(dbUser)
+	// 搜索者已知手机号（主动输入），仍对返回的资料字段应用可见性规则
+	if err := s.applyPhoneVisibility(ctx, viewerID, []*sdkws.UserInfo{pbUser}, []*tablerelation.User{dbUser}); err != nil {
+		log.ZError(ctx, "GetUserByPhone: applyPhoneVisibility failed", err,
+			"opUserID", viewerID, "targetUserID", dbUser.UserID)
+		return nil, err
+	}
 	return &pbuser.GetUserByPhoneResp{UserInfo: pbUser}, nil
 }
 
 // GetUsersByNickname 按昵称精确匹配查询普通用户（app_manger_level 与分页拉取用户一致）。
 // 全局黑名单用户会被过滤；手机号字段按 phone_visibility 与 getDesignateUsers 相同规则处理。
+// MsgReceiveSetting=2 的用户对非本人搜索者不可见。
 func (s *userServer) GetUsersByNickname(ctx context.Context, req *pbuser.GetUsersByNicknameReq) (*pbuser.GetUsersByNicknameResp, error) {
 	nickname := strings.TrimSpace(req.Nickname)
 	if nickname == "" {
@@ -497,8 +618,23 @@ func (s *userServer) GetUsersByNickname(ctx context.Context, req *pbuser.GetUser
 		return &pbuser.GetUsersByNicknameResp{}, nil
 	}
 
-	pbUsers := convert.UsersDB2Pb(users)
+	// 过滤掉 MsgReceiveSetting=2（不接受任何人消息）的用户，本人除外
 	viewerID := mcontext.GetOpUserID(ctx)
+	{
+		visible := make([]*tablerelation.User, 0, len(users))
+		for _, u := range users {
+			if u.MsgReceiveSetting == tablerelation.MsgReceiveSettingNobody && viewerID != u.UserID {
+				continue
+			}
+			visible = append(visible, u)
+		}
+		users = visible
+	}
+	if len(users) == 0 {
+		return &pbuser.GetUsersByNicknameResp{}, nil
+	}
+
+	pbUsers := convert.UsersDB2Pb(users)
 	if err := s.applyPhoneVisibility(ctx, viewerID, pbUsers, users); err != nil {
 		log.ZError(ctx, "GetUsersByNickname: applyPhoneVisibility failed", err,
 			"opUserID", viewerID, "count", len(users))
@@ -590,6 +726,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	now := time.Now()
 	users := make([]*tablerelation.User, 0, len(req.Users))
 	for _, user := range req.Users {
+		fullName := convert.BuildFullName(user.FirstName, user.LastName)
 		users = append(users, &tablerelation.User{
 			UserID:           user.UserID,
 			Nickname:         user.Nickname,
@@ -598,6 +735,11 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 			CreateTime:       now,
 			AppMangerLevel:   user.AppMangerLevel,
 			GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
+			FirstName:        user.FirstName,
+			LastName:         user.LastName,
+			FullName:         fullName,
+			Phone:            user.Phone,
+			AreaCode:         user.AreaCode,
 		})
 	}
 	if err := s.db.Create(ctx, users); err != nil {
