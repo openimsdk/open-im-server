@@ -206,16 +206,18 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 	return &msg.MarkConversationAsReadResp{}, nil
 }
 
-// recordBurnDeadlines 在「单聊」场景下，根据对端（发送者）的 MsgBurnDuration
-// 为本次已读的每条消息同时给接收者和发送者各记录一份「阅后即焚」截止时间。
-// cron 到期后会分别推进两人各自的 min_seq，双方都看不到该消息。
+// recordBurnDeadlines 在「单聊」场景下，为本次已读的每条消息同时给接收者和发送者
+// 各记录一份「阅后即焚」截止时间。cron 到期后会分别删除双方该消息，双方都看不到。
+//
+// 销毁时长优先级：
+//  1. 会话级 BurnDuration（通过 /conversation/set_burn 设置）；
+//  2. 对端（发送者）全局 MsgBurnDuration。
 //
 // 设计要点：
 //  1. 仅单聊。
-//  2. 仅当发送者 MsgBurnDuration > 0 时才记录；0 表示未开启。
-//  3. $setOnInsert 确保同一 (UserID, ConversationID, Seq) 已存在时不覆盖，
+//  2. $setOnInsert 确保同一 (UserID, ConversationID, Seq) 已存在时不覆盖，
 //     以「首次阅读时刻」为 deadline 基准，多端重复 MarkAsRead 不会往后推。
-//  4. 失败仅记录日志，不影响已读主流程。
+//  3. 失败仅记录日志，不影响已读主流程。
 func (m *msgServer) recordBurnDeadlines(ctx context.Context, conv *conversation.Conversation, readerUserID string, seqs []int64) {
 	if len(seqs) == 0 {
 		return
@@ -227,16 +229,23 @@ func (m *msgServer) recordBurnDeadlines(ctx context.Context, conv *conversation.
 	if peerID == "" || peerID == readerUserID {
 		return
 	}
-	peerInfo, err := m.UserLocalCache.GetUserInfo(ctx, peerID)
-	if err != nil {
-		log.ZWarn(ctx, "recordBurnDeadlines GetUserInfo failed", err, "peerID", peerID)
-		return
+
+	// 优先使用会话级 BurnDuration（双方协商后保存到会话），否则回退到发送者全局设置。
+	burnSeconds := conv.BurnDuration
+	if burnSeconds <= 0 {
+		peerInfo, err := m.UserLocalCache.GetUserInfo(ctx, peerID)
+		if err != nil {
+			log.ZWarn(ctx, "recordBurnDeadlines GetUserInfo failed", err, "peerID", peerID)
+			return
+		}
+		if peerInfo == nil || peerInfo.MsgBurnDuration <= 0 {
+			return
+		}
+		burnSeconds = peerInfo.MsgBurnDuration
 	}
-	if peerInfo == nil || peerInfo.MsgBurnDuration <= 0 {
-		return
-	}
+
 	now := time.Now().UnixMilli()
-	deadline := now + int64(peerInfo.MsgBurnDuration)*1000
+	deadline := now + int64(burnSeconds)*1000
 	// 每条消息同时为接收者和发送者各写一条 deadline，双方消息同步焚毁。
 	items := make([]*model.MsgBurnDeadline, 0, len(seqs)*2)
 	for _, seq := range seqs {

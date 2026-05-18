@@ -357,6 +357,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		conversationGroup.POST("/get_not_notify_conversation_ids", c.GetNotNotifyConversationIDs)
 		conversationGroup.POST("/get_pinned_conversation_ids", c.GetPinnedConversationIDs)
 		conversationGroup.POST("/set_mute", c.SetMute)
+		conversationGroup.POST("/set_burn", c.SetBurn)
 	}
 
 	{

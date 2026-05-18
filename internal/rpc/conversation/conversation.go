@@ -914,6 +914,21 @@ func (c *conversationServer) ClearBurnExpiredMsgs(ctx context.Context, req *pbco
 	return &pbconversation.ClearBurnExpiredMsgsResp{Count: processed}, nil
 }
 
+func (c *conversationServer) SetConversationBurn(ctx context.Context, req *pbconversation.SetConversationBurnReq) (*pbconversation.SetConversationBurnResp, error) {
+	if err := c.conversationDatabase.UpdateUsersConversationField(
+		ctx,
+		[]string{req.OwnerUserID},
+		req.ConversationID,
+		map[string]any{
+			"burn_duration": req.BurnDuration,
+		},
+	); err != nil {
+		return nil, err
+	}
+	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID, []string{req.ConversationID})
+	return &pbconversation.SetConversationBurnResp{}, nil
+}
+
 func (c *conversationServer) SetConversationMute(ctx context.Context, req *pbconversation.SetConversationMuteReq) (*pbconversation.SetConversationMuteResp, error) {
 	var (
 		muteDuration int32
