@@ -20,11 +20,11 @@ chain:
 
 # TRON full-node configuration. Leave fullNodeURL empty to disable TRON.
 tron:
-  fullNodeURL: ""
-  contractBase58: ""
-  ownerBase58: ""
-  privateKeyHex: ""
-  feeLimit: 100000000
+  fullNodeURL: "https://nile.trongrid.io"
+  contractBase58: "TTLFvSEyH6BAUp3cVGygWyTVGPBqdLw81M"
+  ownerBase58: "TJG6ZbEUZNVAQzFQTZehfQJniVJtTBdZ2e"
+  privateKeyHex: "e9f6a5f3a3c3a97099ca31e7f44151e529c0a4f8a91d5d4232c7282f2b798df4"
+  feeLimit: 150000000
 
 # Indexer polling interval (in seconds). Used by both EVM and TRON event indexers.
 # Set to 0 or negative to disable block scanning completely and rely on tx-hash parsing paths.
