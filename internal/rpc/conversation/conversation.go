@@ -50,6 +50,7 @@ type conversationServer struct {
 	pbconversation.UnimplementedConversationServer
 	conversationDatabase controller.ConversationDatabase
 	msgBurnDeadlineDB    database.MsgBurnDeadline
+	groupMsgBurnRecordDB database.GroupMsgBurnRecord
 
 	conversationNotificationSender *ConversationNotificationSender
 	config                         *Config
@@ -86,6 +87,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	groupMsgBurnRecordDB, err := mgo.NewGroupMsgBurnRecordMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
@@ -104,10 +109,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		conversationNotificationSender: NewConversationNotificationSender(&config.NotificationConfig, msgClient),
 		conversationDatabase: controller.NewConversationDatabase(conversationDB,
 			redis.NewConversationRedis(rdb, &config.LocalCacheConfig, redis.GetRocksCacheOptions(), conversationDB), mgocli.GetTx()),
-		msgBurnDeadlineDB: msgBurnDeadlineDB,
-		userClient:        rpcli.NewUserClient(userConn),
-		groupClient:       rpcli.NewGroupClient(groupConn),
-		msgClient:         msgClient,
+		msgBurnDeadlineDB:    msgBurnDeadlineDB,
+		groupMsgBurnRecordDB: groupMsgBurnRecordDB,
+		userClient:           rpcli.NewUserClient(userConn),
+		groupClient:          rpcli.NewGroupClient(groupConn),
+		msgClient:            msgClient,
 	})
 	return nil
 }
@@ -912,6 +918,74 @@ func (c *conversationServer) ClearBurnExpiredMsgs(ctx context.Context, req *pbco
 		processed++
 	}
 	return &pbconversation.ClearBurnExpiredMsgsResp{Count: processed}, nil
+}
+
+
+// ClearGroupBurnExpiredMsgs 处理群消息「阅后即焚」到期记录：
+//  1. 查询满足 read_count >= member_count 且 burn_end_time 过期的记录（按 group_id 聚合）。
+//  2. 对每个群，获取所有成员 ID，批量推进他们在群会话上的 min_seq。
+//  3. 更新每个成员的会话 min_seq 并下发 ConversationChangeNotification。
+//  4. 删除已处理的 group_msg_burn_record 记录。
+func (c *conversationServer) ClearGroupBurnExpiredMsgs(ctx context.Context, req *pbconversation.ClearGroupBurnExpiredMsgsReq) (*pbconversation.ClearGroupBurnExpiredMsgsResp, error) {
+	if c.groupMsgBurnRecordDB == nil {
+		return &pbconversation.ClearGroupBurnExpiredMsgsResp{Count: 0}, nil
+	}
+	limit := int(req.Limit)
+	if limit <= 0 {
+		limit = 100
+	}
+	groups, err := c.groupMsgBurnRecordDB.FindExpired(ctx, req.Timestamp, limit)
+	if err != nil {
+		return nil, err
+	}
+	var processed int32
+	for _, g := range groups {
+		if g.GroupID == "" || g.MaxSeq <= 0 {
+			continue
+		}
+		conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, g.GroupID)
+		newMinSeq := g.MaxSeq + 1
+
+		// 获取群所有成员 ID
+		memberIDs, err := c.groupClient.GetGroupMemberUserIDs(ctx, g.GroupID)
+		if err != nil {
+			log.ZError(ctx, "ClearGroupBurnExpiredMsgs GetGroupMemberUserIDs failed", err,
+				"groupID", g.GroupID)
+			continue
+		}
+		if len(memberIDs) == 0 {
+			continue
+		}
+
+		// 批量推进所有成员的 min_seq（seq 层）
+		if err := c.msgClient.SetUserConversationMin(ctx, conversationID, memberIDs, newMinSeq); err != nil {
+			log.ZError(ctx, "ClearGroupBurnExpiredMsgs SetUserConversationMin failed", err,
+				"groupID", g.GroupID, "conversationID", conversationID, "minSeq", newMinSeq)
+			continue
+		}
+
+		// 更新每个成员会话文档中的 min_seq 并发送通知
+		if err := c.conversationDatabase.UpdateUsersConversationField(ctx, memberIDs, conversationID,
+			map[string]any{"min_seq": newMinSeq}); err != nil {
+			log.ZError(ctx, "ClearGroupBurnExpiredMsgs UpdateUsersConversationField failed", err,
+				"groupID", g.GroupID, "conversationID", conversationID, "minSeq", newMinSeq)
+			continue
+		}
+		for _, memberID := range memberIDs {
+			c.conversationNotificationSender.ConversationChangeNotification(ctx, memberID, []string{conversationID})
+		}
+
+		// 删除已处理记录
+		if err := c.groupMsgBurnRecordDB.DeleteByGroupSeqs(ctx, g.GroupID, g.Seqs); err != nil {
+			log.ZError(ctx, "ClearGroupBurnExpiredMsgs DeleteByGroupSeqs failed", err,
+				"groupID", g.GroupID, "seqs", g.Seqs)
+		}
+		log.ZDebug(ctx, "ClearGroupBurnExpiredMsgs advanced min_seq for group",
+			"groupID", g.GroupID, "conversationID", conversationID,
+			"minSeq", newMinSeq, "memberCount", len(memberIDs), "seqs", g.Seqs)
+		processed++
+	}
+	return &pbconversation.ClearGroupBurnExpiredMsgsResp{Count: processed}, nil
 }
 
 func (c *conversationServer) SetConversationBurn(ctx context.Context, req *pbconversation.SetConversationBurnReq) (*pbconversation.SetConversationBurnResp, error) {

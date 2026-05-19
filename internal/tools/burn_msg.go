@@ -51,3 +51,33 @@ func (c *cronServer) clearBurnExpiredMsgs() {
 	}
 	log.ZDebug(ctx, "clear burn expired msgs cron completed", "cost", time.Since(now), "count", count)
 }
+
+// clearGroupBurnExpiredMsgs 群消息阅后即焚 cron 入口：循环调用 conversation 服务的
+// ClearGroupBurnExpiredMsgs，每次至多处理 burnLimit 个 group 分组，
+// 直至本轮没有到期分组或达到防御性的最大循环次数。
+func (c *cronServer) clearGroupBurnExpiredMsgs() {
+	now := time.Now()
+	operationID := fmt.Sprintf("cron_group_burn_msg_%d_%d", os.Getpid(), now.UnixMilli())
+	ctx := mcontext.SetOperationID(c.ctx, operationID)
+	log.ZDebug(ctx, "clear group burn expired msgs cron start")
+	const (
+		maxLoop   = 10000
+		burnLimit = 100
+	)
+	var count int
+	for i := 1; i <= maxLoop; i++ {
+		resp, err := c.conversationClient.ClearGroupBurnExpiredMsgs(ctx, &pbconversation.ClearGroupBurnExpiredMsgsReq{
+			Timestamp: now.UnixMilli(),
+			Limit:     burnLimit,
+		})
+		if err != nil {
+			log.ZError(ctx, "ClearGroupBurnExpiredMsgs failed.", err)
+			return
+		}
+		count += int(resp.Count)
+		if resp.Count < burnLimit {
+			break
+		}
+	}
+	log.ZDebug(ctx, "clear group burn expired msgs cron completed", "cost", time.Since(now), "count", count)
+}
