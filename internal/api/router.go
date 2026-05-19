@@ -216,6 +216,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		friendRouterGroup.POST("/is_friend", f.IsFriend)
 		friendRouterGroup.POST("/get_friend_id", f.GetFriendIDs)
 		friendRouterGroup.POST("/get_specified_friends_info", f.GetSpecifiedFriendsInfo)
+		friendRouterGroup.POST("/get_phone", f.GetFriendPhone)
 		friendRouterGroup.POST("/update_friends", f.UpdateFriends)
 		friendRouterGroup.POST("/get_incremental_friends", f.GetIncrementalFriends)
 		friendRouterGroup.POST("/get_full_friend_user_ids", f.GetFullFriendUserIDs)

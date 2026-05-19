@@ -101,6 +101,10 @@ func (o *FriendApi) GetSpecifiedFriendsInfo(c *gin.Context) {
 	a2r.Call(c, relation.FriendClient.GetSpecifiedFriendsInfo, o.Client)
 }
 
+func (o *FriendApi) GetFriendPhone(c *gin.Context) {
+	a2r.Call(c, relation.FriendClient.GetFriendPhone, o.Client)
+}
+
 func (o *FriendApi) UpdateFriends(c *gin.Context) {
 	a2r.Call(c, relation.FriendClient.UpdateFriends, o.Client)
 }

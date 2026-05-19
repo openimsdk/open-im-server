@@ -597,6 +597,31 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *relatio
 	return resp, nil
 }
 
+// GetFriendPhone 返回 friendUserID 对应用户的 Phone、AreaCode。
+// 是否下发明文仅由该用户（friendUserID）设置的 phone_visibility 决定（经 User.GetDesignateUsers / applyPhoneVisibility，viewer 为 ctx 中的 opUserID）。
+// 非本人查询时，要求 friendUserID 须在 ownerUserID 的好友列表中。
+func (s *friendServer) GetFriendPhone(ctx context.Context, req *relation.GetFriendPhoneReq) (*relation.GetFriendPhoneResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	if req.OwnerUserID != req.FriendUserID {
+		if _, err := s.db.FindFriendsWithError(ctx, req.OwnerUserID, []string{req.FriendUserID}); err != nil {
+			return nil, err
+		}
+	}
+	userInfo, err := s.userClient.GetUserInfo(ctx, req.FriendUserID)
+	if err != nil {
+		return nil, err
+	}
+	if userInfo == nil {
+		return nil, errs.ErrRecordNotFound.WrapMsg("user not found")
+	}
+	return &relation.GetFriendPhoneResp{
+		Phone:     userInfo.Phone,
+		AreaCode:  userInfo.AreaCode,
+	}, nil
+}
+
 func (s *friendServer) UpdateFriends(
 	ctx context.Context,
 	req *relation.UpdateFriendsReq,
