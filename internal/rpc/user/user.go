@@ -179,7 +179,9 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 	return resp, nil
 }
 
-// applyPhoneVisibility 根据 phone_visibility 和好友关系决定是否下发明文手机号。
+// applyPhoneVisibility 根据 phone_visibility 和单向好友关系决定是否下发明文手机号。
+// 「仅好友可见」：viewer 须在 target 的好友列表中（target 单向添加了 viewer），
+// 而不是 viewer 把 target 加进自己的列表。
 // pbUsers 与 dbUsers 下标一一对应。
 func (s *userServer) applyPhoneVisibility(ctx context.Context, viewerID string, pbUsers []*sdkws.UserInfo, dbUsers []*tablerelation.User) error {
 	for i, db := range dbUsers {
@@ -197,12 +199,12 @@ func (s *userServer) applyPhoneVisibility(ctx context.Context, viewerID string, 
 			pb.Phone = ""
 			pb.AreaCode = ""
 		case tablerelation.PhoneVisibilityFriends:
-			// 仅好友可见
+			// 仅好友可见：以资料所属用户的好友列表为准（单向）
 			if viewerID == db.UserID {
 				// 本人始终可见
 				break
 			}
-			isFriend, err := s.relationClient.IsFriend(ctx, viewerID, db.UserID)
+			isFriend, err := s.relationClient.IsFriend(ctx, db.UserID, viewerID)
 			if err != nil {
 				log.ZError(ctx, "applyPhoneVisibility: IsFriend failed", err,
 					"viewerID", viewerID, "targetUserID", db.UserID)
