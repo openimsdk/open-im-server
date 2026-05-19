@@ -216,7 +216,11 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 	}
 	inv.BusyLineUserIDList = busyUserIDs
 
-	// 从主叫用户资料获取铃声 URL，注入到邀请信息中，被叫方收到后播放主叫方铃声
+	if len(inv.InviteeUserIDList) == len(busyUserIDs) {
+		return nil, errs.ErrNoPermission.WrapMsg("all invitees are busy", "inviteeUserIDList", inv.InviteeUserIDList)
+	}
+
+	// 从主叫用户资料获取铃声 URL，注入到邀请s信息中，被叫方收到后播放主叫方铃声
 	if inviterInfo, err := s.userClient.GetUserInfo(ctx, req.UserID); err == nil && inviterInfo.CallRingtoneURL != "" {
 		inv.CallerRingtoneURL = inviterInfo.CallRingtoneURL
 	}
