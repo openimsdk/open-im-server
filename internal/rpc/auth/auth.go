@@ -311,14 +311,27 @@ func (s *authServer) GetActiveDevices(ctx context.Context, req *pbauth.GetActive
 		if err != nil {
 			return nil, err
 		}
-		for _, state := range m {
-			if state == constant.NormalToken {
-				devices = append(devices, &pbauth.DeviceInfo{
-					PlatformID:   int32(platformID),
-					PlatformName: platformName,
-				})
-				break
+		var maxLoginUnix int64
+		var hasNormal bool
+		for tokenStr, state := range m {
+			if state != constant.NormalToken {
+				continue
 			}
+			hasNormal = true
+			claims, err := tokenverify.GetClaimFromToken(tokenStr, authverify.Secret(s.config.Share.Secret))
+			if err != nil || claims.IssuedAt == nil {
+				continue
+			}
+			if u := claims.IssuedAt.Unix(); u > maxLoginUnix {
+				maxLoginUnix = u
+			}
+		}
+		if hasNormal {
+			devices = append(devices, &pbauth.DeviceInfo{
+				PlatformID:       int32(platformID),
+				PlatformName:     platformName,
+				LoginTimeSeconds: maxLoginUnix,
+			})
 		}
 	}
 	return &pbauth.GetActiveDevicesResp{Devices: devices}, nil
