@@ -15,21 +15,23 @@ import (
 )
 
 func (s *friendServer) NotificationUserInfoUpdate(ctx context.Context, req *relation.NotificationUserInfoUpdateReq) (*relation.NotificationUserInfoUpdateResp, error) {
-	userIDs, err := s.db.FindFriendUserIDs(ctx, req.UserID)
+	// 单向好友：仅通知「好友列表中包含 req.UserID」的用户（owner -> req.UserID），
+	// 而非 req.UserID 自己好友列表中的对端。
+	ownerUserIDs, err := s.db.FindFriendUserID(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	if len(userIDs) > 0 {
+	if len(ownerUserIDs) > 0 {
 		friendUserIDs := []string{req.UserID}
 		noCancelCtx := context.WithoutCancel(ctx)
 		err := s.queue.PushCtx(ctx, func() {
-			for _, userID := range userIDs {
-				if err := s.db.OwnerIncrVersion(noCancelCtx, userID, friendUserIDs, model.VersionStateUpdate); err != nil {
-					log.ZError(ctx, "OwnerIncrVersion", err, "userID", userID, "friendUserIDs", friendUserIDs)
+			for _, ownerUserID := range ownerUserIDs {
+				if err := s.db.OwnerIncrVersion(noCancelCtx, ownerUserID, friendUserIDs, model.VersionStateUpdate); err != nil {
+					log.ZError(ctx, "OwnerIncrVersion", err, "userID", ownerUserID, "friendUserIDs", friendUserIDs)
 				}
 			}
-			for _, userID := range userIDs {
-				s.notificationSender.FriendInfoUpdatedNotification(noCancelCtx, req.UserID, userID)
+			for _, ownerUserID := range ownerUserIDs {
+				s.notificationSender.FriendInfoUpdatedNotification(noCancelCtx, req.UserID, ownerUserID)
 			}
 		})
 		if err != nil {

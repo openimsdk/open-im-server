@@ -185,6 +185,7 @@ func (s *userServer) applyPhoneVisibility(ctx context.Context, viewerID string, 
 	for i, db := range dbUsers {
 		pb := pbUsers[i]
 		if db.Phone == "" {
+			pb.AreaCode = ""
 			// 未设置手机号，直接跳过
 			continue
 		}
@@ -194,6 +195,7 @@ func (s *userServer) applyPhoneVisibility(ctx context.Context, viewerID string, 
 		case tablerelation.PhoneVisibilityHidden:
 			// 完全隐藏：即使本人也不通过此接口暴露，客户端自行从个人设置接口获取
 			pb.Phone = ""
+			pb.AreaCode = ""
 		case tablerelation.PhoneVisibilityFriends:
 			// 仅好友可见
 			if viewerID == db.UserID {
@@ -208,9 +210,11 @@ func (s *userServer) applyPhoneVisibility(ctx context.Context, viewerID string, 
 			}
 			if !isFriend {
 				pb.Phone = ""
+				pb.AreaCode = ""
 			}
 		default:
 			pb.Phone = ""
+			pb.AreaCode = ""
 		}
 	}
 	return nil
@@ -335,6 +339,13 @@ func (s *userServer) SetPhoneVisibility(ctx context.Context, req *pbuser.SetPhon
 		return nil, err
 	}
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+
+	if _, err := s.relationClient.NotificationUserInfoUpdate(ctx, &friendpb.NotificationUserInfoUpdateReq{
+		UserID: req.UserID,
+	}); err != nil {
+		log.ZError(ctx, "SetPhoneVisibility: NotificationUserInfoUpdate failed", err, "userID", req.UserID)
+		return nil, err
+	}
 	return &pbuser.SetPhoneVisibilityResp{}, nil
 }
 
