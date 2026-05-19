@@ -16,6 +16,7 @@ package tools
 
 import (
 	"context"
+	"strings"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
@@ -44,36 +45,37 @@ type CronTaskConfig struct {
 	MongodbConfig config.Mongo
 }
 
-func Start(ctx context.Context, config *CronTaskConfig) error {
-	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime", config.CronTask.CronExecuteTime, "msgDestructTime", config.CronTask.RetainChatRecords)
-	if config.CronTask.RetainChatRecords < 1 {
+func Start(ctx context.Context, cfg *CronTaskConfig) error {
+	config.FillCronTaskDefaults(&cfg.CronTask)
+	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime", cfg.CronTask.CronExecuteTime, "msgDestructTime", cfg.CronTask.RetainChatRecords)
+	if cfg.CronTask.RetainChatRecords < 1 {
 		return errs.New("msg destruct time must be greater than 1").Wrap()
 	}
-	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, &config.Share, nil)
+	client, err := kdisc.NewDiscoveryRegister(&cfg.Discovery, &cfg.Share, nil)
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	ctx = mcontext.SetOpUserID(ctx, config.Share.IMAdminUserID[0])
+	ctx = mcontext.SetOpUserID(ctx, cfg.Share.IMAdminUserID[0])
 
-	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
+	msgConn, err := client.GetConn(ctx, cfg.Share.RpcRegisterName.Msg)
 	if err != nil {
 		return err
 	}
-	thirdConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
+	thirdConn, err := client.GetConn(ctx, cfg.Share.RpcRegisterName.Third)
 	if err != nil {
 		return err
 	}
-	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
+	conversationConn, err := client.GetConn(ctx, cfg.Share.RpcRegisterName.Conversation)
 	if err != nil {
 		return err
 	}
-	authConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Auth)
+	authConn, err := client.GetConn(ctx, cfg.Share.RpcRegisterName.Auth)
 	if err != nil {
 		return err
 	}
 
-	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
+	mgocli, err := mongoutil.NewMongoDB(ctx, cfg.MongodbConfig.Build())
 	if err != nil {
 		return errs.WrapMsg(err, "crontask: connect mongodb failed")
 	}
@@ -86,14 +88,14 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 
 	srv := &cronServer{
 		ctx:                 ctx,
-		config:              config,
+		config:              cfg,
 		cron:                cron.New(),
 		msgClient:           msg.NewMsgClient(msgConn),
 		conversationClient:  pbconversation.NewConversationClient(conversationConn),
 		thirdClient:         third.NewThirdClient(thirdConn),
 		authClient:          rpcli.NewAuthClient(authConn),
 		userOfflineRecordDB: userOfflineRecordDB,
-		chatAPIAddress:      config.CronTask.ChatAPI.Address,
+		chatAPIAddress:      cfg.CronTask.ChatAPI.Address,
 	}
 
 	if err := srv.registerClearS3(); err != nil {
@@ -114,7 +116,7 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	if err := srv.registerDeleteExpiredOfflineUsers(); err != nil {
 		return err
 	}
-	log.ZDebug(ctx, "start cron task", "CronExecuteTime", config.CronTask.CronExecuteTime)
+	log.ZDebug(ctx, "start cron task", "CronExecuteTime", cfg.CronTask.CronExecuteTime)
 	srv.cron.Start()
 	<-ctx.Done()
 	return nil
@@ -156,7 +158,11 @@ func (c *cronServer) registerClearUserMsg() error {
 }
 
 func (c *cronServer) registerClearBurnExpiredMsgs() error {
-	_, err := c.cron.AddFunc(c.config.CronTask.CronExecuteTime, c.clearBurnExpiredMsgs)
+	schedule := strings.TrimSpace(c.config.CronTask.BurnCronExecuteTime)
+	if schedule == "" {
+		schedule = c.config.CronTask.CronExecuteTime
+	}
+	_, err := c.cron.AddFunc(schedule, c.clearBurnExpiredMsgs)
 	return errs.WrapMsg(err, "failed to register clear burn expired msgs cron task")
 }
 

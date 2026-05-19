@@ -36,6 +36,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/protocol/constant"
 	pbconversation "github.com/openimsdk/protocol/conversation"
+	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/discovery"
@@ -127,6 +128,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbconvers
 	}
 	resp := &pbconversation.GetConversationResp{Conversation: &pbconversation.Conversation{}}
 	resp.Conversation = convert.ConversationDB2Pb(conversations[0])
+	c.fillConversationUserMute(ctx, resp.Conversation)
 	return resp, nil
 }
 
@@ -201,6 +203,15 @@ func (c *conversationServer) GetSortedConversationList(ctx context.Context, req 
 		}
 		conversation_notPinTime[time] = conversationID
 	}
+	for _, v := range conversations {
+		elem, ok := conversationMsg[v.ConversationID]
+		if !ok {
+			continue
+		}
+		elem.MuteDuration = v.MuteDuration
+		elem.MuteEndTime = v.MuteEndTime
+		elem.IsMuted = computeIsMuted(v.MuteDuration, v.MuteEndTime)
+	}
 	resp = &pbconversation.GetSortedConversationListResp{
 		ConversationTotal: int64(len(chatLogs)),
 		ConversationElems: []*pbconversation.ConversationElem{},
@@ -221,6 +232,7 @@ func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbcon
 	}
 	resp := &pbconversation.GetAllConversationsResp{Conversations: []*pbconversation.Conversation{}}
 	resp.Conversations = convert.ConversationsDB2Pb(conversations)
+	c.fillConversationsUserMute(ctx, resp.Conversations)
 	return resp, nil
 }
 
@@ -239,9 +251,9 @@ func (c *conversationServer) getConversations(ctx context.Context, ownerUserID s
 	if err != nil {
 		return nil, err
 	}
-	resp := &pbconversation.GetConversationsResp{Conversations: []*pbconversation.Conversation{}}
-	resp.Conversations = convert.ConversationsDB2Pb(conversations)
-	return convert.ConversationsDB2Pb(conversations), nil
+	list := convert.ConversationsDB2Pb(conversations)
+	c.fillConversationsUserMute(ctx, list)
+	return list, nil
 }
 
 // Deprecated
@@ -529,7 +541,9 @@ func (c *conversationServer) GetConversationsByConversationID(
 	if err != nil {
 		return nil, err
 	}
-	return &pbconversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
+	list := convert.ConversationsDB2Pb(conversations)
+	c.fillConversationsUserMute(ctx, list)
+	return &pbconversation.GetConversationsByConversationIDResp{Conversations: list}, nil
 }
 
 func (c *conversationServer) GetConversationOfflinePushUserIDs(ctx context.Context, req *pbconversation.GetConversationOfflinePushUserIDsReq) (*pbconversation.GetConversationOfflinePushUserIDsResp, error) {
@@ -717,9 +731,11 @@ func (c *conversationServer) GetOwnerConversation(ctx context.Context, req *pbco
 	if err != nil {
 		return nil, err
 	}
+	list := convert.ConversationsDB2Pb(conversations)
+	c.fillConversationsUserMute(ctx, list)
 	return &pbconversation.GetOwnerConversationResp{
 		Total:         total,
-		Conversations: convert.ConversationsDB2Pb(conversations),
+		Conversations: list,
 	}, nil
 }
 
@@ -770,7 +786,9 @@ func (c *conversationServer) GetConversationsNeedClearMsg(ctx context.Context, _
 		}
 	}
 
-	return &pbconversation.GetConversationsNeedClearMsgResp{Conversations: convert.ConversationsDB2Pb(temp)}, nil
+	list := convert.ConversationsDB2Pb(temp)
+	c.fillConversationsUserMute(ctx, list)
+	return &pbconversation.GetConversationsNeedClearMsgResp{Conversations: list}, nil
 }
 
 func (c *conversationServer) GetNotNotifyConversationIDs(ctx context.Context, req *pbconversation.GetNotNotifyConversationIDsReq) (*pbconversation.GetNotNotifyConversationIDsResp, error) {
@@ -839,9 +857,11 @@ func (c *conversationServer) setConversationMinSeqAndLatestMsgDestructTime(ctx c
 
 // ClearBurnExpiredMsgs 处理「阅后即焚」过期消息：
 //  1. 从 msg_burn_deadline 中拉取一批过期分组（按 user/conversation 聚合，含每组最大 seq）。
-//  2. 对每个分组把用户在该会话上的 min_seq 推进到 max(过期 seq) + 1。
-//  3. 同步更新 conversation 文档的 min_seq 字段并下发会话变更通知。
-//  4. 删除已处理的 deadline 记录。
+//  2. 对每个分组把用户在该会话上的 min_seq 推进到 max(过期 seq) + 1，更新 conversation 文档。
+//  3. 向阅读方发 ConversationChangeNotification + DeleteMsgsNotification（含精确 seqs）。
+//  4. 单聊场景（si_ 前缀）：利用 deadline 记录中的 PeerID 直接推进对端 min_seq，
+//     并向对端也发两条通知，保证双方客户端都删本地消息。
+//  5. 物理删除 msg 存储中的焚毁消息；清理 deadline 记录。
 //
 // 单次最多处理 req.Limit 个分组；若返回的 count == limit，cron 可继续触发。
 func (c *conversationServer) ClearBurnExpiredMsgs(ctx context.Context, req *pbconversation.ClearBurnExpiredMsgsReq) (*pbconversation.ClearBurnExpiredMsgsResp, error) {
@@ -861,29 +881,45 @@ func (c *conversationServer) ClearBurnExpiredMsgs(ctx context.Context, req *pbco
 		if g.UserID == "" || g.ConversationID == "" || g.MaxSeq <= 0 {
 			continue
 		}
-		newMinSeq := g.MaxSeq + 1
-		if err := c.msgClient.SetUserConversationMin(ctx, g.ConversationID, []string{g.UserID}, newMinSeq); err != nil {
-			log.ZError(ctx, "ClearBurnExpiredMsgs SetUserConversationMin failed", err,
-				"userID", g.UserID, "conversationID", g.ConversationID, "minSeq", newMinSeq)
-			continue
+		//newMinSeq := g.MaxSeq + 1
+
+		// 推进阅读方 min_seq。
+		//if err := c.msgClient.SetUserConversationMin(ctx, g.ConversationID, []string{g.UserID}, newMinSeq); err != nil {
+		//	log.ZError(ctx, "ClearBurnExpiredMsgs SetUserConversationMin failed", err,
+		//		"userID", g.UserID, "conversationID", g.ConversationID, "minSeq", newMinSeq)
+		//	continue
+		//}
+		//if err := c.conversationDatabase.UpdateUsersConversationField(ctx, []string{g.UserID}, g.ConversationID,
+		//	map[string]any{"min_seq": newMinSeq}); err != nil {
+		//	log.ZError(ctx, "ClearBurnExpiredMsgs UpdateUsersConversationField failed", err,
+		//		"userID", g.UserID, "conversationID", g.ConversationID, "minSeq", newMinSeq)
+		//	continue
+		//}
+		// 通知 g.UserID 客户端：会话变更 + 精确删除指定 seqs。
+		// 对端用户在 msg_burn_deadline 中有独立记录，cron 处理其分组时会自行通知，
+		// 无需在此重复推进对端 min_seq 或发送额外通知。
+		//c.conversationNotificationSender.ConversationChangeNotification(ctx, g.UserID, []string{g.ConversationID})
+
+		// 删除焚毁消息并同步通知阅读方客户端（best-effort，失败不中断流程）。
+		if err := c.msgClient.DeleteMsgs(ctx, g.UserID, g.ConversationID, g.Seqs, &msg.DeleteSyncOpt{
+			IsSyncSelf: true,
+		}); err != nil {
+			log.ZError(ctx, "ClearBurnExpiredMsgs DeleteMsgs failed", err,
+				"userID", g.UserID, "conversationID", g.ConversationID, "seqs", g.Seqs)
 		}
-		if err := c.conversationDatabase.UpdateUsersConversationField(ctx, []string{g.UserID}, g.ConversationID,
-			map[string]any{"min_seq": newMinSeq}); err != nil {
-			log.ZError(ctx, "ClearBurnExpiredMsgs UpdateUsersConversationField failed", err,
-				"userID", g.UserID, "conversationID", g.ConversationID, "minSeq", newMinSeq)
-			continue
-		}
-		c.conversationNotificationSender.ConversationChangeNotification(ctx, g.UserID, []string{g.ConversationID})
+
 		if err := c.msgBurnDeadlineDB.DeleteByUserConversationSeqs(ctx, g.UserID, g.ConversationID, g.Seqs); err != nil {
 			log.ZError(ctx, "ClearBurnExpiredMsgs DeleteByUserConversationSeqs failed", err,
 				"userID", g.UserID, "conversationID", g.ConversationID, "seqs", g.Seqs)
 		}
+
 		log.ZDebug(ctx, "ClearBurnExpiredMsgs advanced min_seq", "userID", g.UserID,
-			"conversationID", g.ConversationID, "minSeq", newMinSeq, "seqs", g.Seqs)
+			"conversationID", g.ConversationID, "seqs", g.Seqs)
 		processed++
 	}
 	return &pbconversation.ClearBurnExpiredMsgsResp{Count: processed}, nil
 }
+
 
 // ClearGroupBurnExpiredMsgs 处理群消息「阅后即焚」到期记录：
 //  1. 查询满足 read_count >= member_count 且 burn_end_time 过期的记录（按 group_id 聚合）。
@@ -950,4 +986,50 @@ func (c *conversationServer) ClearGroupBurnExpiredMsgs(ctx context.Context, req 
 		processed++
 	}
 	return &pbconversation.ClearGroupBurnExpiredMsgsResp{Count: processed}, nil
+}
+
+func (c *conversationServer) SetConversationBurn(ctx context.Context, req *pbconversation.SetConversationBurnReq) (*pbconversation.SetConversationBurnResp, error) {
+	if err := c.conversationDatabase.UpdateUsersConversationField(
+		ctx,
+		[]string{req.OwnerUserID},
+		req.ConversationID,
+		map[string]any{
+			"burn_duration": req.BurnDuration,
+		},
+	); err != nil {
+		return nil, err
+	}
+	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID, []string{req.ConversationID})
+	return &pbconversation.SetConversationBurnResp{}, nil
+}
+
+func (c *conversationServer) SetConversationMute(ctx context.Context, req *pbconversation.SetConversationMuteReq) (*pbconversation.SetConversationMuteResp, error) {
+	var (
+		muteDuration int32
+		muteEndTime  int64
+	)
+	switch {
+	case req.Duration == 0:
+		// 取消静音：清零所有静音字段
+	case req.Duration == -1:
+		// 永久静音
+		muteDuration = -1
+	default:
+		// 定时静音
+		muteDuration = req.Duration
+		muteEndTime = time.Now().Unix() + int64(req.Duration)
+	}
+	if err := c.conversationDatabase.UpdateUsersConversationField(
+		ctx,
+		[]string{req.OwnerUserID},
+		req.ConversationID,
+		map[string]any{
+			"mute_duration": muteDuration,
+			"mute_end_time": muteEndTime,
+		},
+	); err != nil {
+		return nil, err
+	}
+	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID, []string{req.ConversationID})
+	return &pbconversation.SetConversationMuteResp{}, nil
 }

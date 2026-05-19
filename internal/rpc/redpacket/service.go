@@ -124,6 +124,12 @@ func (s *redPacketServer) CreatedCallback(ctx context.Context, req *pbredpacket.
 		PacketID:        createdPacket.PacketID,
 		ChainID:         createdPacket.ChainID,
 		ContractAddress: createdPacket.ContractAddress,
+		CreatorWallet:   createdPacket.CreatorWallet,
+		PacketType:      createdPacket.PacketType,
+		Token:           createdPacket.Token,
+		TotalAmount:     createdPacket.TotalAmount,
+		TotalShares:     createdPacket.TotalShares,
+		ExpiryAt:        createdPacket.ExpiryAt,
 		TxHash:          req.TxHash,
 		GroupID:         groupID,
 		ScopeType:       scopeType,
@@ -268,15 +274,36 @@ func (s *redPacketServer) ClaimResult(ctx context.Context, req *pbredpacket.Clai
 		return nil, err
 	}
 
-	claimedEvent, err := s.resolveClaimedEvent(ctx, rp, req.TxHash)
+	txSuccess, events, err := s.parseChainReceiptWithStatus(ctx, rp, req.TxHash)
+	if err != nil {
+		log.ZWarn(ctx, "parse claim receipt failed", err, "txHash", req.TxHash)
+		return &pbredpacket.ClaimResultResp{}, nil
+	}
+	if !txSuccess {
+		if markErr := s.markClaimFailed(ctx, req.PacketID, currentUserID, req.Claimer, req.TxHash); markErr != nil {
+			log.ZWarn(ctx, "mark claim failed status failed", markErr, "txHash", req.TxHash)
+		}
+		return &pbredpacket.ClaimResultResp{}, nil
+	}
+
+	claimedEvent, err := resolveClaimedEventFromParsedEvents(rp, events)
 	if err != nil {
 		log.ZWarn(ctx, "resolve claim event failed", err, "txHash", req.TxHash)
+		if markErr := s.markClaimFailed(ctx, req.PacketID, currentUserID, req.Claimer, req.TxHash); markErr != nil {
+			log.ZWarn(ctx, "mark claim failed status failed", markErr, "txHash", req.TxHash)
+		}
 		return &pbredpacket.ClaimResultResp{}, nil
 	}
 	if claimedEvent == nil {
+		if markErr := s.markClaimFailed(ctx, req.PacketID, currentUserID, req.Claimer, req.TxHash); markErr != nil {
+			log.ZWarn(ctx, "mark claim failed status failed", markErr, "txHash", req.TxHash)
+		}
 		return &pbredpacket.ClaimResultResp{}, nil
 	}
 	if !strings.EqualFold(claimedEvent.ClaimerWallet, req.Claimer) {
+		if markErr := s.markClaimFailed(ctx, req.PacketID, currentUserID, req.Claimer, req.TxHash); markErr != nil {
+			log.ZWarn(ctx, "mark claim failed status failed", markErr, "txHash", req.TxHash)
+		}
 		return nil, errs.ErrArgs.WrapMsg(fmt.Sprintf("claim event claimer mismatch: got %s want %s", claimedEvent.ClaimerWallet, req.Claimer))
 	}
 
@@ -309,6 +336,34 @@ func (s *redPacketServer) ClaimResult(ctx context.Context, req *pbredpacket.Clai
 		return nil, err
 	}
 	return &pbredpacket.ClaimResultResp{}, nil
+}
+
+func (s *redPacketServer) parseChainReceiptWithStatus(ctx context.Context, rp *model.RedPacket, txHash string) (bool, []*chain.ParsedEvent, error) {
+	switch rp.ChainType {
+	case "EVM":
+		if s.chainClient == nil {
+			return false, nil, errs.ErrInternalServer.WrapMsg("evm client is unavailable")
+		}
+		return s.chainClient.ParseTransactionReceiptWithStatus(ctx, common.HexToHash(txHash))
+	case "TRON":
+		if s.tronClient == nil {
+			return false, nil, errs.ErrInternalServer.WrapMsg("tron client is unavailable")
+		}
+		return s.tronClient.ParseTransactionReceiptWithStatus(ctx, txHash)
+	default:
+		return false, nil, errs.ErrArgs.WrapMsg("unsupported chain_type: " + rp.ChainType)
+	}
+}
+
+func (s *redPacketServer) markClaimFailed(ctx context.Context, packetID, userID, claimer, txHash string) error {
+	return s.db.SaveClaim(ctx, &model.RedPacketClaim{
+		PacketID:      packetID,
+		UserID:        userID,
+		ClaimerWallet: claimer,
+		ClaimTxHash:   txHash,
+		Status:        "FAILED",
+		UpdatedAt:     time.Now(),
+	})
 }
 
 // canClaim runs the claim-eligibility check (formerly RedPacketService.CanClaim).
@@ -344,6 +399,12 @@ type claimedEventSnapshot struct {
 	BlockNumber   uint64
 }
 
+type refundedEventSnapshot struct {
+	RefundTo    string
+	Amount      string
+	BlockNumber uint64
+}
+
 type createdPacketSnapshot struct {
 	PacketID        string
 	ChainID         int64
@@ -367,9 +428,12 @@ func (s *redPacketServer) resolveCreatedPacket(ctx context.Context, rp *model.Re
 			return buildFallbackCreatedPacket(rp, fallbackPacketID), nil
 		}
 
-		events, err := s.chainClient.ParseTransactionReceipt(ctx, common.HexToHash(txHashHex))
+		success, events, err := s.chainClient.ParseTransactionReceiptWithStatus(ctx, common.HexToHash(txHashHex))
 		if err != nil {
 			return nil, errs.ErrInternalServer.WrapMsg("parse created tx failed: " + err.Error())
+		}
+		if !success {
+			return nil, errs.ErrArgs.WrapMsg("created tx execution failed on chain")
 		}
 
 		for _, event := range events {
@@ -396,9 +460,12 @@ func (s *redPacketServer) resolveCreatedPacket(ctx context.Context, rp *model.Re
 			return buildFallbackCreatedPacket(rp, fallbackPacketID), nil
 		}
 
-		events, err := s.tronClient.ParseTransactionReceipt(ctx, txHashHex)
+		success, events, err := s.tronClient.ParseTransactionReceiptWithStatus(ctx, txHashHex)
 		if err != nil {
 			return nil, errs.ErrInternalServer.WrapMsg("parse tron created tx failed: " + err.Error())
+		}
+		if !success {
+			return nil, errs.ErrArgs.WrapMsg("created tx execution failed on chain")
 		}
 
 		for _, event := range events {
@@ -795,7 +862,10 @@ func (s *redPacketServer) resolveClaimedEvent(ctx context.Context, rp *model.Red
 	if err != nil {
 		return nil, err
 	}
+	return resolveClaimedEventFromParsedEvents(rp, events)
+}
 
+func resolveClaimedEventFromParsedEvents(rp *model.RedPacket, events []*chain.ParsedEvent) (*claimedEventSnapshot, error) {
 	for _, event := range events {
 		if event.Name != "PacketClaimed" {
 			continue
@@ -813,6 +883,24 @@ func (s *redPacketServer) resolveClaimedEvent(ctx context.Context, rp *model.Red
 		}, nil
 	}
 
+	return nil, nil
+}
+
+func resolveRefundedEventFromParsedEvents(rp *model.RedPacket, events []*chain.ParsedEvent) (*refundedEventSnapshot, error) {
+	for _, event := range events {
+		if event.Name != "PacketRefunded" {
+			continue
+		}
+		packetID := chain.GetPacketIDFromEvent(event).String()
+		if packetID != rp.PacketID {
+			return nil, errs.ErrArgs.WrapMsg(fmt.Sprintf("refund event packet mismatch: got %s want %s", packetID, rp.PacketID))
+		}
+		return &refundedEventSnapshot{
+			RefundTo:    strings.ToLower(chain.GetAddressFromEvent(event, "refundTo").Hex()),
+			Amount:      chain.GetAmountFromEvent(event).String(),
+			BlockNumber: event.BlockNumber,
+		}, nil
+	}
 	return nil, nil
 }
 
@@ -946,7 +1034,37 @@ func (s *redPacketServer) RequestRefund(ctx context.Context, req *pbredpacket.Re
 	}
 
 	log.ZInfo(ctx, "redpacket refund submitted", "packetID", rp.PacketID, "txHash", txHash)
-	return &pbredpacket.RequestRefundResp{TxHash: txHash, Status: "PENDING"}, nil
+	txSuccess, events, parseErr := s.parseChainReceiptWithStatus(ctx, rp, txHash)
+	if parseErr != nil {
+		log.ZWarn(ctx, "parse refund receipt failed, fallback to async indexer", parseErr, "packetID", rp.PacketID, "txHash", txHash)
+		return &pbredpacket.RequestRefundResp{TxHash: txHash, Status: "PENDING"}, nil
+	}
+	if !txSuccess {
+		return &pbredpacket.RequestRefundResp{TxHash: txHash, Status: "FAILED"}, nil
+	}
+
+	refundedEvent, err := resolveRefundedEventFromParsedEvents(rp, events)
+	if err != nil {
+		log.ZWarn(ctx, "resolve refunded event failed, fallback to async indexer", err, "packetID", rp.PacketID, "txHash", txHash)
+		return &pbredpacket.RequestRefundResp{TxHash: txHash, Status: "PENDING"}, nil
+	}
+	if refundedEvent == nil {
+		return &pbredpacket.RequestRefundResp{TxHash: txHash, Status: "PENDING"}, nil
+	}
+
+	if err := s.db.SaveRefund(ctx, &model.RedPacketRefund{
+		PacketID:  rp.PacketID,
+		RefundTo:  refundedEvent.RefundTo,
+		TxHash:    txHash,
+		Amount:    refundedEvent.Amount,
+		CreatedAt: time.Now(),
+	}); err != nil {
+		return nil, err
+	}
+	if err := s.db.UpdateRedPacketStatus(ctx, rp.PacketID, "REFUNDED"); err != nil {
+		return nil, err
+	}
+	return &pbredpacket.RequestRefundResp{TxHash: txHash, Status: "REFUNDED"}, nil
 }
 
 func (s *redPacketServer) GetRefund(ctx context.Context, req *pbredpacket.GetRefundReq) (*pbredpacket.GetRefundResp, error) {

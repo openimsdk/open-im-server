@@ -226,7 +226,7 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, us
 	}
 
 	// 第二优先级：单聊发送权限校验（从 messageVerification 迁移）
-	// 仅对非通知类消息生效（调用方已通过 !isNotification 做过前置过滤）
+	// 单聊路径下由 sendMsgSingleChat 始终调用本函数（含通知类），以校验接收方 MsgReceiveSetting 等
 	if sessionType == constant.SingleChatType {
 		// 管理员跳过发送权限拦截，直接进入接收偏好校验
 		if !datautil.Contain(pb.MsgData.SendID, m.config.Share.IMAdminUserID...) {
@@ -255,10 +255,12 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, us
 			// skipFriendVerify: MsgReceiveSetting=1 已确认好友关系，无需再做 FriendVerify 重复查询
 			skipFriendVerify := false
 			switch recvUserInfo.MsgReceiveSetting {
-			case 2: // MsgReceiveSettingNobody
+			case model.MsgReceiveSettingNobody:
 				return false, servererrs.ErrMsgReceiveNotAllowed.Wrap()
-			case 1: // MsgReceiveSettingFriends
-				isFriend, err := m.FriendLocalCache.IsFriend(ctx, pb.MsgData.RecvID, pb.MsgData.SendID)
+			case model.MsgReceiveSettingFriends:
+				// FriendLocalCache.IsFriend(possibleFriendUserID, userID) 对应「userID 的好友列表里是否有 possibleFriendUserID」
+				// 此处须判断：接收方 recv 的好友列表里是否有发送方 send
+				isFriend, err := m.FriendLocalCache.IsFriend(ctx, pb.MsgData.SendID, pb.MsgData.RecvID)
 				if err != nil {
 					log.ZError(ctx, "modifyMessageByUserMessageReceiveOpt: IsFriend failed (MsgReceiveSetting)", err,
 						"sendID", pb.MsgData.SendID, "recvID", pb.MsgData.RecvID,
@@ -323,14 +325,20 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, us
 		}
 	}
 
-	// 第四优先级：用户静音设置（user_mute 集合，支持好友与非好友）
-	// 无论会话记录是否存在均检查，以支持对非好友的静音
-	if m.userMuteDB != nil {
-		muted, err := m.userMuteDB.IsMuted(ctx, userID, pb.MsgData.SendID)
-		if err != nil {
-			return false, err
+	// 第四优先级：会话静音设置（存储于 conversations 集合的 mute_duration/mute_end_time）
+	conv, convErr := m.ConversationLocalCache.GetConversation(ctx, userID, conversationID)
+	if convErr != nil && !errs.ErrRecordNotFound.Is(convErr) {
+		return false, convErr
+	}
+	if convErr == nil && conv != nil {
+		var isMuted bool
+		switch {
+		case conv.MuteDuration == -1 && conv.MuteEndTime == 0:
+			isMuted = true
+		case conv.MuteEndTime > 0:
+			isMuted = conv.MuteEndTime > time.Now().Unix()
 		}
-		if muted {
+		if isMuted {
 			if pb.MsgData.Options == nil {
 				pb.MsgData.Options = make(map[string]bool, 10)
 			}

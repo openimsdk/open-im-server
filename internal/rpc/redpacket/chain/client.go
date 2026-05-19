@@ -113,12 +113,29 @@ func (c *ChainClient) SignClaim(digest [32]byte) ([]byte, error) {
 }
 
 func (c *ChainClient) ParseTransactionReceipt(ctx context.Context, txHash common.Hash) ([]*ParsedEvent, error) {
+	_, events, err := c.ParseTransactionReceiptWithStatus(ctx, txHash)
+	return events, err
+}
+
+// ParseTransactionReceiptWithStatus fetches tx receipt once and returns both
+// execution status and decoded contract events.
+func (c *ChainClient) ParseTransactionReceiptWithStatus(ctx context.Context, txHash common.Hash) (bool, []*ParsedEvent, error) {
 	receipt, err := c.client.TransactionReceipt(ctx, txHash)
 	if err != nil {
-		return nil, fmt.Errorf("get receipt failed: %w", err)
+		return false, nil, fmt.Errorf("get receipt failed: %w", err)
 	}
+	events, err := ParseEventsFromLogs(receipt.Logs, c.contractABI)
+	if err != nil {
+		return false, nil, err
+	}
+	return receipt.Status == types.ReceiptStatusSuccessful, events, nil
+}
 
-	return ParseEventsFromLogs(receipt.Logs, c.contractABI)
+// IsTransactionSuccessful reports whether the EVM transaction executed
+// successfully according to receipt.status (1=success, 0=failure).
+func (c *ChainClient) IsTransactionSuccessful(ctx context.Context, txHash common.Hash) (bool, error) {
+	success, _, err := c.ParseTransactionReceiptWithStatus(ctx, txHash)
+	return success, err
 }
 
 func (c *ChainClient) ContractAddress() common.Address {

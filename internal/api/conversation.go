@@ -71,3 +71,11 @@ func (o *ConversationApi) GetNotNotifyConversationIDs(c *gin.Context) {
 func (o *ConversationApi) GetPinnedConversationIDs(c *gin.Context) {
 	a2r.Call(c, conversation.ConversationClient.GetPinnedConversationIDs, o.Client)
 }
+
+func (o *ConversationApi) SetMute(c *gin.Context) {
+	a2r.Call(c, conversation.ConversationClient.SetConversationMute, o.Client)
+}
+
+func (o *ConversationApi) SetBurn(c *gin.Context) {
+	a2r.Call(c, conversation.ConversationClient.SetConversationBurn, o.Client)
+}

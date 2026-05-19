@@ -241,6 +241,18 @@ func (f *FriendNotificationSender) FriendDeletedNotification(ctx context.Context
 	f.Notification(ctx, req.OwnerUserID, req.FriendUserID, constant.FriendDeletedNotification, &tips)
 }
 
+// FriendDeletedOnewayNotification 单向删好友：仅通知操作方本人刷新好友列表，
+// 不向对端发送 FriendDeletedNotification，对端仍保留「你是 TA 好友」的关系。
+func (f *FriendNotificationSender) FriendDeletedOnewayNotification(ctx context.Context, ownerUserID, friendUserID string) {
+	tips := sdkws.FriendsInfoUpdateTips{
+		FromToUserID: &sdkws.FromToUserID{ToUserID: ownerUserID},
+		FriendIDs:    []string{friendUserID},
+	}
+	f.setSortVersion(ctx, &tips.FriendVersion, &tips.FriendVersionID,
+		database.FriendVersionName, ownerUserID, &tips.FriendSortVersion)
+	f.Notification(ctx, ownerUserID, ownerUserID, constant.FriendsInfoUpdateNotification, &tips)
+}
+
 func (f *FriendNotificationSender) setVersion(ctx context.Context, version *uint64, versionID *string, collName string, id string) {
 	versions := versionctx.GetVersionLog(ctx).Get()
 	for _, coll := range versions {

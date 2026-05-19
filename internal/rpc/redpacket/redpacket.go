@@ -137,13 +137,17 @@ func Start(ctx context.Context, conf *Config, registry discovery.SvcDiscoveryReg
 
 	pbredpacket.RegisterRedPacketServer(server, srv)
 
-	if chainClient != nil {
-		ethIndexer := chain.NewIndexer(chainClient, repo, conf.RpcConfig.Indexer.PollInterval, 0)
-		ethIndexer.Start(ctx)
-	}
-	if tronClient != nil {
-		tronIndexer := chain.NewTronIndexer(tronClient, repo, conf.RpcConfig.Indexer.PollInterval, 0)
-		tronIndexer.Start(ctx)
+	if conf.RpcConfig.Indexer.PollInterval > 0 {
+		if chainClient != nil {
+			ethIndexer := chain.NewIndexer(chainClient, repo, conf.RpcConfig.Indexer.PollInterval, 0, conf.RpcConfig.Indexer.MaxBlocksPerPoll)
+			ethIndexer.Start(ctx)
+		}
+		if tronClient != nil {
+			tronIndexer := chain.NewTronIndexer(tronClient, repo, conf.RpcConfig.Indexer.PollInterval, 0)
+			tronIndexer.Start(ctx)
+		}
+	} else {
+		log.ZInfo(ctx, "redpacket indexer disabled by config", "pollInterval", conf.RpcConfig.Indexer.PollInterval)
 	}
 
 	return nil

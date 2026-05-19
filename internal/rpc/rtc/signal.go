@@ -97,6 +97,10 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 	inv.InviterUserID = req.UserID
 	inv.InitiateTime = time.Now().UnixMilli()
 
+	if len(inv.InviteeUserIDList) == 0 {
+		return nil, errs.ErrArgs.WrapMsg("no invitees", "inviteeUserIDList", inv.InviteeUserIDList)
+	}
+
 	for _, inviteeID := range inv.InviteeUserIDList {
 		allowed, err := s.isCallAllowed(ctx, req.UserID, inviteeID)
 		if err != nil {
@@ -118,6 +122,10 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 		busySet[uid] = struct{}{}
 	}
 	inv.BusyLineUserIDList = busyUserIDs
+
+	if len(inv.InviteeUserIDList) == len(busyUserIDs) {
+		return nil, errs.ErrNoPermission.WrapMsg("all invitees are busy", "inviteeUserIDList", inv.InviteeUserIDList)
+	}
 
 	// 从主叫用户资料获取铃声 URL，注入到邀请信息中，被叫方收到后播放主叫方铃声
 	if inviterInfo, err := s.userClient.GetUserInfo(ctx, req.UserID); err == nil && inviterInfo.CallRingtoneURL != "" {
@@ -167,7 +175,7 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 			continue
 		}
 		log.ZInfo(ctx, "sendSignalingNotification to invitee", "sendID", req.UserID, "recvID", inviteeID)
-		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, int32(constant.SingleChatType), req.OfflinePushInfo, content); err != nil {
+		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, int32(constant.SingleChatType), "", req.OfflinePushInfo, content); err != nil {
 			log.ZError(ctx, "sendSignalingNotification to invitee failed", err, "inviteeID", inviteeID)
 			return nil, errs.WrapMsg(err, "failed to notify invitee", "inviteeID", inviteeID)
 		}
@@ -188,6 +196,9 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 	inv := req.Invitation
 	if inv == nil {
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
+	}
+	if inv.GroupID == "" {
+		return nil, errs.ErrArgs.WrapMsg("groupID is empty")
 	}
 
 	inv.RoomID = newRoomID()
@@ -258,18 +269,22 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 			log.ZInfo(ctx, "handleInviteInGroup: skip busy invitee", "inviteeID", inviteeID)
 			continue
 		}
-		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, int32(constant.ReadGroupChatType), req.OfflinePushInfo, content); err != nil {
-			log.ZWarn(ctx, "sendSignalingNotification to group invitee failed", err, "inviteeID", inviteeID)
+		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, int32(constant.ReadGroupChatType), inv.GroupID, req.OfflinePushInfo, content); err != nil {
+			log.ZWarn(ctx, "handleInviteInGroup to group invitee failed", err, "inviteeID", inviteeID)
 		}
 	}
 
-	return &rtc.SignalInviteInGroupResp{
+	resp := &rtc.SignalInviteInGroupResp{
 		Token:              token,
 		RoomID:             inv.RoomID,
 		LiveURL:            s.config.RpcConfig.LiveKit.ExternalAddress,
 		BusyLineUserIDList: busyUserIDs,
 		CalleeRingtoneURL:  calleeRingtoneURL,
-	}, nil
+	}
+
+	log.ZDebug(ctx, "handleInviteInGroup", "req", req, "resp", resp)
+
+	return resp, nil
 }
 
 // isCallAllowed 判断 inviterID 是否被允许向 inviteeID 发起音视频通话。
@@ -325,7 +340,7 @@ func (s *rtcServer) handleAccept(ctx context.Context, req *rtc.SignalAcceptReq, 
 		return nil, err
 	}
 
-	if err := s.sendSignalingNotification(ctx, req.UserID, dbInv.InviterUserID, sessionType, req.OfflinePushInfo, content); err != nil {
+	if err := s.sendSignalingNotification(ctx, req.UserID, dbInv.InviterUserID, sessionType, dbInv.GroupID, req.OfflinePushInfo, content); err != nil {
 		log.ZWarn(ctx, "sendSignalingNotification accept to inviter failed", err, "inviterID", dbInv.InviterUserID)
 	}
 
@@ -365,7 +380,7 @@ func (s *rtcServer) handleReject(ctx context.Context, req *rtc.SignalRejectReq, 
 	if err != nil {
 		return nil, err
 	}
-	if err := s.sendSignalingNotification(ctx, req.UserID, dbInv.InviterUserID, sessionType, req.OfflinePushInfo, content); err != nil {
+	if err := s.sendSignalingNotification(ctx, req.UserID, dbInv.InviterUserID, sessionType, dbInv.GroupID, req.OfflinePushInfo, content); err != nil {
 		log.ZWarn(ctx, "sendSignalingNotification reject to inviter failed", err, "inviterID", dbInv.InviterUserID)
 	}
 
@@ -405,7 +420,7 @@ func (s *rtcServer) handleCancel(ctx context.Context, req *rtc.SignalCancelReq, 
 		return nil, err
 	}
 	for _, inviteeID := range dbInv.InviteeUserIDList {
-		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, sessionType, req.OfflinePushInfo, content); err != nil {
+		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, sessionType, dbInv.GroupID, req.OfflinePushInfo, content); err != nil {
 			log.ZWarn(ctx, "sendSignalingNotification cancel to invitee failed", err, "inviteeID", inviteeID)
 		}
 	}
@@ -441,7 +456,7 @@ func (s *rtcServer) handleHungUp(ctx context.Context, req *rtc.SignalHungUpReq, 
 	}
 	// 使用 DB 中的参与者列表，不信任客户端传入的 InviteeUserIDList
 	for _, peerID := range hungUpPeerIDsFromDB(dbInv, req.UserID) {
-		if err := s.sendSignalingNotification(ctx, req.UserID, peerID, sessionType, req.OfflinePushInfo, content); err != nil {
+		if err := s.sendSignalingNotification(ctx, req.UserID, peerID, sessionType, dbInv.GroupID, req.OfflinePushInfo, content); err != nil {
 			log.ZWarn(ctx, "sendSignalingNotification hungUp to peer failed", err, "peerID", peerID)
 		}
 	}
@@ -670,12 +685,14 @@ func signalingMsgOptions() map[string]bool {
 }
 
 // sendSignalingNotification sends a SignalingNotification message to a user via the msg service.
-func (s *rtcServer) sendSignalingNotification(ctx context.Context, sendID, recvID string, sessionType int32, offlinePush *sdkws.OfflinePushInfo, content []byte) error {
+// groupID 在 SessionType 为群类型（如 ReadGroupChatType）时必须非空，否则 msg 服务群聊校验会失败。
+func (s *rtcServer) sendSignalingNotification(ctx context.Context, sendID, recvID string, sessionType int32, groupID string, offlinePush *sdkws.OfflinePushInfo, content []byte) error {
 	now := time.Now().UnixMilli()
 	msgData := &sdkws.MsgData{
 		SendID:      sendID,
 		RecvID:      recvID,
 		SessionType: sessionType,
+		GroupID:     groupID,
 		ContentType: int32(constant.SignalingNotification),
 		MsgFrom:     int32(constant.SysMsgType),
 		Content:     content,

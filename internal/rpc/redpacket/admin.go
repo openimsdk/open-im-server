@@ -173,7 +173,7 @@ func (s *redPacketServer) ParseTxEvents(ctx context.Context, req *pbredpacket.Pa
 		if s.tronClient == nil {
 			return nil, errs.ErrInternalServer.WrapMsg("TRON client not configured")
 		}
-		events, err := s.tronClient.ParseTransactionReceipt(ctx, req.TxHash)
+		success, events, err := s.tronClient.ParseTransactionReceiptWithStatus(ctx, req.TxHash)
 		if err != nil {
 			return nil, errs.ErrInternalServer.WrapMsg("parse TRON tx receipt failed: " + err.Error())
 		}
@@ -185,12 +185,16 @@ func (s *redPacketServer) ParseTxEvents(ctx context.Context, req *pbredpacket.Pa
 			}
 			out = append(out, &pbredpacket.ParsedEvent{Name: e.Name, Data: data})
 		}
-		return &pbredpacket.ParseTxEventsResp{Chain: "tron", TxHash: req.TxHash, Events: out}, nil
+		note := "tx_status=FAILED"
+		if success {
+			note = "tx_status=SUCCESS"
+		}
+		return &pbredpacket.ParseTxEventsResp{Chain: "tron", TxHash: req.TxHash, Events: out, Note: note}, nil
 	}
 
 	if s.chainClient != nil {
 		txHashBytes := common.HexToHash(req.TxHash)
-		events, err := s.chainClient.ParseTransactionReceipt(ctx, txHashBytes)
+		success, events, err := s.chainClient.ParseTransactionReceiptWithStatus(ctx, txHashBytes)
 		if err != nil {
 			return nil, errs.ErrInternalServer.WrapMsg("parse tx receipt failed: " + err.Error())
 		}
@@ -206,10 +210,15 @@ func (s *redPacketServer) ParseTxEvents(ctx context.Context, req *pbredpacket.Pa
 				Data: data,
 			})
 		}
+		note := "tx_status=FAILED"
+		if success {
+			note = "tx_status=SUCCESS"
+		}
 		return &pbredpacket.ParseTxEventsResp{
 			Chain:  "eth",
 			TxHash: req.TxHash,
 			Events: out,
+			Note:   note,
 		}, nil
 	}
 

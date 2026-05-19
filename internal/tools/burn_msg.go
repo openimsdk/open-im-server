@@ -25,17 +25,15 @@ import (
 )
 
 // clearBurnExpiredMsgs 阅后即焚 cron 入口：循环调用 conversation 服务的
-// ClearBurnExpiredMsgs，每次至多处理 burnLimit 个 (user, conversation) 分组，
-// 直至本轮没有新的过期分组或达到防御性的最大循环次数。
+// ClearBurnExpiredMsgs，每次至多处理 burnClearLimit 个 (user, conversation) 分组，
+// 直至本轮没有新的过期分组或达到 burnClearMaxLoop 轮。
 func (c *cronServer) clearBurnExpiredMsgs() {
 	now := time.Now()
 	operationID := fmt.Sprintf("cron_burn_msg_%d_%d", os.Getpid(), now.UnixMilli())
 	ctx := mcontext.SetOperationID(c.ctx, operationID)
 	log.ZDebug(ctx, "clear burn expired msgs cron start")
-	const (
-		maxLoop   = 10000
-		burnLimit = 100
-	)
+	burnLimit := int32(c.config.CronTask.BurnClearLimit)
+	maxLoop := c.config.CronTask.BurnClearMaxLoop
 	var count int
 	for i := 1; i <= maxLoop; i++ {
 		resp, err := c.conversationClient.ClearBurnExpiredMsgs(ctx, &pbconversation.ClearBurnExpiredMsgsReq{

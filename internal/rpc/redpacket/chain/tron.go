@@ -63,17 +63,28 @@ func (t *TronClient) FullNodeURL() string {
 }
 
 func (t *TronClient) ParseTransactionReceipt(ctx context.Context, txID string) ([]*ParsedEvent, error) {
+	_, events, err := t.ParseTransactionReceiptWithStatus(ctx, txID)
+	return events, err
+}
+
+// ParseTransactionReceiptWithStatus fetches tx info once and returns both
+// execution status and decoded contract events.
+func (t *TronClient) ParseTransactionReceiptWithStatus(ctx context.Context, txID string) (bool, []*ParsedEvent, error) {
 	info, err := t.getTransactionInfo(ctx, txID)
 	if err != nil {
-		return nil, err
+		return false, nil, err
 	}
 
 	logs, err := tronLogsToEVMLogs(info, txID)
 	if err != nil {
-		return nil, err
+		return false, nil, err
 	}
-
-	return ParseEventsFromLogs(logs, t.parsedABI)
+	events, err := ParseEventsFromLogs(logs, t.parsedABI)
+	if err != nil {
+		return false, nil, err
+	}
+	success := strings.EqualFold(info.Receipt.Result, "SUCCESS")
+	return success, events, nil
 }
 
 func (t *TronClient) SendAdminTransaction(ctx context.Context, methodName string, args ...interface{}) (string, error) {
@@ -111,11 +122,21 @@ func (t *TronClient) GetSignMessageForTron(ctx context.Context, packetID *big.In
 type tronTxInfoResp struct {
 	ID          string `json:"id"`
 	BlockNumber uint64 `json:"blockNumber"`
-	Log         []struct {
+	Receipt     struct {
+		Result string `json:"result"`
+	} `json:"receipt"`
+	Log []struct {
 		Address string   `json:"address"`
 		Topics  []string `json:"topics"`
 		Data    string   `json:"data"`
 	} `json:"log"`
+}
+
+// IsTransactionSuccessful reports whether the TRON transaction execution
+// succeeded based on receipt.result == "SUCCESS".
+func (t *TronClient) IsTransactionSuccessful(ctx context.Context, txID string) (bool, error) {
+	success, _, err := t.ParseTransactionReceiptWithStatus(ctx, txID)
+	return success, err
 }
 
 func getParamTypes(args []interface{}) string {

@@ -115,10 +115,18 @@ type API struct {
 }
 
 type CronTask struct {
+	// CronExecuteTime 标准 5 段 cron 表达式，供聊天记录清理、S3 清理、用户消息清理及阅后即焚清理等任务共用（除非 burnCronExecuteTime 单独指定）。
+	// 未配置时由 FillCronTaskDefaults 设为每天 02:00（与 config/openim-crontask.yml 一致）。
 	CronExecuteTime   string   `mapstructure:"cronExecuteTime"`
 	RetainChatRecords int      `mapstructure:"retainChatRecords"`
 	FileExpireTime    int      `mapstructure:"fileExpireTime"`
 	DeleteObjectType  []string `mapstructure:"deleteObjectType"`
+	// BurnCronExecuteTime 仅「单聊阅后即焚」清理（ClearBurnExpiredMsgs）的 cron；留空则与 CronExecuteTime 相同。
+	BurnCronExecuteTime string `mapstructure:"burnCronExecuteTime"`
+	// BurnClearLimit 单次 RPC 最多处理多少个 (user, conversation) 分组；<=0 时默认 100。
+	BurnClearLimit int `mapstructure:"burnClearLimit"`
+	// BurnClearMaxLoop 单次定时触发内最多循环轮数；<=0 时默认 10000。
+	BurnClearMaxLoop int `mapstructure:"burnClearMaxLoop"`
 	// ChatAPI 是 chat HTTP API 服务的访问配置，用于调用 /account/del 等需要管理员权限的接口。
 	ChatAPI ChatAPI `mapstructure:"chatAPI"`
 }
@@ -290,9 +298,9 @@ type Group struct {
 		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
 		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus                 Prometheus `mapstructure:"prometheus"`
-	EnableHistoryForNewMembers bool       `mapstructure:"enableHistoryForNewMembers"`
-	CommonGroupsLimitWithFriend int       `mapstructure:"commonGroupsLimitWithFriend"`
+	Prometheus                  Prometheus `mapstructure:"prometheus"`
+	EnableHistoryForNewMembers  bool       `mapstructure:"enableHistoryForNewMembers"`
+	CommonGroupsLimitWithFriend int        `mapstructure:"commonGroupsLimitWithFriend"`
 }
 
 type Msg struct {
@@ -483,7 +491,7 @@ type Crypto struct {
 		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
 		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus Prometheus  `mapstructure:"prometheus"`
+	Prometheus Prometheus   `mapstructure:"prometheus"`
 	Virgil     VirgilConfig `mapstructure:"virgil"`
 }
 
@@ -524,8 +532,10 @@ type RedPacketTron struct {
 
 type RedPacketIndexer struct {
 	PollInterval int `mapstructure:"pollInterval"`
+	// MaxBlocksPerPoll limits each eth_getLogs range (lastBlock+1 .. toBlock). Many public RPCs
+	// reject large ranges; 0 means use default 2000.
+	MaxBlocksPerPoll int `mapstructure:"maxBlocksPerPoll"`
 }
-
 
 // FullConfig stores all configurations for before and after events
 type Webhooks struct {
@@ -778,6 +788,37 @@ func (a *API) GetConfigFileName() string {
 
 func (ct *CronTask) GetConfigFileName() string {
 	return OpenIMCronTaskCfgFileName
+}
+
+// FillCronTaskDefaults applies defaults after YAML/env load. Only fills empty or invalid placeholders.
+func FillCronTaskDefaults(ct *CronTask) {
+	if ct == nil {
+		return
+	}
+	if strings.TrimSpace(ct.CronExecuteTime) == "" {
+		ct.CronExecuteTime = "0 2 * * *"
+	}
+	if strings.TrimSpace(ct.BurnCronExecuteTime) == "" {
+		ct.BurnCronExecuteTime = "*/1 * * * *"
+	}
+	if ct.BurnClearLimit <= 0 {
+		ct.BurnClearLimit = 100
+	}
+	if ct.BurnClearMaxLoop <= 0 {
+		ct.BurnClearMaxLoop = 100
+	}
+	if ct.ChatAPI.Address == "" {
+		ct.ChatAPI.Address = "http://127.0.0.1:10008"
+	}
+	if ct.RetainChatRecords < 1 {
+		ct.RetainChatRecords = 365
+	}
+	if ct.BurnClearLimit < 1 {
+		ct.BurnClearLimit = 100
+	}
+	if ct.BurnClearMaxLoop < 1 {
+		ct.BurnClearMaxLoop = 10000
+	}
 }
 
 func (mg *MsgGateway) GetConfigFileName() string {

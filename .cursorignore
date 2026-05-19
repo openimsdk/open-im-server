@@ -1,14 +1,14 @@
 # Cursor 代码索引忽略（语法与 .gitignore 相同）
-# 与根目录 .gitignore 对齐；未列出的规则仍以 .gitignore 为准（Git 不索引的路径 Cursor 通常也不关心）
+# 与根目录 .gitignore 对齐；以下为补充规则，减少生成物/文档噪音，保留业务源码与 .proto
 
 ### OpenIM（与 .gitignore 一致）###
-logs
-.devcontainer
-components
-out-test
+logs/
+.devcontainer/
+components/
+out-test/
 Dockerfile.cross
 
-### macOS / 本地工具（不入索引）###
+### macOS / 本地工具 ###
 .DS_Store
 .playwright-mcp/
 
@@ -17,26 +17,51 @@ tmp/
 bin/
 output/
 _output/
+build/
+dist/
 deployments/charts/generated-configs/
 
 ### 配置与密钥（勿入索引）###
 .env
 config/config.yaml
 config/notification.yaml
+start-config.yml
 
 ### 部署生成物 ###
-deployments/openim-server/charts
+deployments/openim-server/charts/
 
 ### 本地笔记 ###
 .idea.md
 .todo.md
 .note.md
 
+### 生成代码（以 .proto 为准，勿重复索引）###
+protocol/**/*.pb.go
+protocol/**/*_grpc.pb.go
+
+### 文档与资源（保留 docs/contrib、根 README；忽略多语言 readme 与静态资源）###
+docs/readme/
+docs/.generated_docs
+docs/contributing/
+assets/
+virgil_chat_server_design.md
+docs/virgil-e2ee-*.md
+
+### 测试与脚本输出 ###
+test/e2e/output/
+scripts/**/*.log
+
 ### 通用备份与临时文件 ###
 *.bak
+*.gho
+*.ori
+*.orig
 *.tmp
 *~
-dist/
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
 
 ### VS Code（除团队共享配置外）###
 .vscode/*
@@ -44,6 +69,7 @@ dist/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+*.code-workspace
 
 ### Go ###
 *.exe
@@ -54,13 +80,19 @@ dist/
 *.test
 *.out
 vendor/
+go.work
 go.work.sum
+go.sum
 
 ### JetBrains / IDE ###
 .idea/
 out/
 
-### Tags ###
+### Git / CI（低价值索引）###
+.git/
+.github/
+
+### Tags / 索引工具 ###
 TAGS
 tags
 gtags.files
@@ -70,3 +102,5 @@ GPATH
 GSYMS
 cscope.files
 cscope.out
+cscope.in.out
+cscope.po.out

@@ -1,4 +1,7 @@
 cronExecuteTime: 0 2 * * *
+burnCronExecuteTime: "*/1 * * * *"  # 可选：仅阅后即焚清理使用；不配置则与 cronExecuteTime 相同
+burnClearLimit: 100                  # 可选：单次 RPC 批大小，默认 100
+burnClearMaxLoop: 100             # 可选：单次定时内最大循环轮数，默认 10000
 retainChatRecords: 365
 fileExpireTime: 180
 deleteObjectType: ["msg-picture","msg-file", "msg-voice","msg-video","msg-video-snapshot","sdklog"]
