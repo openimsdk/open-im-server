@@ -175,6 +175,8 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 			"opUserID", viewerID, "userCount", len(users))
 		return nil, err
 	}
+
+	log.ZDebug(ctx, "GetDesignateUsers", "pbUsers", pbUsers)
 	resp.UsersInfo = pbUsers
 	return resp, nil
 }
