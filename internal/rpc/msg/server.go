@@ -143,10 +143,6 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	userMuteMgo, err := mgo.NewUserMuteMongo(mgocli.GetDB())
-	if err != nil {
-		return err
-	}
 
 	s := &msgServer{
 		MsgDatabase:            msgDatabase,
