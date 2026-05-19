@@ -23,6 +23,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/livekit/protocol/auth"
 	livekit "github.com/livekit/protocol/livekit"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/constant"
 	pbmsg "github.com/openimsdk/protocol/msg"
@@ -101,15 +102,14 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 		return nil, errs.ErrArgs.WrapMsg("no invitees", "inviteeUserIDList", inv.InviteeUserIDList)
 	}
 
-	for _, inviteeID := range inv.InviteeUserIDList {
-		allowed, err := s.isCallAllowed(ctx, req.UserID, inviteeID)
-		if err != nil {
-			log.ZError(ctx, "handleInvite: isCallAllowed failed", err, "inviteeID", inviteeID)
-			return nil, err
-		}
-		if !allowed {
-			return nil, errs.ErrNoPermission.WrapMsg("the invitee does not accept calls from you", "inviteeID", inviteeID)
-		}
+	notAllowUserIDs, notAllowSet, err := s.filterNotAllowedInvitees(ctx, req.UserID, inv.InviteeUserIDList)
+	if err != nil {
+		return nil, err
+	}
+	inv.NotAllowUserIDList = notAllowUserIDs
+
+	if len(notAllowUserIDs) == len(inv.InviteeUserIDList) {
+		return nil, errs.ErrNoPermission.WrapMsg("all invitees do not accept calls from you", "inviteeUserIDList", inv.InviteeUserIDList)
 	}
 
 	// 检测哪些被叫用户正忙（已在通话中），记录到 BusyLineUserIDList
@@ -123,8 +123,8 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 	}
 	inv.BusyLineUserIDList = busyUserIDs
 
-	if len(inv.InviteeUserIDList) == len(busyUserIDs) {
-		return nil, errs.ErrNoPermission.WrapMsg("all invitees are busy", "inviteeUserIDList", inv.InviteeUserIDList)
+	if len(busyUserIDs) == len(inv.InviteeUserIDList) {
+		return nil, servererrs.ErrAllUserBusy.WrapMsg("all invitees are busy", "inviteeUserIDList", inv.InviteeUserIDList)
 	}
 
 	// 从主叫用户资料获取铃声 URL，注入到邀请信息中，被叫方收到后播放主叫方铃声
@@ -134,10 +134,17 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 
 	// 查询被叫方铃声 URL，供主叫方在等待时播放
 	var calleeRingtoneURL string
-	if len(inv.InviteeUserIDList) > 0 {
-		if inviteeInfo, err := s.userClient.GetUserInfo(ctx, inv.InviteeUserIDList[0]); err == nil {
+	for _, inviteeID := range inv.InviteeUserIDList {
+		if _, notAllow := notAllowSet[inviteeID]; notAllow {
+			continue
+		}
+		if _, busy := busySet[inviteeID]; busy {
+			continue
+		}
+		if inviteeInfo, err := s.userClient.GetUserInfo(ctx, inviteeID); err == nil {
 			calleeRingtoneURL = inviteeInfo.CallRingtoneURL
 		}
+		break
 	}
 
 	if _, err := s.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{Name: inv.RoomID}); err != nil {
@@ -170,6 +177,10 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 	}
 
 	for _, inviteeID := range inv.InviteeUserIDList {
+		if _, notAllow := notAllowSet[inviteeID]; notAllow {
+			log.ZInfo(ctx, "handleInvite: skip not-allowed invitee", "inviteeID", inviteeID)
+			continue
+		}
 		if _, busy := busySet[inviteeID]; busy {
 			log.ZInfo(ctx, "handleInvite: skip busy invitee", "inviteeID", inviteeID)
 			continue
@@ -187,6 +198,7 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 		RoomID:             inv.RoomID,
 		LiveURL:            s.config.RpcConfig.LiveKit.ExternalAddress,
 		BusyLineUserIDList: busyUserIDs,
+		NotAllowUserIDList: notAllowUserIDs,
 		CalleeRingtoneURL:  calleeRingtoneURL,
 	}, nil
 }
@@ -205,6 +217,16 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 	inv.InviterUserID = req.UserID
 	inv.InitiateTime = time.Now().UnixMilli()
 
+	notAllowUserIDs, notAllowSet, err := s.filterNotAllowedInvitees(ctx, req.UserID, inv.InviteeUserIDList)
+	if err != nil {
+		return nil, err
+	}
+	inv.NotAllowUserIDList = notAllowUserIDs
+
+	if len(notAllowUserIDs) == len(inv.InviteeUserIDList) {
+		return nil, errs.ErrNoPermission.WrapMsg("all invitees do not accept calls from you", "inviteeUserIDList", inv.InviteeUserIDList)
+	}
+
 	// 检测哪些被叫用户正忙（已在通话中），记录到 BusyLineUserIDList
 	busyUserIDs, err := s.db.GetBusyUserIDs(ctx, inv.InviteeUserIDList)
 	if err != nil {
@@ -216,8 +238,8 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 	}
 	inv.BusyLineUserIDList = busyUserIDs
 
-	if len(inv.InviteeUserIDList) == len(busyUserIDs) {
-		return nil, errs.ErrNoPermission.WrapMsg("all invitees are busy", "inviteeUserIDList", inv.InviteeUserIDList)
+	if len(busyUserIDs) == len(inv.InviteeUserIDList) {
+		return nil, servererrs.ErrAllUserBusy.WrapMsg("all invitees are busy", "inviteeUserIDList", inv.InviteeUserIDList)
 	}
 
 	// 从主叫用户资料获取铃声 URL，注入到邀请s信息中，被叫方收到后播放主叫方铃声
@@ -225,12 +247,19 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 		inv.CallerRingtoneURL = inviterInfo.CallRingtoneURL
 	}
 
-	// 查询第一位被叫的铃声 URL，供主叫方在等待时播放
+	// 查询第一位可邀请被叫的铃声 URL，供主叫方在等待时播放
 	var calleeRingtoneURL string
-	if len(inv.InviteeUserIDList) > 0 {
-		if inviteeInfo, err := s.userClient.GetUserInfo(ctx, inv.InviteeUserIDList[0]); err == nil {
+	for _, inviteeID := range inv.InviteeUserIDList {
+		if _, notAllow := notAllowSet[inviteeID]; notAllow {
+			continue
+		}
+		if _, busy := busySet[inviteeID]; busy {
+			continue
+		}
+		if inviteeInfo, err := s.userClient.GetUserInfo(ctx, inviteeID); err == nil {
 			calleeRingtoneURL = inviteeInfo.CallRingtoneURL
 		}
+		break
 	}
 
 	if _, err := s.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{Name: inv.RoomID}); err != nil {
@@ -260,12 +289,7 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 		return nil, err
 	}
 	for _, inviteeID := range inv.InviteeUserIDList {
-		allowed, err := s.isCallAllowed(ctx, req.UserID, inviteeID)
-		if err != nil {
-			log.ZWarn(ctx, "handleInviteInGroup: isCallAllowed failed, skipping invitee", err, "inviteeID", inviteeID)
-			continue
-		}
-		if !allowed {
+		if _, notAllow := notAllowSet[inviteeID]; notAllow {
 			log.ZInfo(ctx, "handleInviteInGroup: skipping invitee (call setting blocked)", "inviteeID", inviteeID)
 			continue
 		}
@@ -283,12 +307,43 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 		RoomID:             inv.RoomID,
 		LiveURL:            s.config.RpcConfig.LiveKit.ExternalAddress,
 		BusyLineUserIDList: busyUserIDs,
+		NotAllowUserIDList: notAllowUserIDs,
 		CalleeRingtoneURL:  calleeRingtoneURL,
 	}
 
 	log.ZDebug(ctx, "handleInviteInGroup", "req", req, "resp", resp)
 
 	return resp, nil
+}
+
+func (s *rtcServer) filterNotAllowedInvitees(ctx context.Context, inviterID string, inviteeIDs []string) ([]string, map[string]struct{}, error) {
+	notAllowUserIDs := make([]string, 0)
+	notAllowSet := make(map[string]struct{})
+	for _, inviteeID := range inviteeIDs {
+		allowed, err := s.isCallAllowed(ctx, inviterID, inviteeID)
+		if err != nil {
+			log.ZError(ctx, "filterNotAllowedInvitees: isCallAllowed failed", err, "inviteeID", inviteeID)
+			return nil, nil, err
+		}
+		if !allowed {
+			notAllowUserIDs = append(notAllowUserIDs, inviteeID)
+			notAllowSet[inviteeID] = struct{}{}
+		}
+	}
+	return notAllowUserIDs, notAllowSet, nil
+}
+
+func hasReachableInvitee(inviteeIDs []string, notAllowSet, busySet map[string]struct{}) bool {
+	for _, inviteeID := range inviteeIDs {
+		if _, notAllow := notAllowSet[inviteeID]; notAllow {
+			continue
+		}
+		if _, busy := busySet[inviteeID]; busy {
+			continue
+		}
+		return true
+	}
+	return false
 }
 
 // isCallAllowed 判断 inviterID 是否被允许向 inviteeID 发起音视频通话。

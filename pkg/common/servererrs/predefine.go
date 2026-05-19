@@ -68,4 +68,6 @@ var (
 	ErrIOSBackgroundPushErr = errs.NewCodeError(IOSBackgroundPushErr, "ios background push err")
 
 	ErrFileUploadedExpired = errs.NewCodeError(FileUploadedExpiredError, "FileUploadedExpiredError")
+
+	ErrAllUserBusy = errs.NewCodeError(AllUserBusyError, "AllUserBusyError")
 )

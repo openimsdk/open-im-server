@@ -95,4 +95,7 @@ const (
 
 	// S3 error codes.
 	FileUploadedExpiredError = 1701 // Upload expired
+
+	// RTC error codes.
+	AllUserBusyError = 1801 // All invitees are busy on another call
 )
