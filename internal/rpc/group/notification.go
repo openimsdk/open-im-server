@@ -803,6 +803,36 @@ func (g *NotificationSender) GroupCancelMutedNotification(ctx context.Context, g
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupCancelMutedNotification, tips)
 }
 
+// GroupMemberRemarkUpdateNotification sends GroupMemberInfoSetNotification only to ownerUserID
+// (as a single-chat notification), with ChangedUser.Nickname overridden by displayName
+// (resolved as remark > firstName > nickname by the caller).
+func (g *NotificationSender) GroupMemberRemarkUpdateNotification(ctx context.Context, groupID, friendUserID, ownerUserID, displayName string) {
+	var err error
+	defer func() {
+		if err != nil {
+			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
+		}
+	}()
+	group, err := g.getGroupInfo(ctx, groupID)
+	if err != nil {
+		return
+	}
+	changedUser, err := g.getGroupMember(ctx, groupID, friendUserID)
+	if err != nil {
+		return
+	}
+	if displayName != "" {
+		changedUser.Nickname = displayName
+	}
+	tips := &sdkws.GroupMemberInfoSetTips{
+		Group:       group,
+		ChangedUser: changedUser,
+	}
+	g.setSortVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, groupID, &tips.GroupSortVersion)
+	g.NotificationWithSessionType(ctx, ownerUserID, ownerUserID, constant.GroupMemberInfoSetNotification,
+		constant.SingleChatType, tips, notification.WithGroupID(groupID))
+}
+
 func (g *NotificationSender) GroupMemberInfoSetNotification(ctx context.Context, groupID, groupMemberUserID string) {
 	var err error
 	defer func() {

@@ -165,10 +165,34 @@ func (s *groupServer) NotificationFriendRemarkUpdate(ctx context.Context, req *p
 	if err != nil {
 		return nil, err
 	}
+	if len(commonMembers) == 0 {
+		return &pbgroup.NotificationFriendRemarkUpdateResp{}, nil
+	}
+	displayName, err := s.resolveFriendDisplayName(ctx, req.OwnerUserID, req.FriendUserID)
+	if err != nil {
+		log.ZWarn(ctx, "resolveFriendDisplayName", err, "ownerUserID", req.OwnerUserID, "friendUserID", req.FriendUserID)
+	}
 	for _, member := range commonMembers {
-		s.notification.GroupMemberInfoSetNotification(ctx, member.GroupID, req.FriendUserID)
+		s.notification.GroupMemberRemarkUpdateNotification(ctx, member.GroupID, req.FriendUserID, req.OwnerUserID, displayName)
 	}
 	return &pbgroup.NotificationFriendRemarkUpdateResp{}, nil
+}
+
+// resolveFriendDisplayName returns the display name for friendUserID as seen by ownerUserID,
+// following the priority: remark (if set) > firstName > nickname.
+func (s *groupServer) resolveFriendDisplayName(ctx context.Context, ownerUserID, friendUserID string) (string, error) {
+	friendInfos, err := s.relationClient.GetFriendsInfo(ctx, ownerUserID, []string{friendUserID})
+	if err == nil && len(friendInfos) > 0 && friendInfos[0].GetRemark() != "" {
+		return friendInfos[0].GetRemark(), nil
+	}
+	users, err := s.userClient.GetUsersInfo(ctx, []string{friendUserID})
+	if err != nil || len(users) == 0 {
+		return "", err
+	}
+	if users[0].FirstName != "" {
+		return users[0].FirstName, nil
+	}
+	return users[0].Nickname, nil
 }
 
 func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgroup.NotificationUserInfoUpdateReq) (*pbgroup.NotificationUserInfoUpdateResp, error) {
