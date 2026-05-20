@@ -26,6 +26,8 @@ type GroupMsgBurnRecord struct {
 	GroupID string `bson:"group_id"`
 	// Seq 消息序列号
 	Seq int64 `bson:"seq"`
+	// SendID 发送该条群消息的用户 ID（首次有成员已读时写入，$setOnInsert）
+	SendID string `bson:"send_id"`
 	// ReadCount 已阅读该消息的成员数量（原子累加）
 	ReadCount int32 `bson:"read_count"`
 	// MemberCount 创建记录时的群成员总数；用于判断是否全员已读

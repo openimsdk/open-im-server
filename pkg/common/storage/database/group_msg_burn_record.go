@@ -34,9 +34,9 @@ type ExpiredGroupBurn struct {
 // 消费：conversation 服务 ClearGroupBurnExpiredMsgs cron 入口。
 type GroupMsgBurnRecord interface {
 	// UpsertOnRead 批量原子更新阅读记录：
-	//   - 若 (group_id, seq) 不存在：插入 {member_count, burn_end_time, create_time, read_count=1}
-	//   - 若已存在：仅对 read_count 执行 $inc，不覆盖首次写入的 burn_end_time
-	UpsertOnRead(ctx context.Context, groupID string, seqs []int64, memberCount int32, burnEndTimeMs int64) error
+	//   - 若 (group_id, seq) 不存在：插入 {member_count, burn_end_time, create_time, send_id, read_count=1}；send_id 来自 seqSenderID[seq]，可为空。
+	//   - 若已存在：仅对 read_count 执行 $inc，不覆盖首次写入的 burn_end_time、send_id
+	UpsertOnRead(ctx context.Context, groupID string, seqs []int64, seqSenderID map[int64]string, memberCount int32, burnEndTimeMs int64) error
 
 	// FindExpired 查询满足以下条件的记录并按 group_id 聚合：
 	//   burn_end_time <= nowMs AND read_count >= member_count

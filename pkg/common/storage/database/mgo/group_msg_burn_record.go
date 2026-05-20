@@ -52,15 +52,19 @@ type groupMsgBurnRecordMgo struct {
 }
 
 // UpsertOnRead 对每条 seq 执行 upsert：
-//   - 首次插入（$setOnInsert）写入 member_count、burn_end_time、create_time，read_count 初始化为 1。
+//   - 首次插入（$setOnInsert）写入 member_count、burn_end_time、create_time、send_id，read_count 初始化为 1。
 //   - 已存在时仅对 read_count 执行 $inc 1。
-func (m *groupMsgBurnRecordMgo) UpsertOnRead(ctx context.Context, groupID string, seqs []int64, memberCount int32, burnEndTimeMs int64) error {
+func (m *groupMsgBurnRecordMgo) UpsertOnRead(ctx context.Context, groupID string, seqs []int64, seqSenderID map[int64]string, memberCount int32, burnEndTimeMs int64) error {
 	if len(seqs) == 0 {
 		return nil
 	}
 	now := time.Now().UnixMilli()
 	models := make([]mongo.WriteModel, 0, len(seqs))
 	for _, seq := range seqs {
+		senderID := ""
+		if seqSenderID != nil {
+			senderID = seqSenderID[seq]
+		}
 		filter := bson.M{
 			"group_id": groupID,
 			"seq":      seq,
@@ -70,6 +74,7 @@ func (m *groupMsgBurnRecordMgo) UpsertOnRead(ctx context.Context, groupID string
 			"$setOnInsert": bson.M{
 				"group_id":      groupID,
 				"seq":           seq,
+				"send_id":       senderID,
 				"member_count":  memberCount,
 				"burn_end_time": burnEndTimeMs,
 				"create_time":   now,
