@@ -554,14 +554,73 @@ func (s *rtcServer) handleGetTokenByRoomID(ctx context.Context, req *rtc.SignalG
 
 // SignalGetRoomByGroupID returns room information for a group.
 func (s *rtcServer) SignalGetRoomByGroupID(ctx context.Context, req *rtc.SignalGetRoomByGroupIDReq) (*rtc.SignalGetRoomByGroupIDResp, error) {
-	inv, err := s.db.GetInvitationByGroupID(ctx, req.GroupID)
-	if err != nil {
+	if req.GroupID == "" {
+		return nil, errs.ErrArgs.WrapMsg("groupID is empty")
+	}
+	opUserID := mcontext.GetOpUserID(ctx)
+	if opUserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("op user id is empty")
+	}
+	if _, err := s.groupClient.GetGroupMemberCache(ctx, req.GroupID, opUserID); err != nil {
 		return nil, err
 	}
+
+	inv, err := s.db.GetInvitationByGroupID(ctx, req.GroupID)
+	if err != nil {
+		if errs.ErrRecordNotFound.Is(err) {
+			return &rtc.SignalGetRoomByGroupIDResp{InCall: false}, nil
+		}
+		return nil, err
+	}
+
+	participants, inCall, _ := s.livekitRoomParticipantsMeta(ctx, inv.RoomID)
 	return &rtc.SignalGetRoomByGroupIDResp{
-		Invitation: modelToInvitationInfo(inv),
-		RoomID:     inv.RoomID,
+		Invitation:  modelToInvitationInfo(inv),
+		RoomID:      inv.RoomID,
+		Participant: participants,
+		InCall:      inCall,
 	}, nil
+}
+
+// livekitRoomParticipantsMeta lists LiveKit participants (identity = OpenIM userID) and builds ParticipantMetaData.
+func (s *rtcServer) livekitRoomParticipantsMeta(ctx context.Context, roomID string) ([]*rtc.ParticipantMetaData, bool, error) {
+	if roomID == "" {
+		return nil, false, nil
+	}
+	lp, err := s.roomClient.ListParticipants(ctx, &livekit.ListParticipantsRequest{Room: roomID})
+	if err != nil {
+		log.ZWarn(ctx, "LiveKit ListParticipants failed", err, "roomID", roomID)
+		return nil, false, err
+	}
+	uids := make([]string, 0, len(lp.Participants))
+	for _, p := range lp.Participants {
+		if id := p.GetIdentity(); id != "" {
+			uids = append(uids, id)
+		}
+	}
+	if len(uids) == 0 {
+		return nil, false, nil
+	}
+	userMap, err := s.userClient.GetUsersInfoMap(ctx, uids)
+	if err != nil {
+		log.ZWarn(ctx, "GetUsersInfoMap for room participants failed", err, "roomID", roomID)
+		out := make([]*rtc.ParticipantMetaData, 0, len(uids))
+		for _, id := range uids {
+			out = append(out, &rtc.ParticipantMetaData{UserInfo: &sdkws.PublicUserInfo{UserID: id}})
+		}
+		return out, true, nil
+	}
+	out := make([]*rtc.ParticipantMetaData, 0, len(uids))
+	for _, id := range uids {
+		ui := &sdkws.PublicUserInfo{UserID: id}
+		if u := userMap[id]; u != nil {
+			ui.Nickname = u.Nickname
+			ui.FaceURL = u.FaceURL
+			ui.Ex = u.Ex
+		}
+		out = append(out, &rtc.ParticipantMetaData{UserInfo: ui})
+	}
+	return out, true, nil
 }
 
 // SignalGetTokenByRoomID returns a token for joining a room directly (HTTP API path).
@@ -596,9 +655,12 @@ func (s *rtcServer) SignalGetRooms(ctx context.Context, req *rtc.SignalGetRoomsR
 	}
 	roomList := make([]*rtc.SignalGetRoomByGroupIDResp, 0, len(invs))
 	for _, inv := range invs {
+		participants, inCall, _ := s.livekitRoomParticipantsMeta(ctx, inv.RoomID)
 		roomList = append(roomList, &rtc.SignalGetRoomByGroupIDResp{
-			Invitation: modelToInvitationInfo(inv),
-			RoomID:     inv.RoomID,
+			Invitation:  modelToInvitationInfo(inv),
+			RoomID:      inv.RoomID,
+			Participant: participants,
+			InCall:      inCall,
 		})
 	}
 	return &rtc.SignalGetRoomsResp{RoomList: roomList}, nil

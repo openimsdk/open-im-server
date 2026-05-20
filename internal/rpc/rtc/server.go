@@ -44,6 +44,7 @@ type rtcServer struct {
 	roomClient     *lksdk.RoomServiceClient
 	msgClient      *rpcli.MsgClient
 	userClient     *rpcli.UserClient
+	groupClient    *rpcli.GroupClient
 	relationClient *rpcli.RelationClient
 	tokenExpiry    time.Duration
 }
@@ -75,6 +76,11 @@ func Start(ctx context.Context, cfg *Config, client discovery.SvcDiscoveryRegist
 		return err
 	}
 
+	groupConn, err := client.GetConn(ctx, cfg.Share.RpcRegisterName.Group)
+	if err != nil {
+		return err
+	}
+
 	lk := cfg.RpcConfig.LiveKit
 	roomClient := lksdk.NewRoomServiceClient(lk.InternalAddress, lk.APIKey, lk.APISecret)
 
@@ -89,6 +95,7 @@ func Start(ctx context.Context, cfg *Config, client discovery.SvcDiscoveryRegist
 		roomClient:     roomClient,
 		msgClient:      rpcli.NewMsgClient(msgConn),
 		userClient:     rpcli.NewUserClient(userConn),
+		groupClient:    rpcli.NewGroupClient(groupConn),
 		relationClient: rpcli.NewRelationClient(friendConn),
 		tokenExpiry:    tokenExpiry,
 	}
