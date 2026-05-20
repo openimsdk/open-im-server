@@ -275,9 +275,32 @@ func (m *msgServer) recordBurnDeadlines(ctx context.Context, conv *conversation.
 	}
 }
 
+// resolveGroupBurnSeconds 群聊阅后即焚有效时长（秒），优先级：
+//  1. 会话级 BurnDuration（/conversation/set_burn）；
+//  2. 群级 MsgBurnDuration；
+//  3. 阅读者个人 MsgBurnDuration。
+// 均为 0 时返回 0，表示不开启。
+func (m *msgServer) resolveGroupBurnSeconds(ctx context.Context, conv *conversation.Conversation, groupInfo *sdkws.GroupInfo, readerUserID string) int32 {
+	if conv.BurnDuration > 0 {
+		return conv.BurnDuration
+	}
+	if groupInfo != nil && groupInfo.MsgBurnDuration > 0 {
+		return groupInfo.MsgBurnDuration
+	}
+	readerInfo, err := m.UserLocalCache.GetUserInfo(ctx, readerUserID)
+	if err != nil {
+		log.ZWarn(ctx, "resolveGroupBurnSeconds GetUserInfo failed", err, "readerUserID", readerUserID)
+		return 0
+	}
+	if readerInfo != nil && readerInfo.MsgBurnDuration > 0 {
+		return readerInfo.MsgBurnDuration
+	}
+	return 0
+}
+
 // recordGroupBurnReadCount 在群聊阅读时记录「阅后即焚」进度。
 // 每次已读触发 $inc read_count；首次写入时记录 member_count、burn_end_time、send_id（发送者）。
-// 仅在群的 MsgBurnDuration > 0 时生效；失败只记日志，不影响主流程。
+// 焚毁时长见 resolveGroupBurnSeconds；为 0 时不记录；失败只记日志，不影响主流程。
 func (m *msgServer) recordGroupBurnReadCount(ctx context.Context, conv *conversation.Conversation, readerUserID string, seqs []int64) {
 	if len(seqs) == 0 || m.groupMsgBurnRecordDB == nil {
 		return
@@ -287,7 +310,8 @@ func (m *msgServer) recordGroupBurnReadCount(ctx context.Context, conv *conversa
 		log.ZWarn(ctx, "recordGroupBurnReadCount GetGroupInfo failed", err, "groupID", conv.GroupID)
 		return
 	}
-	if groupInfo.MsgBurnDuration <= 0 {
+	burnSeconds := m.resolveGroupBurnSeconds(ctx, conv, groupInfo, readerUserID)
+	if burnSeconds <= 0 {
 		return
 	}
 	seqSenderID := make(map[int64]string, len(seqs))
@@ -303,7 +327,7 @@ func (m *msgServer) recordGroupBurnReadCount(ctx context.Context, conv *conversa
 		}
 	}
 	now := time.Now().UnixMilli()
-	burnEndTimeMs := now + int64(groupInfo.MsgBurnDuration)*1000
+	burnEndTimeMs := now + int64(burnSeconds)*1000
 	memberCount := int32(groupInfo.MemberCount)
 	if err := m.groupMsgBurnRecordDB.UpsertOnRead(ctx, conv.GroupID, seqs, seqSenderID, memberCount, burnEndTimeMs); err != nil {
 		log.ZError(ctx, "recordGroupBurnReadCount UpsertOnRead failed", err,
