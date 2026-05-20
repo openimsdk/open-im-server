@@ -189,8 +189,8 @@ func (s *groupServer) resolveFriendDisplayName(ctx context.Context, ownerUserID,
 	if err != nil || len(users) == 0 {
 		return "", err
 	}
-	if users[0].FirstName != "" {
-		return users[0].FirstName, nil
+	if users[0].FirstName != "" || users[0].LastName != "" {
+		return users[0].FirstName + " " + users[0].LastName, nil
 	}
 	return users[0].Nickname, nil
 }
