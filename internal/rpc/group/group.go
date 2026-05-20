@@ -793,9 +793,13 @@ func (s *groupServer) getGroupMembersInfo(ctx context.Context, groupID string, u
 	if err := s.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
-	return datautil.Slice(members, func(e *model.GroupMember) *sdkws.GroupMemberFullInfo {
+	pbMembers := datautil.Slice(members, func(e *model.GroupMember) *sdkws.GroupMemberFullInfo {
 		return convert.Db2PbGroupMember(e)
-	}), nil
+	})
+	if err := s.applyMemberDisplayNicknames(ctx, pbMembers); err != nil {
+		return nil, err
+	}
+	return pbMembers, nil
 }
 
 // GetGroupApplicationList handles functions that get a list of group requests.

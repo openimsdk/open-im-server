@@ -34,6 +34,17 @@ func BuildFullName(firstName, lastName string) string {
 	return strings.TrimSpace(firstName + " " + lastName)
 }
 
+// MemberDisplayNickname 非好友场景下的群成员展示名：优先 firstName+lastName，否则 nickname。
+func MemberDisplayNickname(u *sdkws.UserInfo) string {
+	if u == nil {
+		return ""
+	}
+	if name := BuildFullName(u.FirstName, u.LastName); name != "" {
+		return name
+	}
+	return u.Nickname
+}
+
 func UserDB2Pb(user *relationtb.User) *sdkws.UserInfo {
 	return &sdkws.UserInfo{
 		UserID:            user.UserID,
