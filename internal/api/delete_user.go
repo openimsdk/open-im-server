@@ -48,7 +48,7 @@ type deleteUserReq struct {
 }
 
 // DeleteUser permanently deletes a user account and cleans up associated data.
-// Steps: force-logout → delete friends → quit/kick groups → hard-delete user doc.
+// Steps: force-logout → delete friends → dismiss owned groups / quit others → hard-delete user doc.
 // Caller must be the same user as userID, or an IM admin (see CheckAccessV3).
 func (d *DeleteUserApi) DeleteUser(c *gin.Context) {
 	var req deleteUserReq
@@ -108,7 +108,7 @@ func (d *DeleteUserApi) DeleteUser(c *gin.Context) {
 		}
 	}
 
-	// 4. Quit / kick from all joined groups (paginated, page size 100)
+	// 4. Leave all joined groups: dismiss groups owned by the user, quit the rest (paginated).
 	pageNumber := int32(1)
 	const pageSize = int32(100)
 	for {
@@ -121,6 +121,15 @@ func (d *DeleteUserApi) DeleteUser(c *gin.Context) {
 			break
 		}
 		for _, g := range groupListResp.Groups {
+			if g.OwnerUserID == req.UserID {
+				if _, err := d.groupClient.DismissGroup(c, &group.DismissGroupReq{
+					GroupID:      g.GroupID,
+					DeleteMember: true,
+				}); err != nil {
+					log.ZWarn(c, "DeleteUser: DismissGroup failed", err, "userID", req.UserID, "groupID", g.GroupID)
+				}
+				continue
+			}
 			if _, err := d.groupClient.QuitGroup(c, &group.QuitGroupReq{
 				GroupID: g.GroupID,
 				UserID:  req.UserID,
