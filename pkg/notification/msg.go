@@ -181,6 +181,7 @@ func NewNotificationSender(conf *config.Notification, opts ...NotificationSender
 type notificationOpt struct {
 	RpcGetUsername bool
 	SendMessage    *bool
+	GroupID        string
 }
 
 type NotificationOptions func(*notificationOpt)
@@ -193,6 +194,13 @@ func WithRpcGetUserName() NotificationOptions {
 func WithSendMessage(sendMessage *bool) NotificationOptions {
 	return func(opt *notificationOpt) {
 		opt.SendMessage = sendMessage
+	}
+}
+
+// WithGroupID sets MsgData.GroupID for notifications sent as single chat (e.g. per-member group events).
+func WithGroupID(groupID string) NotificationOptions {
+	return func(opt *notificationOpt) {
+		opt.GroupID = groupID
 	}
 }
 
@@ -231,9 +239,15 @@ func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, co
 	msg.SessionType = sessionType
 	if msg.SessionType == constant.ReadGroupChatType {
 		msg.GroupID = recvID
+	} else if notificationOpt.GroupID != "" {
+		msg.GroupID = notificationOpt.GroupID
 	}
 	msg.CreateTime = timeutil.GetCurrentTimestampByMill()
-	msg.ClientMsgID = idutil.GetMsgIDByMD5(sendID)
+	if notificationOpt.GroupID != "" {
+		msg.ClientMsgID = idutil.GetMsgIDByMD5(sendID + "_" + recvID + "_" + notificationOpt.GroupID)
+	} else {
+		msg.ClientMsgID = idutil.GetMsgIDByMD5(sendID)
+	}
 	optionsConfig := s.contentTypeConf[contentType]
 	if sendID == recvID && contentType == constant.HasReadReceipt {
 		optionsConfig.ReliabilityLevel = constant.UnreliableNotification

@@ -22,7 +22,8 @@ import (
 
 // 群置顶消息相关 RPC 实现：
 // - 自动滚动保留最近 N 条置顶消息（N=model.GroupPinnedMsgMaxKeep，默认为 3）
-// - 置顶时把整条消息内容做完整快照存档，避免后续消息删除/撤回影响展示
+// - 置顶时记录消息 seq，并按 seq 做完整内容快照存档
+// - 返回置顶列表与群通知均按各用户会话 minSeq/maxSeq 过滤可见置顶
 // - 每条置顶记录拥有唯一 pinID，作为 unpin 时的精准删除凭据
 // - 权限：默认全员可置顶；当 group.AllowPinMsg=1 时，仅群主/管理员可置顶或取消置顶
 
@@ -75,13 +76,17 @@ func (s *groupServer) PinGroupMessage(ctx context.Context, req *pbgroup.PinGroup
 	}
 
 	pbPinned := pinnedMsgDB2PB(pin)
-	pbList := pinnedListDB2PB(pinnedList)
+	pbListAll := pinnedListDB2PB(pinnedList)
+	visibleList, err := s.filterPinnedMsgsByUserSeq(ctx, req.GroupID, mcontext.GetOpUserID(ctx), pinnedList)
+	if err != nil {
+		return nil, err
+	}
 
-	s.notification.GroupMessagePinnedNotification(ctx, req.GroupID, groupPinnedActionPin, pbPinned, pbList)
+	s.notification.GroupMessagePinnedNotification(ctx, req.GroupID, groupPinnedActionPin, pbPinned, pbListAll)
 
 	return &pbgroup.PinGroupMessageResp{
 		PinnedMsg:  pbPinned,
-		PinnedList: pbList,
+		PinnedList: pinnedListDB2PB(visibleList),
 	}, nil
 }
 
@@ -131,11 +136,15 @@ func (s *groupServer) UnpinGroupMessage(ctx context.Context, req *pbgroup.UnpinG
 	}
 
 	pbPinned := pinnedMsgDB2PB(target)
-	pbList := pinnedListDB2PB(pinnedList)
+	pbListAll := pinnedListDB2PB(pinnedList)
+	visibleList, err := s.filterPinnedMsgsByUserSeq(ctx, req.GroupID, mcontext.GetOpUserID(ctx), pinnedList)
+	if err != nil {
+		return nil, err
+	}
 
-	s.notification.GroupMessagePinnedNotification(ctx, req.GroupID, groupPinnedActionUnpin, pbPinned, pbList)
+	s.notification.GroupMessagePinnedNotification(ctx, req.GroupID, groupPinnedActionUnpin, pbPinned, pbListAll)
 
-	return &pbgroup.UnpinGroupMessageResp{PinnedList: pbList}, nil
+	return &pbgroup.UnpinGroupMessageResp{PinnedList: pinnedListDB2PB(visibleList)}, nil
 }
 
 // GetGroupPinnedMessages 获取群置顶消息列表
@@ -150,9 +159,78 @@ func (s *groupServer) GetGroupPinnedMessages(ctx context.Context, req *pbgroup.G
 	if err != nil {
 		return nil, err
 	}
+	userID := mcontext.GetOpUserID(ctx)
+	visibleList, err := s.filterPinnedMsgsByUserSeq(ctx, req.GroupID, userID, pinnedList)
+	if err != nil {
+		return nil, err
+	}
 	return &pbgroup.GetGroupPinnedMessagesResp{
-		PinnedList: pinnedListDB2PB(pinnedList),
+		PinnedList: pinnedListDB2PB(visibleList),
 	}, nil
+}
+
+// filterPinnedMsgsByUserSeq 按用户在该群会话的 minSeq/maxSeq 过滤置顶消息。
+// 与拉取群消息可见范围一致：新成员（minSeq 被抬高）看不到入群前的置顶；被踢成员（maxSeq 受限）看不到踢出后的置顶。
+func (s *groupServer) filterPinnedMsgsByUserSeq(ctx context.Context, groupID, userID string, list []*model.GroupPinnedMessage) ([]*model.GroupPinnedMessage, error) {
+	if len(list) == 0 {
+		return nil, nil
+	}
+	if authverify.IsAppManagerUid(ctx, s.config.Share.IMAdminUserID) {
+		return list, nil
+	}
+	if userID == "" {
+		return nil, errs.ErrNoPermission.WrapMsg("op user id empty")
+	}
+	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
+	conv, err := s.conversationClient.GetConversation(ctx, conversationID, userID)
+	if err != nil {
+		if errs.ErrRecordNotFound.Is(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	out := make([]*model.GroupPinnedMessage, 0, len(list))
+	for _, m := range list {
+		if m == nil || !isPinnedSeqVisible(m.Seq, conv.MinSeq, conv.MaxSeq) {
+			continue
+		}
+		out = append(out, m)
+	}
+	return out, nil
+}
+
+func isPinnedSeqVisible(seq, minSeq, maxSeq int64) bool {
+	if seq <= 0 {
+		return false
+	}
+	if minSeq > 0 && seq < minSeq {
+		return false
+	}
+	if maxSeq > 0 && seq > maxSeq {
+		return false
+	}
+	return true
+}
+
+func filterPinnedListPB(list []*sdkws.GroupPinnedMsgInfo, minSeq, maxSeq int64) []*sdkws.GroupPinnedMsgInfo {
+	if len(list) == 0 {
+		return nil
+	}
+	out := make([]*sdkws.GroupPinnedMsgInfo, 0, len(list))
+	for _, m := range list {
+		if m == nil || !isPinnedSeqVisible(m.Seq, minSeq, maxSeq) {
+			continue
+		}
+		out = append(out, m)
+	}
+	return out
+}
+
+func pinnedMsgPBVisibleToUser(pinned *sdkws.GroupPinnedMsgInfo, minSeq, maxSeq int64) *sdkws.GroupPinnedMsgInfo {
+	if pinned == nil || !isPinnedSeqVisible(pinned.Seq, minSeq, maxSeq) {
+		return nil
+	}
+	return pinned
 }
 
 // checkPinPermission 校验当前操作者是否具备群消息置顶权限
