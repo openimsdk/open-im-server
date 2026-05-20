@@ -298,8 +298,8 @@ func (o *GroupApi) GetEditSetting(c *gin.Context) {
 // SetMsgBurnDuration 设置群消息阅后即焚时长（秒）；burnDuration=0 表示关闭。
 func (o *GroupApi) SetMsgBurnDuration(c *gin.Context) {
 	var req struct {
-		GroupID         string `json:"groupID"`
-		BurnDuration    int32  `json:"burnDuration"`
+		GroupID      string `json:"groupID"`
+		BurnDuration int32  `json:"burnDuration"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WrapMsg(err.Error()))
@@ -322,6 +322,40 @@ func (o *GroupApi) SetMsgBurnDuration(c *gin.Context) {
 		return
 	}
 	apiresp.GinSuccess(c, resp)
+}
+
+// GetMsgBurnDuration 返回当前群消息阅后即焚时长（秒）；0 表示关闭（与 get_groups_info 中字段一致）。
+func (o *GroupApi) GetMsgBurnDuration(c *gin.Context) {
+	var req struct {
+		GroupID string `json:"groupID"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WrapMsg(err.Error()))
+		return
+	}
+	if req.GroupID == "" {
+		apiresp.GinError(c, errs.ErrArgs.WrapMsg("groupID is empty"))
+		return
+	}
+	resp, err := o.Client.GetGroupsInfo(c.Request.Context(), &group.GetGroupsInfoReq{
+		GroupIDs: []string{req.GroupID},
+	})
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+	if len(resp.GroupInfos) == 0 {
+		apiresp.GinError(c, errs.ErrRecordNotFound.WrapMsg("group not found", "groupID", req.GroupID))
+		return
+	}
+	gi := resp.GroupInfos[0]
+	apiresp.GinSuccess(c, struct {
+		GroupID      string `json:"groupID"`
+		BurnDuration int32  `json:"burnDuration"`
+	}{
+		GroupID:      gi.GroupID,
+		BurnDuration: gi.GetMsgBurnDuration(),
+	})
 }
 
 func (o *GroupApi) JoinGroup(c *gin.Context) {

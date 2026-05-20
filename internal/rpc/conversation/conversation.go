@@ -902,7 +902,7 @@ func (c *conversationServer) ClearBurnExpiredMsgs(ctx context.Context, req *pbco
 
 		// 删除焚毁消息并同步通知阅读方客户端（best-effort，失败不中断流程）。
 		if err := c.msgClient.DeleteMsgs(ctx, g.UserID, g.ConversationID, g.Seqs, &msg.DeleteSyncOpt{
-			IsSyncSelf: true,
+			IsSyncOther: true,
 		}); err != nil {
 			log.ZError(ctx, "ClearBurnExpiredMsgs DeleteMsgs failed", err,
 				"userID", g.UserID, "conversationID", g.ConversationID, "seqs", g.Seqs)
@@ -920,12 +920,10 @@ func (c *conversationServer) ClearBurnExpiredMsgs(ctx context.Context, req *pbco
 	return &pbconversation.ClearBurnExpiredMsgsResp{Count: processed}, nil
 }
 
-
 // ClearGroupBurnExpiredMsgs 处理群消息「阅后即焚」到期记录：
 //  1. 查询满足 read_count >= member_count 且 burn_end_time 过期的记录（按 group_id 聚合）。
-//  2. 对每个群，获取所有成员 ID，批量推进他们在群会话上的 min_seq。
-//  3. 更新每个成员的会话 min_seq 并下发 ConversationChangeNotification。
-//  4. 删除已处理的 group_msg_burn_record 记录。
+//  2. 对每个群调用 msg.DeleteMsgs（IsSyncOther：物理删除群会话消息并下发 DeleteMsgsNotification）。
+//  3. 删除已处理的 group_msg_burn_record 记录。
 func (c *conversationServer) ClearGroupBurnExpiredMsgs(ctx context.Context, req *pbconversation.ClearGroupBurnExpiredMsgsReq) (*pbconversation.ClearGroupBurnExpiredMsgsResp, error) {
 	if c.groupMsgBurnRecordDB == nil {
 		return &pbconversation.ClearGroupBurnExpiredMsgsResp{Count: 0}, nil
@@ -944,35 +942,20 @@ func (c *conversationServer) ClearGroupBurnExpiredMsgs(ctx context.Context, req 
 			continue
 		}
 		conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, g.GroupID)
-		newMinSeq := g.MaxSeq + 1
 
-		// 获取群所有成员 ID
-		memberIDs, err := c.groupClient.GetGroupMemberUserIDs(ctx, g.GroupID)
-		if err != nil {
-			log.ZError(ctx, "ClearGroupBurnExpiredMsgs GetGroupMemberUserIDs failed", err,
-				"groupID", g.GroupID)
-			continue
+		// 与 ClearBurnExpiredMsgs 一致：物理删除并同步客户端（best-effort）。
+		var deleteAsUserID string
+		if len(c.config.Share.IMAdminUserID) > 0 {
+			deleteAsUserID = c.config.Share.IMAdminUserID[0]
 		}
-		if len(memberIDs) == 0 {
-			continue
-		}
-
-		// 批量推进所有成员的 min_seq（seq 层）
-		if err := c.msgClient.SetUserConversationMin(ctx, conversationID, memberIDs, newMinSeq); err != nil {
-			log.ZError(ctx, "ClearGroupBurnExpiredMsgs SetUserConversationMin failed", err,
-				"groupID", g.GroupID, "conversationID", conversationID, "minSeq", newMinSeq)
-			continue
-		}
-
-		// 更新每个成员会话文档中的 min_seq 并发送通知
-		if err := c.conversationDatabase.UpdateUsersConversationField(ctx, memberIDs, conversationID,
-			map[string]any{"min_seq": newMinSeq}); err != nil {
-			log.ZError(ctx, "ClearGroupBurnExpiredMsgs UpdateUsersConversationField failed", err,
-				"groupID", g.GroupID, "conversationID", conversationID, "minSeq", newMinSeq)
-			continue
-		}
-		for _, memberID := range memberIDs {
-			c.conversationNotificationSender.ConversationChangeNotification(ctx, memberID, []string{conversationID})
+		if deleteAsUserID == "" {
+			log.ZWarn(ctx, "ClearGroupBurnExpiredMsgs: IMAdminUserID empty, skip DeleteMsgs", nil,
+				"groupID", g.GroupID, "conversationID", conversationID, "seqs", g.Seqs)
+		} else if err := c.msgClient.DeleteMsgs(ctx, deleteAsUserID, conversationID, g.Seqs, &msg.DeleteSyncOpt{
+			IsSyncOther: true,
+		}); err != nil {
+			log.ZError(ctx, "ClearGroupBurnExpiredMsgs DeleteMsgs failed", err,
+				"groupID", g.GroupID, "conversationID", conversationID, "seqs", g.Seqs)
 		}
 
 		// 删除已处理记录
@@ -980,9 +963,9 @@ func (c *conversationServer) ClearGroupBurnExpiredMsgs(ctx context.Context, req 
 			log.ZError(ctx, "ClearGroupBurnExpiredMsgs DeleteByGroupSeqs failed", err,
 				"groupID", g.GroupID, "seqs", g.Seqs)
 		}
-		log.ZDebug(ctx, "ClearGroupBurnExpiredMsgs advanced min_seq for group",
+		log.ZDebug(ctx, "ClearGroupBurnExpiredMsgs processed group burn batch",
 			"groupID", g.GroupID, "conversationID", conversationID,
-			"minSeq", newMinSeq, "memberCount", len(memberIDs), "seqs", g.Seqs)
+			"seqs", g.Seqs)
 		processed++
 	}
 	return &pbconversation.ClearGroupBurnExpiredMsgsResp{Count: processed}, nil

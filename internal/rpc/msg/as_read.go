@@ -266,16 +266,7 @@ func (m *msgServer) recordBurnDeadlines(ctx context.Context, conv *conversation.
 				PeerID:         peerID,
 				DeadlineMs:     deadline,
 				CreateTime:     now,
-			},
-			&model.MsgBurnDeadline{
-				UserID:         peerID,
-				ConversationID: conv.ConversationID,
-				Seq:            seq,
-				PeerID:         readerUserID,
-				DeadlineMs:     deadline,
-				CreateTime:     now,
-			},
-		)
+			})
 	}
 	if err := m.msgBurnDeadlineDB.UpsertIfAbsent(ctx, items); err != nil {
 		log.ZError(ctx, "recordBurnDeadlines UpsertIfAbsent failed", err,
