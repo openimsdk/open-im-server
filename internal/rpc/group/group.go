@@ -153,6 +153,24 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	return nil
 }
 
+func (s *groupServer) NotificationFriendRemarkUpdate(ctx context.Context, req *pbgroup.NotificationFriendRemarkUpdateReq) (*pbgroup.NotificationFriendRemarkUpdateResp, error) {
+	ownerGroupIDs, err := s.db.FindJoinGroupID(ctx, req.OwnerUserID)
+	if err != nil {
+		return nil, err
+	}
+	if len(ownerGroupIDs) == 0 {
+		return &pbgroup.NotificationFriendRemarkUpdateResp{}, nil
+	}
+	commonMembers, err := s.db.FindGroupMemberUser(ctx, ownerGroupIDs, req.FriendUserID)
+	if err != nil {
+		return nil, err
+	}
+	for _, member := range commonMembers {
+		s.notification.GroupMemberInfoSetNotification(ctx, member.GroupID, req.FriendUserID)
+	}
+	return &pbgroup.NotificationFriendRemarkUpdateResp{}, nil
+}
+
 func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgroup.NotificationUserInfoUpdateReq) (*pbgroup.NotificationUserInfoUpdateResp, error) {
 	members, err := s.db.FindGroupMemberUser(ctx, nil, req.UserID)
 	if err != nil {

@@ -20,6 +20,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/notification/common_user"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	pbgroup "github.com/openimsdk/protocol/group"
 
 	"github.com/openimsdk/tools/mq/memamq"
 
@@ -65,6 +66,7 @@ type friendServer struct {
 	queue              *memamq.MemoryQueue
 	userClient         *rpcli.UserClient
 	conversationClient *rpcli.ConversationClient
+	groupClient        *rpcli.GroupClient
 }
 
 type Config struct {
@@ -126,6 +128,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
+	if err != nil {
+		return err
+	}
 	userClient := rpcli.NewUserClient(userConn)
 
 	database := controller.NewFriendDatabase(
@@ -159,6 +165,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		queue:              memamq.NewMemoryQueue(16, 1024*1024),
 		userClient:         userClient,
 		conversationClient: rpcli.NewConversationClient(conversationConn),
+		groupClient:        rpcli.NewGroupClient(groupConn),
 	})
 	return nil
 }
@@ -330,6 +337,15 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *relation.SetFri
 
 	s.webhookAfterSetFriendRemark(ctx, &s.config.WebhooksConfig.AfterSetFriendRemark, req)
 	s.notificationSender.FriendRemarkSetNotification(ctx, req.OwnerUserID, req.FriendUserID)
+	go func() {
+		noCancelCtx := context.WithoutCancel(ctx)
+		if _, err := s.groupClient.NotificationFriendRemarkUpdate(noCancelCtx, &pbgroup.NotificationFriendRemarkUpdateReq{
+			OwnerUserID:  req.OwnerUserID,
+			FriendUserID: req.FriendUserID,
+		}); err != nil {
+			log.ZError(noCancelCtx, "NotificationFriendRemarkUpdate", err, "ownerUserID", req.OwnerUserID, "friendUserID", req.FriendUserID)
+		}
+	}()
 
 	return &relation.SetFriendRemarkResp{}, nil
 }
