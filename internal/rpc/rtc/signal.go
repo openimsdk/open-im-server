@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -76,6 +77,10 @@ func (s *rtcServer) SignalMessageAssemble(ctx context.Context, req *rtc.SignalMe
 	case *rtc.SignalReq_GetTokenByRoomID:
 		r, err := s.handleGetTokenByRoomID(ctx, payload.GetTokenByRoomID)
 		resp.Payload = &rtc.SignalResp_GetTokenByRoomID{GetTokenByRoomID: r}
+		respErr = err
+	case *rtc.SignalReq_Timeout:
+		r, err := s.handleTimeout(ctx, payload.Timeout, req.SignalReq)
+		resp.Payload = &rtc.SignalResp_Timeout{Timeout: r}
 		respErr = err
 	default:
 		return nil, errs.ErrArgs.WrapMsg("unknown signal payload type")
@@ -403,6 +408,11 @@ func (s *rtcServer) handleAccept(ctx context.Context, req *rtc.SignalAcceptReq, 
 		log.ZWarn(ctx, "sendSignalingNotification accept to inviter failed", err, "inviterID", dbInv.InviterUserID)
 	}
 
+	// Record the exact moment the callee accepted; used later to split dial vs. call duration.
+	if err := s.db.SetConnectTime(ctx, dbInv.RoomID, time.Now().UnixMilli()); err != nil {
+		log.ZWarn(ctx, "SetConnectTime failed", err, "roomID", dbInv.RoomID)
+	}
+
 	// 接受邀请后不删除 invitation：通话仍在进行，双方应被标记为忙线（BusyLineUserIDList）。
 	// invitation 的清理由以下路径负责：
 	//   - 主动挂断：handleHungUp → DeleteInvitation
@@ -451,6 +461,8 @@ func (s *rtcServer) handleReject(ctx context.Context, req *rtc.SignalRejectReq, 
 		if err := s.db.DeleteInvitation(ctx, dbInv.RoomID); err != nil {
 			log.ZWarn(ctx, "DeleteInvitation failed", err, "roomID", dbInv.RoomID)
 		}
+		// For 1v1 calls, rejection means the call was never answered.
+		go s.writeCallRecord(context.WithoutCancel(ctx), dbInv, model.CallStatusNotConnected, time.Now().UnixMilli())
 	}
 
 	return &rtc.SignalRejectResp{}, nil
@@ -488,7 +500,53 @@ func (s *rtcServer) handleCancel(ctx context.Context, req *rtc.SignalCancelReq, 
 		log.ZWarn(ctx, "DeleteInvitation failed", err, "roomID", dbInv.RoomID)
 	}
 
+	go s.writeCallRecord(context.WithoutCancel(ctx), dbInv, model.CallStatusNotConnected, time.Now().UnixMilli())
+
 	return &rtc.SignalCancelResp{}, nil
+}
+
+// handleTimeout processes a call timeout: the inviter's ring timer fired without any invitee answering.
+// Semantics are similar to cancel, but the payload type is Timeout so clients can show "missed call" UI.
+func (s *rtcServer) handleTimeout(ctx context.Context, req *rtc.SignalTimeoutReq, signalReq *rtc.SignalReq) (*rtc.SignalTimeoutResp, error) {
+	if req.Invitation == nil {
+		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
+	}
+
+	dbInv, err := s.db.GetInvitationByRoomID(ctx, req.Invitation.RoomID)
+	if err != nil {
+		// Invitation may have been cleaned up by TTL already; treat as no-op.
+		if errs.ErrRecordNotFound.Is(err) {
+			log.ZWarn(ctx, "handleTimeout: invitation already expired or not found", nil, "roomID", req.Invitation.RoomID)
+			return &rtc.SignalTimeoutResp{}, nil
+		}
+		return nil, errs.WrapMsg(err, "get invitation failed", "roomID", req.Invitation.RoomID)
+	}
+	if req.UserID != dbInv.InviterUserID {
+		return nil, errs.ErrNoPermission.WrapMsg("only the inviter can trigger timeout", "userID", req.UserID, "inviterUserID", dbInv.InviterUserID)
+	}
+
+	sessionType := int32(constant.SingleChatType)
+	if dbInv.GroupID != "" {
+		sessionType = int32(constant.ReadGroupChatType)
+	}
+	content, err := marshalSignalReq(signalReq)
+	if err != nil {
+		return nil, err
+	}
+	// Notify each invitee so they can dismiss the incoming-call UI and show "missed call".
+	for _, inviteeID := range dbInv.InviteeUserIDList {
+		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, sessionType, dbInv.GroupID, req.OfflinePushInfo, content); err != nil {
+			log.ZWarn(ctx, "handleTimeout: sendSignalingNotification to invitee failed", err, "inviteeID", inviteeID)
+		}
+	}
+
+	if err := s.db.DeleteInvitation(ctx, dbInv.RoomID); err != nil {
+		log.ZWarn(ctx, "handleTimeout: DeleteInvitation failed", err, "roomID", dbInv.RoomID)
+	}
+
+	go s.writeCallRecord(context.WithoutCancel(ctx), dbInv, model.CallStatusNotConnected, time.Now().UnixMilli())
+
+	return &rtc.SignalTimeoutResp{}, nil
 }
 
 // handleHungUp processes a call hang-up.
@@ -528,6 +586,8 @@ func (s *rtcServer) handleHungUp(ctx context.Context, req *rtc.SignalHungUpReq, 
 	if err := s.db.DeleteInvitation(ctx, dbInv.RoomID); err != nil {
 		log.ZWarn(ctx, "DeleteInvitation failed", err, "roomID", dbInv.RoomID)
 	}
+
+	go s.writeCallRecord(context.WithoutCancel(ctx), dbInv, model.CallStatusAnswered, time.Now().UnixMilli())
 
 	return &rtc.SignalHungUpResp{}, nil
 }
@@ -765,6 +825,95 @@ func (s *rtcServer) DeleteSignalRecords(ctx context.Context, req *rtc.DeleteSign
 	return &rtc.DeleteSignalRecordsResp{}, nil
 }
 
+// GetCallRecords returns paginated call records for a user.
+// status=0 returns all records; status=1 returns answered calls; status=2 returns not-connected calls.
+// For 1v1 calls, InviterUserNickname is resolved per-viewer with priority: remark > firstName+lastName > nickname.
+func (s *rtcServer) GetCallRecords(ctx context.Context, req *rtc.GetCallRecordsReq) (*rtc.GetCallRecordsResp, error) {
+	if req.UserID == "" {
+		req.UserID = mcontext.GetOpUserID(ctx)
+	}
+	total, records, err := s.db.SearchCallRecords(ctx, req.UserID, req.Status, req.StartTime, req.EndTime, req.Keyword, req.Pagination)
+	if err != nil {
+		return nil, err
+	}
+
+	// For 1v1 calls, resolve InviterUserNickname from the querying user's perspective:
+	// remark (if friend) > firstName + lastName > nickname.
+	// Collect unique inviter IDs that appear in 1v1 records.
+	inviterIDSet := make(map[string]struct{})
+	for _, r := range records {
+		if r.GroupID == "" && r.InviterUserID != "" {
+			inviterIDSet[r.InviterUserID] = struct{}{}
+		}
+	}
+	userInfoMap := make(map[string]*sdkws.UserInfo)
+	remarkMap := make(map[string]string) // inviterUserID → remark
+	if len(inviterIDSet) > 0 {
+		inviterIDs := make([]string, 0, len(inviterIDSet))
+		for id := range inviterIDSet {
+			inviterIDs = append(inviterIDs, id)
+		}
+		if infoMap, e := s.userClient.GetUsersInfoMap(ctx, inviterIDs); e == nil {
+			userInfoMap = infoMap
+		} else {
+			log.ZWarn(ctx, "GetCallRecords: GetUsersInfoMap failed", e)
+		}
+		if friendInfos, e := s.relationClient.GetFriendsInfo(ctx, req.UserID, inviterIDs); e == nil {
+			for _, f := range friendInfos {
+				if f.GetRemark() != "" {
+					remarkMap[f.GetFriendUserID()] = f.GetRemark()
+				}
+			}
+		} else {
+			log.ZWarn(ctx, "GetCallRecords: GetFriendsInfo failed", e)
+		}
+	}
+
+	items := make([]*rtc.CallRecordItem, 0, len(records))
+	for _, r := range records {
+		direction := model.CallDirectionIncoming
+		if r.InviterUserID == req.UserID {
+			direction = model.CallDirectionOutgoing
+		}
+
+		inviterNickname := r.InviterUserNickname
+		if r.GroupID == "" && r.InviterUserID != "" {
+			if remark, ok := remarkMap[r.InviterUserID]; ok {
+				inviterNickname = remark
+			} else if ui, ok := userInfoMap[r.InviterUserID]; ok {
+				if name := strings.TrimSpace(ui.FirstName + " " + ui.LastName); name != "" {
+					inviterNickname = name
+				} else {
+					inviterNickname = ui.Nickname
+				}
+			}
+		}
+
+		items = append(items, &rtc.CallRecordItem{
+			Sid:                 r.SID,
+			RoomID:              r.RoomID,
+			Status:              r.Status,
+			Duration:            r.Duration,
+			DialDuration:        r.DialDuration,
+			CallDuration:        r.CallDuration,
+			CreateTime:          r.CreateTime,
+			MediaType:           r.MediaType,
+			SessionType:         r.SessionType,
+			InviterUserID:       r.InviterUserID,
+			InviterUserNickname: inviterNickname,
+			InviterUserFaceURL:  r.InviterUserFaceURL,
+			InviteeUserIDList:   r.InviteeUserIDList,
+			GroupID:             r.GroupID,
+			GroupName:           r.GroupName,
+			Direction:           direction,
+		})
+	}
+	return &rtc.GetCallRecordsResp{
+		Total:   int32(total),
+		Records: items,
+	}, nil
+}
+
 // ---- helpers ----
 
 // genToken generates a LiveKit access token for the given room and identity.
@@ -915,6 +1064,75 @@ func modelToInvitationInfo(m *model.SignalInvitation) *rtc.InvitationInfo {
 		SessionType:        m.SessionType,
 		InitiateTime:       m.InitiateTime,
 		BusyLineUserIDList: m.BusyLineUserIDList,
+	}
+}
+
+// writeCallRecord creates a call record entry after a call ends (best-effort, logs on failure).
+// status: model.CallStatusAnswered or model.CallStatusNotConnected.
+// endTimeMs: Unix ms timestamp when the call ended (used to compute duration for answered calls).
+func (s *rtcServer) writeCallRecord(ctx context.Context, inv *model.SignalInvitation, status int32, endTimeMs int64) {
+	sid := fmt.Sprintf("call-%s", uuid.New().String())
+
+	// totalDuration: kept for backward compatibility (initiate → end).
+	var totalDuration, dialDuration, callDuration int64
+	if inv.InitiateTime > 0 {
+		if status == model.CallStatusAnswered && inv.ConnectTime > 0 {
+			// 拨打时长 = 振铃到接听
+			dialDuration = (inv.ConnectTime - inv.InitiateTime) / 1000
+			// 通话时长 = 接听到挂断
+			callDuration = (endTimeMs - inv.ConnectTime) / 1000
+			totalDuration = dialDuration + callDuration
+		} else {
+			// 未接通：全程视为拨打时长
+			dialDuration = (endTimeMs - inv.InitiateTime) / 1000
+		}
+		if dialDuration < 0 {
+			dialDuration = 0
+		}
+		if callDuration < 0 {
+			callDuration = 0
+		}
+		if totalDuration < 0 {
+			totalDuration = 0
+		}
+	}
+
+	record := &model.CallRecord{
+		SID:               sid,
+		RoomID:            inv.RoomID,
+		Status:            status,
+		Duration:          totalDuration,
+		DialDuration:      dialDuration,
+		CallDuration:      callDuration,
+		CreateTime:        inv.InitiateTime,
+		MediaType:         inv.MediaType,
+		SessionType:       inv.SessionType,
+		InviterUserID:     inv.InviterUserID,
+		InviteeUserIDList: inv.InviteeUserIDList,
+		GroupID:           inv.GroupID,
+	}
+
+	// Fetch inviter's nickname and face URL.
+	if inv.InviterUserID != "" {
+		if userInfo, err := s.userClient.GetUserInfo(ctx, inv.InviterUserID); err == nil {
+			record.InviterUserNickname = userInfo.Nickname
+			record.InviterUserFaceURL = userInfo.FaceURL
+		} else {
+			log.ZWarn(ctx, "writeCallRecord: GetUserInfo failed", err, "inviterUserID", inv.InviterUserID)
+		}
+	}
+
+	// Fetch group name if this is a group call.
+	if inv.GroupID != "" {
+		if groupInfo, err := s.groupClient.GetGroupInfo(ctx, inv.GroupID); err == nil {
+			record.GroupName = groupInfo.GroupName
+		} else {
+			log.ZWarn(ctx, "writeCallRecord: GetGroupInfo failed", err, "groupID", inv.GroupID)
+		}
+	}
+
+	if err := s.db.CreateCallRecord(ctx, record); err != nil {
+		log.ZWarn(ctx, "writeCallRecord: CreateCallRecord failed", err, "roomID", inv.RoomID, "status", status)
 	}
 }
 

@@ -63,3 +63,7 @@ func (o *RtcApi) GetSignalInvitationRecords(c *gin.Context) {
 func (o *RtcApi) DeleteSignalRecords(c *gin.Context) {
 	a2r.Call(c, rtc.RtcServiceClient.DeleteSignalRecords, o.Client)
 }
+
+func (o *RtcApi) GetCallRecords(c *gin.Context) {
+	a2r.Call(c, rtc.RtcServiceClient.GetCallRecords, o.Client)
+}

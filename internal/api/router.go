@@ -386,6 +386,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		rtcGroup.POST("/signal_send_custom_signal", rc.SignalSendCustomSignal)
 		rtcGroup.POST("/get_signal_invitation_records", rc.GetSignalInvitationRecords)
 		rtcGroup.POST("/delete_signal_records", rc.DeleteSignalRecords)
+		rtcGroup.POST("/get_call_records", rc.GetCallRecords)
 	}
 
 	// Crypto / E2EE

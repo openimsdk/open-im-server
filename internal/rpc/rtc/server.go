@@ -61,6 +61,11 @@ func Start(ctx context.Context, cfg *Config, client discovery.SvcDiscoveryRegist
 		return err
 	}
 
+	callRecordDB, err := mgo.NewCallRecordMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+
 	msgConn, err := client.GetConn(ctx, cfg.Share.RpcRegisterName.Msg)
 	if err != nil {
 		return err
@@ -91,7 +96,7 @@ func Start(ctx context.Context, cfg *Config, client discovery.SvcDiscoveryRegist
 
 	s := &rtcServer{
 		config:         cfg,
-		db:             controller.NewRtcDatabase(signalDB),
+		db:             controller.NewRtcDatabase(signalDB, callRecordDB),
 		roomClient:     roomClient,
 		msgClient:      rpcli.NewMsgClient(msgConn),
 		userClient:     rpcli.NewUserClient(userConn),
