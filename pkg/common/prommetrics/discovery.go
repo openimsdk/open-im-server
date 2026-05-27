@@ -19,11 +19,11 @@ type RespTarget struct {
 }
 
 func BuildDiscoveryKeyPrefix(name string) string {
-	return fmt.Sprintf("%s/%s/%s", "openim", "prometheus_discovery", name)
+	return fmt.Sprintf("%s/%s", "prometheus_discovery", name)
 }
 
 func BuildDiscoveryKey(name string, index int) string {
-	return fmt.Sprintf("%s/%s/%s/%d", "openim", "prometheus_discovery", name, index)
+	return fmt.Sprintf("%s/%s/%d", "prometheus_discovery", name, index)
 }
 
 func BuildDefaultTarget(host string, ip int) Target {
