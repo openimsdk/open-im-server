@@ -77,6 +77,7 @@ jobs:
             add_tag "$tag"
             if [[ "$tag" =~ ^v([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
               add_tag "${BASH_REMATCH[1]}"
+              add_tag "release-$tag"
             fi
           }
 
