@@ -47,12 +47,6 @@ func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
 			},
 			Options: options.Index(),
 		},
-		{
-			Keys: bson.D{
-				{Key: "conversation_id", Value: 1},
-			},
-			Options: options.Index().SetUnique(true),
-		},
 	})
 	if err != nil {
 		return nil, errs.Wrap(err)
