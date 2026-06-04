@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        go_version: ["1.22.x"]
+        go_version: ["1.25.x"]
 
     steps:
       - name: Checkout Server repository
@@ -188,7 +188,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        go_version: ["1.22.x"]
+        go_version: ["1.25.x"]
 
     steps:
       - name: Checkout Server repository
@@ -237,7 +237,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go_version: ["1.22"]
+        go_version: ["1.25.x"]
 
     steps:
       - name: Checkout Repository
