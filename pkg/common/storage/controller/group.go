@@ -65,6 +65,8 @@ type GroupDatabase interface {
 	FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error)
 	// FindGroupMemberNum retrieves the number of members in a group.
 	FindGroupMemberNum(ctx context.Context, groupID string) (uint32, error)
+	// FindGroupMemberNums retrieves the number of members for multiple groups.
+	FindGroupMemberNums(ctx context.Context, groupIDs []string) (map[string]uint32, error)
 	// FindUserManagedGroupID retrieves group IDs managed by a user.
 	FindUserManagedGroupID(ctx context.Context, userID string) (groupIDs []string, err error)
 	// PageGroupRequest paginates through group requests for specified groups.
@@ -230,6 +232,18 @@ func (g *groupDatabase) FindGroupMemberNum(ctx context.Context, groupID string) 
 		return 0, err
 	}
 	return uint32(num), nil
+}
+
+func (g *groupDatabase) FindGroupMemberNums(ctx context.Context, groupIDs []string) (map[string]uint32, error) {
+	nums, err := g.cache.GetGroupMemberNums(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[string]uint32, len(nums))
+	for groupID, num := range nums {
+		result[groupID] = uint32(num)
+	}
+	return result, nil
 }
 
 func (g *groupDatabase) TakeGroup(ctx context.Context, groupID string) (*model.Group, error) {
