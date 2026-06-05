@@ -51,7 +51,7 @@ func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
 			Keys: bson.D{
 				{Key: "conversation_id", Value: 1},
 			},
-			Options: options.Index().SetUnique(true),
+			Options: options.Index(),
 		},
 	})
 	if err != nil {
