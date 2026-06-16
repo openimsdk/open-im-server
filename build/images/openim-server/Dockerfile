@@ -13,8 +13,7 @@ RUN go mod tidy
 RUN if [ "$RELEASE" = "true" ]; then \
     go build -trimpath -ldflags "-s -w" -o _output/${BINARY_NAME} ./${CMD_PATH}; \
     else \
-    go build -o _output/${BINARY_NAME} ./${CMD_PATH}; \
-    fi
+    RUN go build -o myapp ./cmd/open-im-api
 
 FROM alpine:latest
 
