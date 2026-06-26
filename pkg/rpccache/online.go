@@ -202,8 +202,6 @@ func (o *OnlineCache) GetUserOnlinePlatform(ctx context.Context, userID string) 
 	if err != nil {
 		return nil, err
 	}
-	tmp := make([]int32, len(platformIDs))
-	copy(tmp, platformIDs)
 	return platformIDs, nil
 }
 
