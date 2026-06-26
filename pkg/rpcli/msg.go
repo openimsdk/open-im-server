@@ -41,6 +41,10 @@ func (x *MsgClient) GetHasReadSeqs(ctx context.Context, conversationIDs []string
 	return extractField(ctx, x.MsgClient.GetHasReadSeqs, req, (*msg.SeqsInfoResp).GetMaxSeqs)
 }
 
+func (x *MsgClient) GetConversationsFullSyncSeqs(ctx context.Context, req *msg.GetConversationsFullSyncSeqsReq) (*msg.GetConversationsFullSyncSeqsResp, error) {
+	return x.MsgClient.GetConversationsFullSyncSeqs(ctx, req)
+}
+
 func (x *MsgClient) SetUserConversationMaxSeq(ctx context.Context, conversationID string, ownerUserIDs []string, maxSeq int64) error {
 	if len(ownerUserIDs) == 0 {
 		return nil
