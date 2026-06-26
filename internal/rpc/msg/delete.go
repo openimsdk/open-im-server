@@ -19,7 +19,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
@@ -74,7 +73,7 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 		if err := m.MsgDatabase.DeleteMsgsPhysicalBySeqs(ctx, req.ConversationID, req.Seqs); err != nil {
 			return nil, err
 		}
-		conv, err := m.conversationClient.GetConversationsByConversationID(ctx, req.ConversationID)
+		conv, err := m.conversationClient.GetConversation(ctx, req.ConversationID, req.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -116,14 +115,12 @@ func (m *msgServer) DeleteMsgPhysical(ctx context.Context, req *msg.DeleteMsgPhy
 }
 
 func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []string, userID string, deleteSyncOpt *msg.DeleteSyncOpt) error {
-	conversations, err := m.conversationClient.GetConversationsByConversationIDs(ctx, conversationIDs)
+	conversations, err := m.conversationClient.GetConversations(ctx, conversationIDs, userID)
 	if err != nil {
 		return err
 	}
-	var existConversations []*conversation.Conversation
 	var existConversationIDs []string
 	for _, conversation := range conversations {
-		existConversations = append(existConversations, conversation)
 		existConversationIDs = append(existConversationIDs, conversation.ConversationID)
 	}
 	log.ZDebug(ctx, "ClearConversationsMsg", "existConversationIDs", existConversationIDs)
@@ -152,7 +149,7 @@ func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []str
 		if err := m.MsgDatabase.SetMinSeqs(ctx, m.getMinSeqs(maxSeqs)); err != nil {
 			return err
 		}
-		for _, conversation := range existConversations {
+		for _, conversation := range conversations {
 			tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: []string{conversation.ConversationID}}
 			m.notificationSender.NotificationWithSessionType(ctx, userID, m.conversationAndGetRecvID(conversation, userID), constant.ClearConversationNotification, conversation.ConversationType, tips)
 		}

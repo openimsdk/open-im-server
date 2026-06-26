@@ -137,7 +137,7 @@ func (f *FriendRequestMgo) Take(ctx context.Context, fromUserID, toUserID string
 func (f *FriendRequestMgo) GetUnhandledCount(ctx context.Context, userID string, ts int64) (int64, error) {
 	filter := bson.M{"to_user_id": userID, "handle_result": 0}
 	if ts != 0 {
-		filter["create_time"] = bson.M{"$gt": time.Unix(ts, 0)}
+		filter["create_time"] = bson.M{"$gt": time.UnixMilli(ts)}
 	}
 	return mongoutil.Count(ctx, f.coll, filter)
 }

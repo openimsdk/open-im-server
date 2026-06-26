@@ -4,42 +4,80 @@ on:
   push:
     branches:
       - release-*
-    # tags:
-    #   - 'v*'
-
   release:
     types: [published]
-
   workflow_dispatch:
     inputs:
       tag:
         description: "Tag version to be used for Docker image"
         required: true
-        default: "v3.8.0"
+        default: "v3.8.3"
+
+env:
+  GO_VERSION: "1.22"
+  IMAGE_NAME: "openim-server"
+  # IMAGE_NAME: ${{ github.event.repository.name }}
+  DOCKER_BUILDKIT: 1
 
 jobs:
-  build-and-test:
+  publish-docker-images:
     runs-on: ubuntu-latest
+    if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.merged == false) }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout main repository
+        uses: actions/checkout@v4
         with:
           path: main-repo
 
-      # - name: Set up QEMU
-      #   uses: docker/setup-qemu-action@v3.3.0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3.3.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.8.0
-
-      - name: Build Docker image
-        id: build
-        uses: docker/build-push-action@v5
+        id: buildx
+        uses: docker/setup-buildx-action@v3
         with:
-          context: ./main-repo
-          load: true
-          tags: "openim/openim-server:local"
-          cache-from: type=gha,scope=build
-          cache-to: type=gha,mode=max,scope=build
+          driver-opts: network=host
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5.6.0
+        with:
+          images: |
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}
+            ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+
+      - name: Install skopeo
+        run: |
+          sudo apt-get update && sudo apt-get install -y skopeo
+
+      - name: Build multi-arch images as OCI
+        run: |
+          mkdir -p /tmp/oci-image /tmp/docker-cache
+
+          # Build multi-architecture image and save in OCI format        
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            --output type=oci,dest=/tmp/oci-image/multi-arch.tar \
+            --cache-to type=local,dest=/tmp/docker-cache \
+            --cache-from type=gha \
+            ./main-repo
+
+            # Use skopeo to convert the amd64 image from OCI format to Docker format and load it
+          skopeo copy --override-arch amd64 oci-archive:/tmp/oci-image/multi-arch.tar docker-daemon:${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:local
+
+          # check image
+          docker image ls | grep openim
 
       - name: Checkout compose repository
         uses: actions/checkout@v4
@@ -52,11 +90,11 @@ jobs:
         run: |
           IP=$(hostname -I | awk '{print $1}')
           echo "The IP Address is: $IP"
-          echo "::set-output name=ip::$IP"
+          echo "ip=$IP" >> $GITHUB_OUTPUT
 
       - name: Update .env to use the local image
         run: |
-          sed -i 's|OPENIM_SERVER_IMAGE=.*|OPENIM_SERVER_IMAGE=openim/openim-server:local|' ${{ github.workspace }}/compose-repo/.env
+          sed -i 's|OPENIM_SERVER_IMAGE=.*|OPENIM_SERVER_IMAGE=${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:local|' ${{ github.workspace }}/compose-repo/.env
           sed -i 's|MINIO_EXTERNAL_ADDRESS=.*|MINIO_EXTERNAL_ADDRESS=http://${{ steps.get-ip.outputs.ip }}:10005|' ${{ github.workspace }}/compose-repo/.env
 
       - name: Start services using Docker Compose
@@ -66,23 +104,34 @@ jobs:
 
           docker compose ps
 
-      - name: Extract metadata for Docker (tags, labels)
-        id: meta
-        uses: docker/metadata-action@v5.6.0
-        with:
-          images: |
-            openim/openim-server
-            ghcr.io/openimsdk/openim-server
-            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server
-          tags: |
-            type=ref,event=tag
-            type=schedule
-            type=ref,event=branch
-            # type=semver,pattern={{version}}
-            type=semver,pattern=v{{version}}
-            type=semver,pattern=release-{{raw}}
-            type=sha
-            type=raw,value=${{ github.event.inputs.tag }}
+      # - name: Check openim-server health
+      #   run: |
+      #     timeout=300
+      #     interval=30
+      #     elapsed=0
+      #     while [[ $elapsed -le $timeout ]]; do
+      #       if ! docker exec openim-server mage check; then
+      #         echo "openim-server is not ready, waiting..."
+      #         sleep $interval
+      #         elapsed=$(($elapsed + $interval))
+      #       else
+      #         echo "Health check successful"
+      #         exit 0
+      #       fi
+      #     done
+      #     echo "Health check failed after 5 minutes"
+      #     exit 1
+
+      # - name: Check openim-chat health
+      #   if: success()
+      #   run: |
+      #     if ! docker exec openim-chat mage check; then
+      #         echo "openim-chat check failed"
+      #         exit 1
+      #       else
+      #         echo "Health check successful"
+      #         exit 0
+      #       fi
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3.3.0
@@ -104,22 +153,27 @@ jobs:
           username: ${{ secrets.ALIREGISTRY_USERNAME }}
           password: ${{ secrets.ALIREGISTRY_TOKEN }}
 
-      - name: Push Docker images
-        uses: docker/build-push-action@v5
-        with:
-          context: ./main-repo
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=build
-          cache-to: type=gha,mode=max,scope=build
+      - name: Push multi-architecture images
+        if: success()
+        run: |
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            $(echo "${{ steps.meta.outputs.tags }}" | sed 's/,/ --tag /g' | sed 's/^/--tag /') \
+            --cache-from type=local,src=/tmp/docker-cache \
+            --push \
+            ./main-repo
 
       - name: Verify multi-platform support
         run: |
-          images=("openim/openim-server" "ghcr.io/openimsdk/openim-server" "registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server")
+          images=(
+            "${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}"
+            "ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}"
+            "registry.cn-hangzhou.aliyuncs.com/openimsdk/${{ env.IMAGE_NAME }}"
+          )
+
           for image in "${images[@]}"; do
-              for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n'); do
+              for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | cut -d':' -f2); do
+                  echo "Verifying multi-arch support for $image:$tag"
                   manifest=$(docker manifest inspect "$image:$tag" || echo "error")
                   if [[ "$manifest" == "error" ]]; then
                       echo "Manifest not found for $image:$tag"
@@ -135,5 +189,6 @@ jobs:
                       echo "Multi-platform support check failed for $image:$tag - missing arm64"
                       exit 1
                   fi
+                  echo "✅ $image:$tag supports both amd64 and arm64 architectures"
               done
           done

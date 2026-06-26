@@ -8,7 +8,7 @@ api:
 
 
 prometheus:
-  # Whether to enable prometheus
+  # Enable Prometheus metrics exposure for this service; set to true to allow scraping.
   enable: true
   # autoSetPorts indicates whether to automatically set the ports
   autoSetPorts: true
@@ -17,3 +17,13 @@ prometheus:
   ports:
   # This address can be accessed via a browser
   grafanaURL:
+
+ratelimiter:
+  # Whether to enable rate limiting
+  enable: false
+  # WindowSize defines time duration per window
+  window: 20s
+  # BucketNum defines bucket number for each window
+  bucket: 500
+  # CPU threshold; valid range 0–1000 (1000 = 100%)
+  cpuThreshold: 850

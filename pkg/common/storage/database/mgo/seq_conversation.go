@@ -57,8 +57,8 @@ func (s *seqConversationMongo) Malloc(ctx context.Context, conversationID string
 	}
 	filter := map[string]any{"conversation_id": conversationID}
 	update := map[string]any{
-		"$inc": map[string]any{"max_seq": size},
-		"$set": map[string]any{"min_seq": int64(0)},
+		"$inc":         map[string]any{"max_seq": size},
+		"$setOnInsert": map[string]any{"min_seq": int64(0)},
 	}
 	opt := options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After).SetProjection(map[string]any{"_id": 0, "max_seq": 1})
 	lastSeq, err := mongoutil.FindOneAndUpdate[int64](ctx, s.coll, filter, update, opt)

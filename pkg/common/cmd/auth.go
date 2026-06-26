@@ -40,6 +40,7 @@ func NewAuthRpcCmd() *AuthRpcCmd {
 		config.RedisConfigFileName:      &authConfig.RedisConfig,
 		config.MongodbConfigFileName:    &authConfig.MongoConfig,
 		config.ShareFileName:            &authConfig.Share,
+		config.LocalCacheConfigFileName: &authConfig.LocalCacheConfig,
 		config.DiscoveryConfigFilename:  &authConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
@@ -56,7 +57,7 @@ func (a *AuthRpcCmd) Exec() error {
 }
 
 func (a *AuthRpcCmd) runE() error {
-	return startrpc.Start(a.ctx, &a.authConfig.Discovery, &a.authConfig.RpcConfig.Prometheus, a.authConfig.RpcConfig.RPC.ListenIP,
+	return startrpc.Start(a.ctx, &a.authConfig.Discovery, &a.authConfig.RpcConfig.CircuitBreaker, &a.authConfig.RpcConfig.RateLimiter, &a.authConfig.RpcConfig.Prometheus, a.authConfig.RpcConfig.RPC.ListenIP,
 		a.authConfig.RpcConfig.RPC.RegisterIP, a.authConfig.RpcConfig.RPC.AutoSetPorts, a.authConfig.RpcConfig.RPC.Ports,
 		a.Index(), a.authConfig.Discovery.RpcService.Auth, nil, a.authConfig,
 		[]string{

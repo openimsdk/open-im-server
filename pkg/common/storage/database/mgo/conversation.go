@@ -47,6 +47,12 @@ func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
 			},
 			Options: options.Index(),
 		},
+		{
+			Keys: bson.D{
+				{Key: "conversation_id", Value: 1},
+			},
+			Options: options.Index(),
+		},
 	})
 	if err != nil {
 		return nil, errs.Wrap(err)
@@ -232,10 +238,6 @@ func (c *ConversationMgo) PageConversationIDs(ctx context.Context, pagination pa
 	return mongoutil.FindPageOnly[string](ctx, c.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"conversation_id": 1}))
 }
 
-func (c *ConversationMgo) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*model.Conversation, error) {
-	return mongoutil.Find[*model.Conversation](ctx, c.coll, bson.M{"conversation_id": bson.M{"$in": conversationIDs}})
-}
-
 func (c *ConversationMgo) GetConversationIDsNeedDestruct(ctx context.Context) ([]*model.Conversation, error) {
 	// "is_msg_destruct = 1 && msg_destruct_time != 0 && (UNIX_TIMESTAMP(NOW()) > (msg_destruct_time + UNIX_TIMESTAMP(latest_msg_destruct_time)) || latest_msg_destruct_time is NULL)"
 	return mongoutil.Find[*model.Conversation](ctx, c.coll, bson.M{
@@ -307,4 +309,21 @@ func (c *ConversationMgo) FindRandConversation(ctx context.Context, ts int64, li
 		},
 	}
 	return mongoutil.Aggregate[*model.Conversation](ctx, c.coll, pipeline)
+}
+
+func (c *ConversationMgo) DeleteUsersConversations(ctx context.Context, userID string, conversationIDs []string) (err error) {
+	if len(conversationIDs) == 0 {
+		return nil
+	}
+	return mongoutil.IncrVersion(func() error {
+		err := mongoutil.DeleteMany(ctx, c.coll, bson.M{"owner_user_id": userID, "conversation_id": bson.M{"$in": conversationIDs}})
+		return err
+	}, func() error {
+		for _, conversationID := range conversationIDs {
+			if err := c.version.IncrVersion(ctx, userID, []string{conversationID}, model.VersionStateDelete); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }

@@ -112,7 +112,7 @@ func (s *userOnline) SetUserOnline(ctx context.Context, userID string, online, o
 	end
 `
 	now := time.Now()
-	argv := make([]any, 0, 2+len(online)+len(offline))
+	argv := make([]any, 0, 4+len(online)+len(offline))
 	argv = append(argv, int32(s.expire/time.Second), now.Unix(), now.Add(s.expire).Unix(), int32(len(offline)))
 	for _, platformID := range offline {
 		argv = append(argv, platformID)

@@ -16,6 +16,7 @@ package cache
 
 import (
 	"context"
+
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 )
 
@@ -57,7 +58,7 @@ type ConversationCache interface {
 	GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error)
 	DelConversationNotReceiveMessageUserIDs(conversationIDs ...string) ConversationCache
 	DelConversationNotNotifyMessageUserIDs(userIDs ...string) ConversationCache
-	DelConversationPinnedMessageUserIDs(userIDs ...string) ConversationCache
+	DelUserPinnedConversations(userIDs ...string) ConversationCache
 	DelConversationVersionUserIDs(userIDs ...string) ConversationCache
 
 	FindMaxConversationUserVersion(ctx context.Context, userID string) (*relationtb.VersionLog, error)

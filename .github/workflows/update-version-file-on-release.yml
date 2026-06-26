@@ -96,13 +96,13 @@ jobs:
                   repo,
                   per_page: 100
                 });
-                
+            
                 release = releases.data.find(r => r.draft && r.tag_name === tagName);            
                 if (!release) {
                   throw new Error(`No release found with tag ${tagName}`);
                 }
               }
-              
+            
               await github.rest.repos.updateRelease({
                 owner,
                 repo,
@@ -110,10 +110,10 @@ jobs:
                 draft: false,
                 prerelease: release.prerelease
               });
-              
+            
               const status = release.draft ? "was draft" : "was already published";
               core.info(`Release ${tagName} ensured to be published (${status}).`);
-              
+            
             } catch (error) {
               core.warning(`Could not find or update release for tag ${tagName}: ${error.message}`);
             }

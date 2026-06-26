@@ -109,7 +109,7 @@ func (g *GroupRequestMgo) GetUnhandledCount(ctx context.Context, groupIDs []stri
 	}
 	filter := bson.M{"group_id": bson.M{"$in": groupIDs}, "handle_result": 0}
 	if ts != 0 {
-		filter["req_time"] = bson.M{"$gt": time.Unix(ts, 0)}
+		filter["req_time"] = bson.M{"$gt": time.UnixMilli(ts)}
 	}
 	return mongoutil.Count(ctx, g.coll, filter)
 }
