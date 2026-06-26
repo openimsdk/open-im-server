@@ -8,44 +8,20 @@ services:
     ports:
       - "37017:27017"
     container_name: mongo
-    command: >
-      bash -c '
-      docker-entrypoint.sh mongod --wiredTigerCacheSizeGB $$wiredTigerCacheSizeGB --auth &
-      until mongosh -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin --eval "db.runCommand({ ping: 1 })" &>/dev/null; do
-        echo "Waiting for MongoDB to start..."
-        sleep 1
-      done &&
-      mongosh -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin --eval "
-      db = db.getSiblingDB(\"$$MONGO_INITDB_DATABASE\");
-      if (!db.getUser(\"$$MONGO_OPENIM_USERNAME\")) {
-        db.createUser({
-          user: \"$$MONGO_OPENIM_USERNAME\",
-          pwd: \"$$MONGO_OPENIM_PASSWORD\",
-          roles: [{role: \"readWrite\", db: \"$$MONGO_INITDB_DATABASE\"}]
-        });
-        print(\"User created successfully: \");
-        print(\"Username: $$MONGO_OPENIM_USERNAME\");
-        print(\"Password: $$MONGO_OPENIM_PASSWORD\");
-        print(\"Database: $$MONGO_INITDB_DATABASE\");
-      } else {
-        print(\"User already exists in database: $$MONGO_INITDB_DATABASE, Username: $$MONGO_OPENIM_USERNAME\");
-      }
-      " &&
-      tail -f /dev/null
-      '
     volumes:
       - "${DATA_DIR}/components/mongodb/data/db:/data/db"
       - "${DATA_DIR}/components/mongodb/data/logs:/data/logs"
       - "${DATA_DIR}/components/mongodb/data/conf:/etc/mongo"
       - "${MONGO_BACKUP_DIR}:/data/backup"
+      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
     environment:
       - TZ=Asia/Shanghai
-      - wiredTigerCacheSizeGB=1
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=openIM123
       - MONGO_INITDB_DATABASE=openim_v3
       - MONGO_OPENIM_USERNAME=openIM
       - MONGO_OPENIM_PASSWORD=openIM123
+    command: [ "mongod", "--wiredTigerCacheSizeGB", "1", "--auth" ]
     restart: always
     networks:
       - openim
@@ -64,11 +40,7 @@ services:
     sysctls:
       net.core.somaxconn: 1024
     command: >
-      redis-server
-      --requirepass openIM123
-      --appendonly yes
-      --aof-use-rdb-preamble yes
-      --save ""
+      redis-server --requirepass openIM123 --appendonly yes --aof-use-rdb-preamble yes --save ""
     networks:
       - openim
 
@@ -89,7 +61,6 @@ services:
       - ETCD_INITIAL_CLUSTER_TOKEN=tkn
       - ETCD_INITIAL_CLUSTER_STATE=new
       - ALLOW_NONE_AUTHENTICATION=no
-
       ## Optional: Enable etcd authentication by setting the following credentials
       # - ETCD_ROOT_USER=root
       # - ETCD_ROOT_PASSWORD=openIM123
@@ -212,7 +183,6 @@ services:
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT"
       # Defines which listener is used for inter-broker communication within the Kafka cluster
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
-
       # Authentication configuration variables - comment out to disable auth
       # KAFKA_USERNAME: "openIM"
       # KAFKA_PASSWORD: "openIM123"
