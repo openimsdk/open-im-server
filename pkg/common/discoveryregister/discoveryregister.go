@@ -22,19 +22,26 @@ import (
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/discovery/kubernetes"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 	"google.golang.org/grpc"
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
 func NewDiscoveryRegister(discovery *config.Discovery, share *config.Share, watchNames []string) (discovery.SvcDiscoveryRegistry, error) {
-	switch discovery.Enable {
-	case "k8s":
-		return kubernetes.NewConnManager("default", watchNames,
+	if runtimeenv.RuntimeEnvironment() == config.KUBERNETES {
+		namespace := discovery.Kubernetes.Namespace
+		if namespace == "" {
+			namespace = "default"
+		}
+		return kubernetes.NewConnManager(namespace, watchNames,
 			grpc.WithDefaultCallOptions(
 				grpc.MaxCallSendMsgSize(1024*1024*20),
 			),
 		)
-	case "etcd":
+	}
+
+	switch discovery.Enable {
+	case config.ETCD:
 		return etcd.NewSvcDiscoveryRegistry(
 			discovery.Etcd.RootDirectory,
 			discovery.Etcd.Address,

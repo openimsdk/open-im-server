@@ -14,6 +14,7 @@ import (
 	"github.com/openimsdk/tools/apiresp"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
@@ -288,24 +289,11 @@ func (ws *WsServer) registerClient(client *Client) {
 		}
 	}
 
-	wg := sync.WaitGroup{}
 	log.ZDebug(client.ctx, "ws.msgGatewayConfig.Discovery.Enable", "discoveryEnable", ws.msgGatewayConfig.Discovery.Enable)
 
-	if ws.msgGatewayConfig.Discovery.Enable != "k8s" {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			_ = ws.sendUserOnlineInfoToOtherNode(client.ctx, client)
-		}()
+	if ws.msgGatewayConfig.Discovery.Enable != config.KUBERNETES {
+		_ = ws.sendUserOnlineInfoToOtherNode(client.ctx, client)
 	}
-
-	//wg.Add(1)
-	//go func() {
-	//	defer wg.Done()
-	//	ws.SetUserOnlineStatus(client.ctx, client, constant.Online)
-	//}()
-
-	wg.Wait()
 
 	log.ZDebug(client.ctx, "user online", "online user Num", ws.onlineUserNum.Load(), "online user conn Num", ws.onlineUserConnNum.Load())
 }
