@@ -49,7 +49,7 @@ func New[V any](opts ...Option) Cache[V] {
 			if opt.expirationEvict {
 				return lru.NewExpirationLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
 			} else {
-				return lru.NewLayLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
+				return lru.NewLazyLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
 			}
 		}
 		if opt.localSlotNum == 1 {
@@ -72,11 +72,18 @@ type cache[V any] struct {
 
 func (c *cache[V]) onEvict(key string, value V) {
 	if c.link != nil {
-		lks := c.link.Del(key)
-		for k := range lks {
-			if key != k { // prevent deadlock
-				c.local.Del(k)
-			}
+		// Do not delete other keys while the underlying LRU still holds its lock;
+		// defer linked deletions to avoid re-entering the same slot and deadlocking.
+		if lks := c.link.Del(key); len(lks) > 0 {
+			go c.delLinked(key, lks)
+		}
+	}
+}
+
+func (c *cache[V]) delLinked(src string, keys map[string]struct{}) {
+	for k := range keys {
+		if src != k {
+			c.local.Del(k)
 		}
 	}
 }
@@ -103,7 +110,7 @@ func (c *cache[V]) Get(ctx context.Context, key string, fetch func(ctx context.C
 func (c *cache[V]) GetLink(ctx context.Context, key string, fetch func(ctx context.Context) (V, error), link ...string) (V, error) {
 	if c.local != nil {
 		return c.local.Get(key, func() (V, error) {
-			if len(link) > 0 {
+			if len(link) > 0 && c.link != nil {
 				c.link.Link(key, link...)
 			}
 			return fetch(ctx)

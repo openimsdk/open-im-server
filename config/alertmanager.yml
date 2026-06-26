@@ -1,34 +1,36 @@
+# Global Alertmanager runtime and SMTP settings.
 global:
-  resolve_timeout: 5m
-  smtp_from: alert@openim.io
-  smtp_smarthost: smtp.163.com:465
-  smtp_auth_username: alert@openim.io
-  smtp_auth_password: YOURAUTHPASSWORD
-  smtp_require_tls: false
-  smtp_hello: xxx
+  resolve_timeout: 5m # Wait time before an alert is considered resolved when no further updates are received.
+  smtp_from: alert@openim.io # Sender address displayed in alert emails.
+  smtp_smarthost: smtp.163.com:465 # SMTP relay endpoint in host:port format.
+  smtp_auth_username: alert@openim.io # SMTP authentication username (commonly the same as smtp_from).
+  smtp_auth_password: YOURAUTHPASSWORD # SMTP authorization token or app password.
+  smtp_require_tls: false # Set to true when your SMTP provider requires STARTTLS.
+  smtp_hello: xxx # HELO/EHLO identity presented to the SMTP server.
 
 templates:
-  - /etc/alertmanager/email.tmpl
+  - /etc/alertmanager/email.tmpl # Go template file used to render HTML email content.
 
+# Root routing tree for all incoming alerts.
 route:
-  group_by: [ 'alertname' ]
-  group_wait: 5s
-  group_interval: 5s
-  repeat_interval: 5m
-  receiver: email
+  group_by: [ 'alertname' ] # Alerts sharing this label value are batched into one notification.
+  group_wait: 5s # Initial delay before sending the first notification for a new alert group.
+  group_interval: 5s # Minimum interval between notifications for the same alert group.
+  repeat_interval: 5m # Reminder interval while an alert group remains firing.
+  receiver: email # Default receiver when no child route matches.
   routes:
     - matchers:
-        - alertname = "XXX"
-      group_by: [ 'instance' ]
+        - alertname = "XXX" # Example matcher; replace with a real alert name or remove this route.
+      group_by: [ 'instance' ] # Override grouping for this specific route.
       group_wait: 5s
       group_interval: 5s
       repeat_interval: 5m
       receiver: email
 
 receivers:
-  - name: email
+  - name: email # Receiver name referenced by route.receiver.
     email_configs:
-      - to: 'alert@example.com'
-        html: '{{ template "email.to.html" . }}'
-        headers: { Subject: "[OPENIM-SERVER]Alarm" }
-        send_resolved: true
+      - to: 'alert@example.com' # Recipient mailbox for alert notifications.
+        html: '{{ template "email.to.html" . }}' # Rendered with the template declared in email.tmpl.
+        headers: { Subject: "[OPENIM-SERVER]Alarm" } # Custom email subject line.
+        send_resolved: true # Also send a notification when the alert recovers.

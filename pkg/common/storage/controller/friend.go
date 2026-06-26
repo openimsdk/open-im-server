@@ -16,9 +16,9 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
@@ -109,15 +109,13 @@ func (f *friendDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (
 	// Retrieve friend IDs of userID1 from the cache
 	userID1FriendIDs, err := f.cache.GetFriendIDs(ctx, userID1)
 	if err != nil {
-		err = fmt.Errorf("error retrieving friend IDs for user %s: %w", userID1, err)
-		return
+		return false, false, err
 	}
 
 	// Retrieve friend IDs of userID2 from the cache
 	userID2FriendIDs, err := f.cache.GetFriendIDs(ctx, userID2)
 	if err != nil {
-		err = fmt.Errorf("error retrieving friend IDs for user %s: %w", userID2, err)
-		return
+		return false, false, err
 	}
 
 	// Check if userID2 is in userID1's friend list and vice versa
@@ -214,12 +212,12 @@ func (f *friendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest 
 	// Attempt to retrieve the friend request from the database.
 	fr, err := f.friendRequest.Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 	if err != nil {
-		return fmt.Errorf("failed to retrieve friend request from %s to %s: %w", friendRequest.FromUserID, friendRequest.ToUserID, err)
+		return err
 	}
 
 	// Check if the friend request has already been handled.
 	if fr.HandleResult != 0 {
-		return fmt.Errorf("friend request from %s to %s has already been processed", friendRequest.FromUserID, friendRequest.ToUserID)
+		return servererrs.ErrFriendRequestHandled.WrapMsg("friend request has already been processed", "from", friendRequest.FromUserID, "to", friendRequest.ToUserID)
 	}
 
 	// Log the action of refusing the friend request for debugging and auditing purposes.
@@ -232,7 +230,7 @@ func (f *friendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest 
 	friendRequest.HandleResult = constant.FriendResponseRefuse
 	friendRequest.HandleTime = time.Now()
 	if err := f.friendRequest.Update(ctx, friendRequest); err != nil {
-		return fmt.Errorf("failed to update friend request from %s to %s as refused: %w", friendRequest.FromUserID, friendRequest.ToUserID, err)
+		return err
 	}
 
 	return nil
@@ -350,9 +348,9 @@ func (f *friendDatabase) PageFriendRequestToMe(ctx context.Context, userID strin
 func (f *friendDatabase) FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*model.Friend, err error) {
 	friends, err = f.friend.FindFriends(ctx, ownerUserID, friendUserIDs)
 	if err != nil {
-		return
+		return nil, err
 	}
-	return
+	return friends, nil
 }
 
 func (f *friendDatabase) FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error) {

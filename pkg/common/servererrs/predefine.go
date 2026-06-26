@@ -51,10 +51,11 @@ var (
 
 	ErrMessageHasReadDisable = errs.NewCodeError(MessageHasReadDisable, "MessageHasReadDisable")
 
-	ErrCanNotAddYourself   = errs.NewCodeError(CanNotAddYourselfError, "CanNotAddYourselfError")
-	ErrBlockedByPeer       = errs.NewCodeError(BlockedByPeer, "BlockedByPeer")
-	ErrNotPeersFriend      = errs.NewCodeError(NotPeersFriend, "NotPeersFriend")
-	ErrRelationshipAlready = errs.NewCodeError(RelationshipAlreadyError, "RelationshipAlreadyError")
+	ErrCanNotAddYourself    = errs.NewCodeError(CanNotAddYourselfError, "CanNotAddYourselfError")
+	ErrBlockedByPeer        = errs.NewCodeError(BlockedByPeer, "BlockedByPeer")
+	ErrNotPeersFriend       = errs.NewCodeError(NotPeersFriend, "NotPeersFriend")
+	ErrRelationshipAlready  = errs.NewCodeError(RelationshipAlreadyError, "RelationshipAlreadyError")
+	ErrFriendRequestHandled = errs.NewCodeError(FriendRequestHandled, "FriendRequestHandled")
 
 	ErrMutedInGroup     = errs.NewCodeError(MutedInGroup, "MutedInGroup")
 	ErrMutedGroup       = errs.NewCodeError(MutedGroup, "MutedGroup")
