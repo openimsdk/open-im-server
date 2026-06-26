@@ -1,5 +1,5 @@
 prometheus:
-  # Enable or disable Prometheus monitoring
+  # Enable Prometheus metrics exposure for this service; set to true to allow scraping.
   enable: true
   # autoSetPorts indicates whether to automatically set the ports
   autoSetPorts: true
