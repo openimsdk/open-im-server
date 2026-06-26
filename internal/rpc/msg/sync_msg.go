@@ -24,7 +24,6 @@ import (
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/timeutil"
 )
 
@@ -216,9 +215,24 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 	// Construct response with updated information
 	for _, chatLog := range chatLogs {
 		pbchatLog := &msg.ChatLog{}
-		datautil.CopyStructFields(pbchatLog, chatLog.MsgData)
-		pbchatLog.SendTime = chatLog.MsgData.SendTime
-		pbchatLog.CreateTime = chatLog.MsgData.CreateTime
+		msgData := chatLog.MsgData
+		pbchatLog.ServerMsgID = msgData.ServerMsgID
+		pbchatLog.ClientMsgID = msgData.ClientMsgID
+		pbchatLog.SendID = msgData.SendID
+		pbchatLog.RecvID = msgData.RecvID
+		pbchatLog.GroupID = msgData.GroupID
+		pbchatLog.SenderPlatformID = msgData.SenderPlatformID
+		pbchatLog.SenderNickname = msgData.SenderNickname
+		pbchatLog.SenderFaceURL = msgData.SenderFaceURL
+		pbchatLog.SessionType = msgData.SessionType
+		pbchatLog.MsgFrom = msgData.MsgFrom
+		pbchatLog.ContentType = msgData.ContentType
+		pbchatLog.Content = string(msgData.Content)
+		pbchatLog.Status = msgData.Status
+		pbchatLog.SendTime = msgData.SendTime
+		pbchatLog.CreateTime = msgData.CreateTime
+		pbchatLog.Ex = msgData.Ex
+		pbchatLog.Seq = msgData.Seq
 		if chatLog.MsgData.SenderNickname == "" {
 			pbchatLog.SenderNickname = sendMap[chatLog.MsgData.SendID]
 		}

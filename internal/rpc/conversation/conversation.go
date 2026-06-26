@@ -233,9 +233,28 @@ func (c *conversationServer) getConversations(ctx context.Context, ownerUserID s
 
 // Deprecated
 func (c *conversationServer) SetConversation(ctx context.Context, req *pbconversation.SetConversationReq) (*pbconversation.SetConversationResp, error) {
+	if req.Conversation == nil {
+		return nil, errs.ErrArgs.WrapMsg("conversation must not be nil")
+	}
 	var conversation dbModel.Conversation
-	if err := datautil.CopyStructFields(&conversation, req.Conversation); err != nil {
-		return nil, err
+	conversation.OwnerUserID = req.Conversation.OwnerUserID
+	conversation.ConversationID = req.Conversation.ConversationID
+	conversation.RecvMsgOpt = req.Conversation.RecvMsgOpt
+	conversation.ConversationType = req.Conversation.ConversationType
+	conversation.UserID = req.Conversation.UserID
+	conversation.GroupID = req.Conversation.GroupID
+	conversation.IsPinned = req.Conversation.IsPinned
+	conversation.AttachedInfo = req.Conversation.AttachedInfo
+	conversation.IsPrivateChat = req.Conversation.IsPrivateChat
+	conversation.GroupAtType = req.Conversation.GroupAtType
+	conversation.Ex = req.Conversation.Ex
+	conversation.BurnDuration = req.Conversation.BurnDuration
+	conversation.MinSeq = req.Conversation.MinSeq
+	conversation.MaxSeq = req.Conversation.MaxSeq
+	conversation.MsgDestructTime = req.Conversation.MsgDestructTime
+	conversation.IsMsgDestruct = req.Conversation.IsMsgDestruct
+	if req.Conversation.LatestMsgDestructTime != 0 {
+		conversation.LatestMsgDestructTime = time.UnixMilli(req.Conversation.LatestMsgDestructTime)
 	}
 	err := c.conversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*dbModel.Conversation{&conversation})
 	if err != nil {
@@ -606,9 +625,17 @@ func (c *conversationServer) getConversationInfo(
 	}
 	for conversationID, chatLog := range chatLogs {
 		pbchatLog := &pbconversation.ConversationElem{}
-		msgInfo := &pbconversation.MsgInfo{}
-		if err := datautil.CopyStructFields(msgInfo, chatLog); err != nil {
-			return nil, err
+		msgInfo := &pbconversation.MsgInfo{
+			ServerMsgID: chatLog.ServerMsgID,
+			ClientMsgID: chatLog.ClientMsgID,
+			SessionType: chatLog.SessionType,
+			SendID:      chatLog.SendID,
+			RecvID:      chatLog.RecvID,
+			GroupID:     chatLog.GroupID,
+			MsgFrom:     chatLog.MsgFrom,
+			ContentType: chatLog.ContentType,
+			Content:     string(chatLog.Content),
+			Ex:          chatLog.Ex,
 		}
 		switch chatLog.SessionType {
 		case constant.SingleChatType:

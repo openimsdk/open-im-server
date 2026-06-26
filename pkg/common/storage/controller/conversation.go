@@ -127,13 +127,10 @@ func (c *conversationDatabase) SetUsersConversationFieldTx(ctx context.Context, 
 		var conversations []*relationtb.Conversation
 		now := time.Now()
 		for _, v := range NotUserIDs {
-			temp := new(relationtb.Conversation)
-			if err = datautil.CopyStructFields(temp, conversation); err != nil {
-				return err
-			}
+			temp := *conversation
 			temp.OwnerUserID = v
 			temp.CreateTime = now
-			conversations = append(conversations, temp)
+			conversations = append(conversations, &temp)
 		}
 		if len(conversations) > 0 {
 			err = c.conversationDB.Create(ctx, conversations)
