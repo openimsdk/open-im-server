@@ -143,6 +143,23 @@ type API struct {
 		Ports        []int  `yaml:"ports"`
 		GrafanaURL   string `yaml:"grafanaURL"`
 	} `yaml:"prometheus"`
+
+	RateLimiter RateLimiter `yaml:"rateLimiter"`
+}
+
+type RateLimiter struct {
+	Enable       bool          `yaml:"enable"`
+	Window       time.Duration `yaml:"window"`
+	Bucket       int           `yaml:"bucket"`
+	CPUThreshold int64         `yaml:"cpuThreshold"`
+}
+
+type CircuitBreaker struct {
+	Enable  bool          `yaml:"enable"`
+	Window  time.Duration `yaml:"window"`
+	Bucket  int           `yaml:"bucket"`
+	Success float64       `yaml:"success"`
+	Request int64         `yaml:"request"`
 }
 
 type CronTask struct {
@@ -217,6 +234,8 @@ type MsgGateway struct {
 		WebsocketMaxMsgLen  int   `yaml:"websocketMaxMsgLen"`
 		WebsocketTimeout    int   `yaml:"websocketTimeout"`
 	} `yaml:"longConnSvr"`
+	RateLimiter    RateLimiter    `yaml:"rateLimiter"`
+	CircuitBreaker CircuitBreaker `yaml:"circuitBreaker"`
 }
 
 type MsgTransfer struct {
@@ -225,6 +244,8 @@ type MsgTransfer struct {
 		AutoSetPorts bool  `yaml:"autoSetPorts"`
 		Ports        []int `yaml:"ports"`
 	} `yaml:"prometheus"`
+	RateLimiter    RateLimiter    `yaml:"rateLimiter"`
+	CircuitBreaker CircuitBreaker `yaml:"circuitBreaker"`
 }
 
 type Push struct {
@@ -255,7 +276,9 @@ type Push struct {
 		BadgeCount bool   `yaml:"badgeCount"`
 		Production bool   `yaml:"production"`
 	} `yaml:"iosPush"`
-	FullUserCache bool `yaml:"fullUserCache"`
+	FullUserCache  bool           `yaml:"fullUserCache"`
+	RateLimiter    RateLimiter    `yaml:"rateLimiter"`
+	CircuitBreaker CircuitBreaker `yaml:"circuitBreaker"`
 }
 
 type Auth struct {
@@ -264,28 +287,38 @@ type Auth struct {
 	TokenPolicy struct {
 		Expire int64 `yaml:"expire"`
 	} `yaml:"tokenPolicy"`
+	RateLimiter    RateLimiter    `yaml:"rateLimiter"`
+	CircuitBreaker CircuitBreaker `yaml:"circuitBreaker"`
 }
 
 type Conversation struct {
-	RPC        RPC        `yaml:"rpc"`
-	Prometheus Prometheus `yaml:"prometheus"`
+	RPC            RPC            `yaml:"rpc"`
+	Prometheus     Prometheus     `yaml:"prometheus"`
+	RateLimiter    RateLimiter    `yaml:"rateLimiter"`
+	CircuitBreaker CircuitBreaker `yaml:"circuitBreaker"`
 }
 
 type Friend struct {
-	RPC        RPC        `yaml:"rpc"`
-	Prometheus Prometheus `yaml:"prometheus"`
+	RPC            RPC            `yaml:"rpc"`
+	Prometheus     Prometheus     `yaml:"prometheus"`
+	RateLimiter    RateLimiter    `yaml:"rateLimiter"`
+	CircuitBreaker CircuitBreaker `yaml:"circuitBreaker"`
 }
 
 type Group struct {
-	RPC                        RPC        `yaml:"rpc"`
-	Prometheus                 Prometheus `yaml:"prometheus"`
-	EnableHistoryForNewMembers bool       `yaml:"enableHistoryForNewMembers"`
+	RPC                        RPC            `yaml:"rpc"`
+	Prometheus                 Prometheus     `yaml:"prometheus"`
+	EnableHistoryForNewMembers bool           `yaml:"enableHistoryForNewMembers"`
+	RateLimiter                RateLimiter    `yaml:"rateLimiter"`
+	CircuitBreaker             CircuitBreaker `yaml:"circuitBreaker"`
 }
 
 type Msg struct {
-	RPC          RPC        `yaml:"rpc"`
-	Prometheus   Prometheus `yaml:"prometheus"`
-	FriendVerify bool       `yaml:"friendVerify"`
+	RPC            RPC            `yaml:"rpc"`
+	Prometheus     Prometheus     `yaml:"prometheus"`
+	FriendVerify   bool           `yaml:"friendVerify"`
+	RateLimiter    RateLimiter    `yaml:"rateLimiter"`
+	CircuitBreaker CircuitBreaker `yaml:"circuitBreaker"`
 }
 
 type Third struct {
@@ -298,6 +331,8 @@ type Third struct {
 		Kodo   Kodo   `yaml:"kodo"`
 		Aws    Aws    `yaml:"aws"`
 	} `yaml:"object"`
+	RateLimiter    RateLimiter    `yaml:"rateLimiter"`
+	CircuitBreaker CircuitBreaker `yaml:"circuitBreaker"`
 }
 type Cos struct {
 	BucketURL    string `yaml:"bucketURL"`
@@ -336,8 +371,10 @@ type Aws struct {
 }
 
 type User struct {
-	RPC        RPC        `yaml:"rpc"`
-	Prometheus Prometheus `yaml:"prometheus"`
+	RPC            RPC            `yaml:"rpc"`
+	Prometheus     Prometheus     `yaml:"prometheus"`
+	RateLimiter    RateLimiter    `yaml:"rateLimiter"`
+	CircuitBreaker CircuitBreaker `yaml:"circuitBreaker"`
 }
 
 type RPC struct {
@@ -436,6 +473,7 @@ type Webhooks struct {
 	BeforeSendGroupMsg                  BeforeConfig `yaml:"beforeSendGroupMsg"`
 	BeforeMsgModify                     BeforeConfig `yaml:"beforeMsgModify"`
 	AfterSendGroupMsg                   AfterConfig  `yaml:"afterSendGroupMsg"`
+	AfterMsgSaveDB                      AfterConfig  `yaml:"afterMsgSaveDB"`
 	AfterUserOnline                     AfterConfig  `yaml:"afterUserOnline"`
 	AfterUserOffline                    AfterConfig  `yaml:"afterUserOffline"`
 	AfterUserKickOff                    AfterConfig  `yaml:"afterUserKickOff"`

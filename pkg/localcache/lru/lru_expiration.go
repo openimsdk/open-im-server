@@ -52,8 +52,53 @@ type ExpirationLRU[K comparable, V any] struct {
 }
 
 func (x *ExpirationLRU[K, V]) GetBatch(keys []K, fetch func(keys []K) (map[K]V, error)) (map[K]V, error) {
-	//TODO implement me
-	panic("implement me")
+	var (
+		err     error
+		results = make(map[K]V)
+		misses  = make([]K, 0, len(keys))
+	)
+
+	for _, key := range keys {
+		x.lock.Lock()
+		v, ok := x.core.Get(key)
+		x.lock.Unlock()
+		if ok {
+			x.target.IncrGetHit()
+			v.lock.RLock()
+			results[key] = v.value
+			if v.err != nil && err == nil {
+				err = v.err
+			}
+			v.lock.RUnlock()
+			continue
+		}
+		misses = append(misses, key)
+	}
+
+	if len(misses) == 0 {
+		return results, err
+	}
+
+	fetchValues, fetchErr := fetch(misses)
+	if fetchErr != nil && err == nil {
+		err = fetchErr
+	}
+
+	for key, val := range fetchValues {
+		results[key] = val
+		if fetchErr != nil {
+			x.target.IncrGetFailed()
+			continue
+		}
+		x.target.IncrGetSuccess()
+		item := &expirationLruItem[V]{value: val}
+		x.lock.Lock()
+		x.core.Add(key, item)
+		x.lock.Unlock()
+	}
+
+	// any keys not returned from fetch remain absent (no cache write)
+	return results, err
 }
 
 func (x *ExpirationLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {

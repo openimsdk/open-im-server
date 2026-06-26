@@ -220,7 +220,6 @@ func (c *tokenCache) DeleteAndSetTemporary(ctx context.Context, userID string, p
 	if err := c.rdb.HDel(ctx, key, fields...).Err(); err != nil {
 		return errs.Wrap(err)
 	}
-
 	if c.localCache != nil {
 		c.removeLocalTokenCache(ctx, key)
 	}

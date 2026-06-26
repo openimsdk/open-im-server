@@ -34,10 +34,6 @@ func InitLocalCache(localCache *config.LocalCache) {
 			Keys  []string
 		}{
 			{
-				Local: localCache.Auth,
-				Keys:  []string{cachekey.UidPidToken},
-			},
-			{
 				Local: localCache.User,
 				Keys:  []string{cachekey.UserInfoKey, cachekey.UserGlobalRecvMsgOptKey},
 			},

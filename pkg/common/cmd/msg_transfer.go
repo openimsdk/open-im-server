@@ -62,6 +62,8 @@ func (m *MsgTransferCmd) runE() error {
 	var prometheus config.Prometheus
 	return startrpc.Start(
 		m.ctx, &m.msgTransferConfig.Discovery,
+		&m.msgTransferConfig.MsgTransfer.CircuitBreaker,
+		&m.msgTransferConfig.MsgTransfer.RateLimiter,
 		&prometheus,
 		"", "",
 		true,

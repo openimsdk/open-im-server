@@ -39,9 +39,9 @@ type Conversation interface {
 	GetAllConversationIDs(ctx context.Context) ([]string, error)
 	GetAllConversationIDsNumber(ctx context.Context) (int64, error)
 	PageConversationIDs(ctx context.Context, pagination pagination.Pagination) (conversationIDs []string, err error)
-	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*model.Conversation, error)
 	GetConversationIDsNeedDestruct(ctx context.Context) ([]*model.Conversation, error)
 	GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error)
 	FindConversationUserVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error)
 	FindRandConversation(ctx context.Context, ts int64, limit int) ([]*model.Conversation, error)
+	DeleteUsersConversations(ctx context.Context, userID string, conversationIDs []string) (err error)
 }

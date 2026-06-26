@@ -23,9 +23,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/openimsdk/tools/utils/stringutil"
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
-	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
@@ -143,8 +145,8 @@ func (g *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 			return nil, err
 		}
 	}
-	for _, groupID := range groupIDs {
-		g.notification.GroupMemberInfoSetNotification(ctx, groupID, req.UserID)
+	if err = g.notification.GroupMemberInfoSetNotificationBulk(ctx, groupIDs, req.NewUserInfo); err != nil {
+		log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 	}
 	if err = g.db.DeleteGroupMemberHash(ctx, groupIDs); err != nil {
 		return nil, err
@@ -472,6 +474,9 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 			g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, req.SendMessage, opUserID, userIDs...)
 		}
 	}
+	if err := g.setMemberJoinSeq(ctx, req.GroupID, req.InvitedUserIDs); err != nil {
+		return nil, err
+	}
 	return &pbgroup.InviteUserToGroupResp{}, nil
 }
 
@@ -602,10 +607,6 @@ func (g *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 			}
 		}
 	}
-	num, err := g.db.FindGroupMemberNum(ctx, req.GroupID)
-	if err != nil {
-		return nil, err
-	}
 	ownerUserIDs, err := g.db.GetGroupRoleLevelMemberIDs(ctx, req.GroupID, constant.GroupOwner)
 	if err != nil {
 		return nil, err
@@ -617,6 +618,10 @@ func (g *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	if err := g.db.DeleteGroupMember(ctx, group.GroupID, req.KickedUserIDs); err != nil {
 		return nil, err
 	}
+	num, err := g.db.FindGroupMemberNum(ctx, req.GroupID)
+	if err != nil {
+		return nil, err
+	}
 	tips := &sdkws.MemberKickedTips{
 		Group: &sdkws.GroupInfo{
 			GroupID:                group.GroupID,
@@ -626,7 +631,7 @@ func (g *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 			FaceURL:                group.FaceURL,
 			OwnerUserID:            ownerUserID,
 			CreateTime:             group.CreateTime.UnixMilli(),
-			MemberCount:            num - uint32(len(req.KickedUserIDs)),
+			MemberCount:            num,
 			Ex:                     group.Ex,
 			Status:                 group.Status,
 			CreatorUserID:          group.CreatorUserID,
@@ -905,6 +910,9 @@ func (g *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 					return nil, err
 				}
 			}
+			if err := g.setMemberJoinSeq(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
+				return nil, err
+			}
 		}
 	case constant.GroupResponseRefuse:
 		g.notification.GroupApplicationRejectedNotification(ctx, req)
@@ -967,6 +975,9 @@ func (g *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		if err = g.notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID); err != nil {
 			return nil, err
 		}
+		if err := g.setMemberJoinSeq(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
+			return nil, err
+		}
 		g.webhookAfterJoinGroup(ctx, &g.config.WebhooksConfig.AfterJoinGroup, req)
 
 		return &pbgroup.JoinGroupResp{}, nil
@@ -1026,6 +1037,11 @@ func (g *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 		return err
 	}
 	return g.conversationClient.SetConversationMaxSeq(ctx, conversationID, userIDs, maxSeq)
+}
+
+func (g *groupServer) setMemberJoinSeq(ctx context.Context, groupID string, userIDs []string) error {
+	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
+	return g.conversationClient.SetConversationMaxSeq(ctx, conversationID, userIDs, 0)
 }
 
 func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInfoReq) (*pbgroup.SetGroupInfoResp, error) {

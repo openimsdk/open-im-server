@@ -37,6 +37,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
 	pbconversation "github.com/openimsdk/protocol/conversation"
+	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
@@ -512,14 +513,6 @@ func (c *conversationServer) GetUserConversationIDsHash(ctx context.Context, req
 	return &pbconversation.GetUserConversationIDsHashResp{Hash: hash}, nil
 }
 
-func (c *conversationServer) GetConversationsByConversationID(ctx context.Context, req *pbconversation.GetConversationsByConversationIDReq) (*pbconversation.GetConversationsByConversationIDResp, error) {
-	conversations, err := c.conversationDatabase.GetConversationsByConversationID(ctx, req.ConversationIDs)
-	if err != nil {
-		return nil, err
-	}
-	return &pbconversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
-}
-
 func (c *conversationServer) GetConversationOfflinePushUserIDs(ctx context.Context, req *pbconversation.GetConversationOfflinePushUserIDsReq) (*pbconversation.GetConversationOfflinePushUserIDsResp, error) {
 	if req.ConversationID == "" {
 		return nil, errs.ErrArgs.WrapMsg("conversationID is empty")
@@ -716,56 +709,6 @@ func (c *conversationServer) GetOwnerConversation(ctx context.Context, req *pbco
 	}, nil
 }
 
-func (c *conversationServer) GetConversationsNeedClearMsg(ctx context.Context, _ *pbconversation.GetConversationsNeedClearMsgReq) (*pbconversation.GetConversationsNeedClearMsgResp, error) {
-	num, err := c.conversationDatabase.GetAllConversationIDsNumber(ctx)
-	if err != nil {
-		log.ZError(ctx, "GetAllConversationIDsNumber failed", err)
-		return nil, err
-	}
-	const batchNum = 100
-
-	if num == 0 {
-		return nil, errs.New("Need Destruct Msg is nil").Wrap()
-	}
-
-	maxPage := (num + batchNum - 1) / batchNum
-
-	temp := make([]*dbModel.Conversation, 0, maxPage*batchNum)
-
-	for pageNumber := 0; pageNumber < int(maxPage); pageNumber++ {
-		pagination := &sdkws.RequestPagination{
-			PageNumber: int32(pageNumber),
-			ShowNumber: batchNum,
-		}
-
-		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, pagination)
-		if err != nil {
-			log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
-			continue
-		}
-
-		// log.ZDebug(ctx, "PageConversationIDs success", "pageNumber", pageNumber, "conversationIDsNum", len(conversationIDs), "conversationIDs", conversationIDs)
-		if len(conversationIDs) == 0 {
-			continue
-		}
-
-		conversations, err := c.conversationDatabase.GetConversationsByConversationID(ctx, conversationIDs)
-		if err != nil {
-			log.ZError(ctx, "GetConversationsByConversationID failed", err, "conversationIDs", conversationIDs)
-			continue
-		}
-
-		for _, conversation := range conversations {
-			if conversation.IsMsgDestruct && conversation.MsgDestructTime != 0 && ((time.Now().UnixMilli() > (conversation.MsgDestructTime + conversation.LatestMsgDestructTime.UnixMilli() + 8*60*60)) || // 8*60*60 is UTC+8
-				conversation.LatestMsgDestructTime.IsZero()) {
-				temp = append(temp, conversation)
-			}
-		}
-	}
-
-	return &pbconversation.GetConversationsNeedClearMsgResp{Conversations: convert.ConversationsDB2Pb(temp)}, nil
-}
-
 func (c *conversationServer) GetNotNotifyConversationIDs(ctx context.Context, req *pbconversation.GetNotNotifyConversationIDsReq) (*pbconversation.GetNotNotifyConversationIDsResp, error) {
 	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
@@ -795,7 +738,7 @@ func (c *conversationServer) ClearUserConversationMsg(ctx context.Context, req *
 	}
 	latestMsgDestructTime := time.UnixMilli(req.Timestamp)
 	for i, conversation := range conversations {
-		if conversation.IsMsgDestruct == false || conversation.MsgDestructTime == 0 {
+		if !conversation.IsMsgDestruct || conversation.MsgDestructTime == 0 {
 			continue
 		}
 		seq, err := c.msgClient.GetLastMessageSeqByTime(ctx, conversation.ConversationID, req.Timestamp-(conversation.MsgDestructTime*1000))
@@ -834,4 +777,54 @@ func (c *conversationServer) setConversationMinSeqAndLatestMsgDestructTime(ctx c
 	}
 	c.conversationNotificationSender.ConversationChangeNotification(ctx, ownerUserID, []string{conversationID})
 	return nil
+}
+
+func (c *conversationServer) DeleteConversations(ctx context.Context, req *pbconversation.DeleteConversationsReq) (resp *pbconversation.DeleteConversationsResp, err error) {
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
+		return nil, err
+	}
+	if req.NeedDeleteTime == 0 && len(req.ConversationIDs) == 0 {
+		return nil, errs.ErrArgs.WrapMsg("need_delete_time or conversationIDs need be set")
+	}
+
+	if req.NeedDeleteTime != 0 && len(req.ConversationIDs) != 0 {
+		return nil, errs.ErrArgs.WrapMsg("need_delete_time and conversationIDs cannot both be set")
+	}
+
+	var needDeleteConversationIDs []string
+
+	if len(req.ConversationIDs) == 0 {
+		deleteTimeThreshold := time.Now().AddDate(0, 0, -int(req.NeedDeleteTime)).UnixMilli()
+		conversationIDs, err := c.conversationDatabase.GetConversationIDs(ctx, req.OwnerUserID)
+		if err != nil {
+			return nil, err
+		}
+		latestMsgs, err := c.msgClient.GetLastMessage(ctx, &msg.GetLastMessageReq{
+			UserID:          req.OwnerUserID,
+			ConversationIDs: conversationIDs,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		for conversationID, msg := range latestMsgs.Msgs {
+			if msg.SendTime < deleteTimeThreshold {
+				needDeleteConversationIDs = append(needDeleteConversationIDs, conversationID)
+			}
+		}
+
+		if len(needDeleteConversationIDs) == 0 {
+			return &pbconversation.DeleteConversationsResp{}, nil
+		}
+	} else {
+		needDeleteConversationIDs = req.ConversationIDs
+	}
+
+	if err := c.conversationDatabase.DeleteUsersConversations(ctx, req.OwnerUserID, needDeleteConversationIDs); err != nil {
+		return nil, err
+	}
+
+	// c.conversationNotificationSender.ConversationDeleteNotification(ctx, req.OwnerUserID, needDeleteConversationIDs)
+
+	return &pbconversation.DeleteConversationsResp{}, nil
 }
