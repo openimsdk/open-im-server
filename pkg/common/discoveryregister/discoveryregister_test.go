@@ -15,16 +15,12 @@
 package discoveryregister
 
 import (
-	"os"
-)
+	"strings"
+	"testing"
 
-func setupTestEnvironment() {
-	os.Setenv("ZOOKEEPER_SCHEMA", "openim")
-	os.Setenv("ZOOKEEPER_ADDRESS", "172.28.0.1")
-	os.Setenv("ZOOKEEPER_PORT", "12181")
-	os.Setenv("ZOOKEEPER_USERNAME", "")
-	os.Setenv("ZOOKEEPER_PASSWORD", "")
-}
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/utils/runtimeenv"
+)
 
 //func TestNewDiscoveryRegister(t *testing.T) {
 //	setupTestEnvironment()
@@ -58,3 +54,23 @@ func setupTestEnvironment() {
 //		}
 //	}
 //}
+
+func TestNewDiscoveryRegisterRejectsKubernetesOutsideCluster(t *testing.T) {
+	if runtimeenv.RuntimeEnvironment() == config.KUBERNETES {
+		t.Skip("outside-cluster fallback is only relevant outside Kubernetes")
+	}
+	discovery := &config.Discovery{
+		Enable: config.KUBERNETES,
+		Kubernetes: config.Kubernetes{
+			Namespace: "default",
+		},
+	}
+
+	client, err := NewDiscoveryRegister(discovery, &config.Share{}, nil)
+	if err == nil && client != nil {
+		client.Close()
+	}
+	if err == nil || !strings.Contains(err.Error(), "unsupported discovery type") {
+		t.Fatalf("%q outside Kubernetes should not select Kubernetes discovery: %v", config.KUBERNETES, err)
+	}
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
@@ -39,11 +40,11 @@ func (u emptyOnlinePusher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *
 
 func NewOnlinePusher(disCov discovery.SvcDiscoveryRegistry, config *Config) OnlinePusher {
 	switch config.Discovery.Enable {
-	case "k8s":
-		return NewK8sStaticConsistentHash(disCov, config)
+	case conf.KUBERNETES:
+		return NewDefaultAllNode(disCov, config)
 	case "zookeeper":
 		return NewDefaultAllNode(disCov, config)
-	case "etcd":
+	case conf.ETCD:
 		return NewDefaultAllNode(disCov, config)
 	default:
 		return newEmptyOnlinePusher()

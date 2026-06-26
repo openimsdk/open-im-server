@@ -484,9 +484,14 @@ type ZooKeeper struct {
 }
 
 type Discovery struct {
-	Enable    string    `mapstructure:"enable"`
-	Etcd      Etcd      `mapstructure:"etcd"`
-	ZooKeeper ZooKeeper `mapstructure:"zooKeeper"`
+	Enable     string     `mapstructure:"enable"`
+	Etcd       Etcd       `mapstructure:"etcd"`
+	Kubernetes Kubernetes `mapstructure:"kubernetes"`
+	ZooKeeper  ZooKeeper  `mapstructure:"zooKeeper"`
+}
+
+type Kubernetes struct {
+	Namespace string `mapstructure:"namespace"`
 }
 
 type Etcd struct {

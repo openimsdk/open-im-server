@@ -1,8 +1,12 @@
 package config
 
 import (
-	"github.com/stretchr/testify/assert"
+	"os"
+	"path/filepath"
+
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLoadLogConfig(t *testing.T) {
@@ -25,6 +29,24 @@ func TestLoadWebhooksConfig(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 5, webhooks.BeforeAddBlack.Timeout)
 
+}
+
+func TestLoadDiscoveryKubernetesConfig(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "discovery.yml")
+	err := os.WriteFile(path, []byte(`enable: kubernetes
+kubernetes:
+  namespace: openim
+etcd:
+  rootDirectory: openim
+  address: [localhost:12379]
+`), 0600)
+	assert.Nil(t, err)
+
+	var discovery Discovery
+	err = LoadConfig(path, "IMENV_DISCOVERY", &discovery)
+	assert.Nil(t, err)
+	assert.Equal(t, KUBERNETES, discovery.Enable)
+	assert.Equal(t, "openim", discovery.Kubernetes.Namespace)
 }
 
 func TestLoadOpenIMRpcUserConfig(t *testing.T) {
