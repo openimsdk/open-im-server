@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenIM WS Demo</title>
+    <style>
+      :root {
+        --bg: #f2efe8;
+        --panel: rgba(255, 250, 242, 0.94);
+        --panel-2: #fffdf8;
+        --border: #d5c6ab;
+        --text: #1e1a14;
+        --muted: #665c4f;
+        --accent: #b45736;
+        --accent-2: #23506a;
+        --ok: #1c6a57;
+        --err: #a2352d;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Avenir Next", "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(180, 87, 54, 0.13), transparent 28%),
+          radial-gradient(circle at bottom right, rgba(35, 80, 106, 0.16), transparent 30%),
+          linear-gradient(180deg, #f7f2ea, var(--bg));
+      }
+
+      main {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 24px 16px 40px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(30px, 4vw, 46px);
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+
+      .lead {
+        margin: 0 0 18px;
+        color: var(--muted);
+        line-height: 1.5;
+        max-width: 900px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 380px minmax(0, 1fr);
+        gap: 16px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        box-shadow: 0 16px 40px rgba(31, 27, 22, 0.06);
+      }
+
+      .sidebar {
+        padding: 18px;
+      }
+
+      .content {
+        display: grid;
+        grid-template-rows: auto auto auto minmax(420px, 1fr);
+        overflow: hidden;
+      }
+
+      .section + .section {
+        margin-top: 18px;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        font-size: 16px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: var(--panel-2);
+        border-radius: 14px;
+        padding: 11px 12px;
+        color: var(--text);
+        font: inherit;
+      }
+
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .grid.two {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 16px;
+        color: white;
+        background: var(--accent);
+        font: inherit;
+        cursor: pointer;
+      }
+
+      button.alt {
+        background: var(--accent-2);
+      }
+
+      button.ghost {
+        background: #706451;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: progress;
+      }
+
+      .status {
+        margin-top: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #f4ecdf;
+        line-height: 1.5;
+        font-size: 13px;
+      }
+
+      .status.ok {
+        color: var(--ok);
+      }
+
+      .status.err {
+        color: var(--err);
+      }
+
+      .note {
+        color: var(--muted);
+        line-height: 1.5;
+        font-size: 13px;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 18px;
+        border-bottom: 1px solid rgba(213, 198, 171, 0.75);
+      }
+
+      .toolbar .meta {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .block {
+        padding: 16px 18px;
+        border-bottom: 1px solid rgba(213, 198, 171, 0.65);
+      }
+
+      .block:last-child {
+        border-bottom: 0;
+      }
+
+      .console {
+        overflow: auto;
+        padding: 18px;
+        min-height: 420px;
+        max-height: 68vh;
+        background: rgba(255, 252, 247, 0.75);
+        font-family: "SFMono-Regular", "Consolas", monospace;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .line {
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(213, 198, 171, 0.5);
+        margin-bottom: 10px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .line.in {
+        border-left: 4px solid #23506a;
+      }
+
+      .line.out {
+        border-left: 4px solid #b45736;
+      }
+
+      .line.sys {
+        border-left: 4px solid #7a6a56;
+      }
+
+      .line.err {
+        border-left: 4px solid #a2352d;
+      }
+
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .grid.two {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.4.0/dist/protobuf.min.js"></script>
+  </head>
+  <body>
+    <main>
+      <h1>OpenIM WS Demo</h1>
+      <p class="lead">
+        这个页面是真正走 WebSocket 的最小 OpenIM 浏览器客户端。它使用浏览器原生
+        <code>new WebSocket(url)</code> 握手，再用 OpenIM 的 JSON envelope +
+        protobuf 数据体发二进制帧。
+      </p>
+
+      <div class="layout">
+        <aside class="panel sidebar">
+          <div class="section">
+            <h2>连接参数</h2>
+            <div class="grid">
+              <div>
+                <label for="apiBase">API Base URL</label>
+                <input id="apiBase" value="http://127.0.0.1:10002" />
+              </div>
+              <div>
+                <label for="wsBase">WS URL</label>
+                <input id="wsBase" value="ws://127.0.0.1:10001/" />
+              </div>
+              <div>
+                <label for="operationID">Operation ID</label>
+                <input id="operationID" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>管理员</h2>
+            <div class="grid two">
+              <div>
+                <label for="adminUserID">Admin User ID</label>
+                <input id="adminUserID" value="imAdmin" />
+              </div>
+              <div>
+                <label for="adminSecret">Secret</label>
+                <input id="adminSecret" value="openIM123" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>当前登录用户</h2>
+            <div class="grid two">
+              <div>
+                <label for="userID">User ID</label>
+                <input id="userID" value="user_1" />
+              </div>
+              <div>
+                <label for="peerUserID">Peer User ID</label>
+                <input id="peerUserID" value="user_2" />
+              </div>
+            </div>
+            <div class="grid two" style="margin-top: 12px">
+              <div>
+                <label for="platformID">Platform ID</label>
+                <input id="platformID" value="5" />
+              </div>
+              <div>
+                <label for="sdkType">SDK Type</label>
+                <input id="sdkType" value="js" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>文本消息</h2>
+            <textarea id="textContent">hello from native browser websocket</textarea>
+            <div class="actions">
+              <button id="prepareBtn">拿 Token</button>
+              <button class="alt" id="connectBtn">连接 WS</button>
+              <button class="ghost" id="disconnectBtn">断开</button>
+            </div>
+            <div class="actions">
+              <button id="getSeqBtn">WSGetNewestSeq</button>
+              <button class="alt" id="sendMsgBtn">WSSendMsg</button>
+            </div>
+            <div class="note" style="margin-top: 10px">
+              这里不是 HTTP fallback。点击“连接 WS”后，会真的对
+              <code>ws://127.0.0.1:10001</code> 发浏览器原生 WebSocket 握手请求。
+            </div>
+            <div id="status" class="status"><pre>Ready.</pre></div>
+          </div>
+        </aside>
+
+        <section class="panel content">
+          <div class="toolbar">
+            <div>
+              <strong>连接状态</strong>
+              <div class="meta" id="connectionMeta">未连接</div>
+            </div>
+            <div class="meta" id="reqMeta">msgIncr=0</div>
+          </div>
+
+          <div class="block">
+            <h2>Last URL</h2>
+            <div id="lastURL" class="note">尚未构造</div>
+          </div>
+
+          <div class="block">
+            <h2>Raw Envelope</h2>
+            <div id="rawEnvelope" class="note">尚未发送</div>
+          </div>
+
+          <div class="console" id="console"></div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+
+      const els = {
+        apiBase: $("apiBase"),
+        wsBase: $("wsBase"),
+        operationID: $("operationID"),
+        adminUserID: $("adminUserID"),
+        adminSecret: $("adminSecret"),
+        userID: $("userID"),
+        peerUserID: $("peerUserID"),
+        platformID: $("platformID"),
+        sdkType: $("sdkType"),
+        textContent: $("textContent"),
+        prepareBtn: $("prepareBtn"),
+        connectBtn: $("connectBtn"),
+        disconnectBtn: $("disconnectBtn"),
+        getSeqBtn: $("getSeqBtn"),
+        sendMsgBtn: $("sendMsgBtn"),
+        status: $("status"),
+        connectionMeta: $("connectionMeta"),
+        reqMeta: $("reqMeta"),
+        lastURL: $("lastURL"),
+        rawEnvelope: $("rawEnvelope"),
+        console: $("console"),
+      };
+
+      const state = {
+        adminToken: "",
+        userToken: "",
+        ws: null,
+        msgIncr: 0,
+        proto: null,
+      };
+
+      const SDKWS_PROTO = `
+        syntax = "proto3";
+        package openim.sdkws;
+
+        enum PullOrder {
+          PullOrderAsc = 0;
+          PullOrderDesc = 1;
+        }
+
+        message GetMaxSeqReq {
+          string userID = 1;
+        }
+
+        message GetMaxSeqResp {
+          map<string, int64> maxSeqs = 1;
+          map<string, int64> minSeqs = 2;
+        }
+
+        message PullMsgs {
+          repeated MsgData Msgs = 1;
+          bool isEnd = 2;
+          int64 endSeq = 3;
+        }
+
+        message MsgData {
+          string sendID = 1;
+          string recvID = 2;
+          string groupID = 3;
+          string clientMsgID = 4;
+          string serverMsgID = 5;
+          int32 senderPlatformID = 6;
+          string senderNickname = 7;
+          string senderFaceURL = 8;
+          int32 sessionType = 9;
+          int32 msgFrom = 10;
+          int32 contentType = 11;
+          bytes content = 12;
+          int64 seq = 14;
+          int64 sendTime = 15;
+          int64 createTime = 16;
+          int32 status = 17;
+          bool isRead = 18;
+          map<string, bool> options = 19;
+          string attachedInfo = 22;
+          string ex = 23;
+        }
+
+        message PushMessages {
+          map<string, PullMsgs> msgs = 1;
+          map<string, PullMsgs> notificationMsgs = 2;
+        }
+      `;
+
+      const MSG_PROTO = `
+        syntax = "proto3";
+        package openim.msg;
+
+        message SendMsgResp {
+          string serverMsgID = 1;
+          string clientMsgID = 2;
+          int64 sendTime = 3;
+        }
+      `;
+
+      function ensureOperationID() {
+        if (!els.operationID.value.trim()) {
+          els.operationID.value = `ws-${Date.now()}`;
+        }
+        return els.operationID.value.trim();
+      }
+
+      function setStatus(message, type = "ok") {
+        els.status.className = `status ${type}`;
+        els.status.innerHTML = `<pre>${message}</pre>`;
+      }
+
+      function logLine(type, title, payload) {
+        const line = document.createElement("div");
+        line.className = `line ${type}`;
+        const text = typeof payload === "string" ? payload : JSON.stringify(payload, null, 2);
+        line.textContent = `${title}\n${text}`;
+        els.console.prepend(line);
+      }
+
+      function setConnectionMeta(text) {
+        els.connectionMeta.textContent = text;
+      }
+
+      function nextMsgIncr() {
+        state.msgIncr += 1;
+        els.reqMeta.textContent = `msgIncr=${state.msgIncr}`;
+        return String(state.msgIncr);
+      }
+
+      async function postJSON(path, body, token = "") {
+        const operationID = ensureOperationID();
+        const url = `${els.apiBase.value.replace(/\/$/, "")}${path}`;
+        const headers = {
+          "Content-Type": "application/json",
+          operationID,
+          ...(token ? { token } : {}),
+        };
+        const response = await fetch(url, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body),
+        });
+        const data = await response.json();
+        if (!response.ok || data.errCode) {
+          throw new Error(data.errDlt || data.errMsg || `HTTP ${response.status}`);
+        }
+        return data.data;
+      }
+
+      async function prepareTokens() {
+        const admin = await postJSON("/auth/get_admin_token", {
+          secret: els.adminSecret.value.trim(),
+          userID: els.adminUserID.value.trim(),
+        });
+        state.adminToken = admin.token;
+
+        try {
+          await postJSON(
+            "/user/user_register",
+            {
+              users: [
+                { userID: els.userID.value.trim(), nickname: els.userID.value.trim() },
+                { userID: els.peerUserID.value.trim(), nickname: els.peerUserID.value.trim() },
+              ],
+            },
+            state.adminToken
+          );
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          if (!message.includes("registered already")) {
+            throw error;
+          }
+        }
+
+        const user = await postJSON(
+          "/auth/get_user_token",
+          {
+            userID: els.userID.value.trim(),
+            platformID: Number(els.platformID.value),
+          },
+          state.adminToken
+        );
+        state.userToken = user.token;
+      }
+
+      function initProto() {
+        if (state.proto) return state.proto;
+        const root = new protobuf.Root();
+        protobuf.parse(SDKWS_PROTO, root);
+        protobuf.parse(MSG_PROTO, root);
+        state.proto = {
+          root,
+          GetMaxSeqReq: root.lookupType("openim.sdkws.GetMaxSeqReq"),
+          GetMaxSeqResp: root.lookupType("openim.sdkws.GetMaxSeqResp"),
+          MsgData: root.lookupType("openim.sdkws.MsgData"),
+          PushMessages: root.lookupType("openim.sdkws.PushMessages"),
+          SendMsgResp: root.lookupType("openim.msg.SendMsgResp"),
+        };
+        return state.proto;
+      }
+
+      function buildWSURL() {
+        const url = new URL(els.wsBase.value);
+        url.searchParams.set("sendID", els.userID.value.trim());
+        url.searchParams.set("token", state.userToken);
+        url.searchParams.set("operationID", ensureOperationID());
+        url.searchParams.set("platformID", els.platformID.value.trim());
+        url.searchParams.set("sdkType", els.sdkType.value.trim());
+        url.searchParams.set("isBackground", "false");
+        url.searchParams.set("isMsgResp", "true");
+        return url.toString();
+      }
+
+      function base64FromBytes(bytes) {
+        let binary = "";
+        for (const b of bytes) binary += String.fromCharCode(b);
+        return btoa(binary);
+      }
+
+      function bytesFromBase64(base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i += 1) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes;
+      }
+
+      function sendEnvelope(reqIdentifier, payloadBytes) {
+        if (!state.ws || state.ws.readyState !== WebSocket.OPEN) {
+          throw new Error("websocket is not connected");
+        }
+        const envelope = {
+          reqIdentifier,
+          token: state.userToken,
+          sendID: els.userID.value.trim(),
+          operationID: ensureOperationID(),
+          msgIncr: nextMsgIncr(),
+          data: base64FromBytes(payloadBytes),
+        };
+        els.rawEnvelope.textContent = JSON.stringify(envelope, null, 2);
+        logLine("out", `WS Send ${reqIdentifier}`, envelope);
+        const jsonBytes = new TextEncoder().encode(JSON.stringify(envelope));
+        state.ws.send(jsonBytes);
+      }
+
+      async function connectWS() {
+        if (!state.userToken) {
+          throw new Error("user token is missing, click '拿 Token' first");
+        }
+        if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+          throw new Error("websocket already connected");
+        }
+
+        const url = buildWSURL();
+        els.lastURL.textContent = url;
+
+        const ws = new WebSocket(url);
+        ws.binaryType = "arraybuffer";
+
+        ws.onopen = () => {
+          setConnectionMeta(`OPEN as ${els.userID.value.trim()}`);
+          setStatus("WebSocket connected.", "ok");
+          logLine("sys", "WS Open", url);
+        };
+
+        ws.onclose = (event) => {
+          setConnectionMeta(`CLOSED code=${event.code}`);
+          logLine("sys", "WS Close", { code: event.code, reason: event.reason });
+        };
+
+        ws.onerror = () => {
+          setStatus("WebSocket error.", "err");
+          logLine("err", "WS Error", "See browser console/network panel for handshake details.");
+        };
+
+        ws.onmessage = (event) => {
+          if (typeof event.data === "string") {
+            logLine("in", "WS Text", event.data);
+            return;
+          }
+          const text = new TextDecoder().decode(new Uint8Array(event.data));
+          let envelope;
+          try {
+            envelope = JSON.parse(text);
+          } catch {
+            logLine("err", "WS Binary Parse Error", text);
+            return;
+          }
+          logLine("in", `WS Recv ${envelope.reqIdentifier}`, envelope);
+          decodeEnvelope(envelope);
+        };
+
+        state.ws = ws;
+      }
+
+      function disconnectWS() {
+        if (state.ws) {
+          state.ws.close();
+          state.ws = null;
+        }
+      }
+
+      function decodeEnvelope(envelope) {
+        const proto = initProto();
+        if (!envelope.data) return;
+        const bytes = bytesFromBase64(envelope.data);
+        try {
+          switch (envelope.reqIdentifier) {
+            case 1001: {
+              const decoded = proto.GetMaxSeqResp.decode(bytes);
+              logLine("sys", "Decoded GetMaxSeqResp", proto.GetMaxSeqResp.toObject(decoded, { longs: String }));
+              break;
+            }
+            case 1003: {
+              const decoded = proto.SendMsgResp.decode(bytes);
+              logLine("sys", "Decoded SendMsgResp", proto.SendMsgResp.toObject(decoded, { longs: String }));
+              break;
+            }
+            case 2001: {
+              const decoded = proto.PushMessages.decode(bytes);
+              logLine("sys", "Decoded PushMessages", proto.PushMessages.toObject(decoded, { longs: String, bytes: String }));
+              break;
+            }
+            default:
+              logLine("sys", "Unknown Proto Payload", { reqIdentifier: envelope.reqIdentifier, base64: envelope.data });
+          }
+        } catch (error) {
+          logLine("err", "Proto Decode Error", error instanceof Error ? error.message : String(error));
+        }
+      }
+
+      function sendGetNewestSeq() {
+        const proto = initProto();
+        const message = proto.GetMaxSeqReq.create({
+          userID: els.userID.value.trim(),
+        });
+        const bytes = proto.GetMaxSeqReq.encode(message).finish();
+        sendEnvelope(1001, bytes);
+      }
+
+      function makeClientMsgID() {
+        return `browser-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+      }
+
+      function sendTextMessage() {
+        const proto = initProto();
+        const contentBytes = new TextEncoder().encode(
+          JSON.stringify({
+            content: els.textContent.value,
+          })
+        );
+        const now = Date.now();
+        const message = proto.MsgData.create({
+          sendID: els.userID.value.trim(),
+          recvID: els.peerUserID.value.trim(),
+          clientMsgID: makeClientMsgID(),
+          senderPlatformID: Number(els.platformID.value),
+          sessionType: 1,
+          msgFrom: 100,
+          contentType: 101,
+          content: contentBytes,
+          sendTime: now,
+          createTime: now,
+        });
+        const bytes = proto.MsgData.encode(message).finish();
+        sendEnvelope(1003, bytes);
+      }
+
+      async function run(button, fn, okText) {
+        try {
+          setBusy(button, true);
+          setStatus("Running...", "ok");
+          await fn();
+          if (okText) {
+            setStatus(okText, "ok");
+          }
+        } catch (error) {
+          setStatus(error instanceof Error ? error.message : String(error), "err");
+          logLine("err", "Action Error", error instanceof Error ? error.message : String(error));
+        } finally {
+          setBusy(button, false);
+        }
+      }
+
+      function setBusy(button, busy) {
+        button.disabled = busy;
+      }
+
+      ensureOperationID();
+      initProto();
+
+      els.prepareBtn.addEventListener("click", () => run(els.prepareBtn, prepareTokens, "Tokens prepared."));
+      els.connectBtn.addEventListener("click", () => run(els.connectBtn, connectWS, ""));
+      els.disconnectBtn.addEventListener("click", () => run(els.disconnectBtn, async () => disconnectWS(), "Disconnected."));
+      els.getSeqBtn.addEventListener("click", () => run(els.getSeqBtn, async () => sendGetNewestSeq(), "WSGetNewestSeq sent."));
+      els.sendMsgBtn.addEventListener("click", () => run(els.sendMsgBtn, async () => sendTextMessage(), "WSSendMsg sent."));
+    </script>
+  </body>
+</html>
