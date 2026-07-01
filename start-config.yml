@@ -15,4 +15,4 @@ toolBinaries:
   - check-free-memory
   - check-component
   - seq
-maxFileDescriptors: 100000
+maxFileDescriptors: 10000
