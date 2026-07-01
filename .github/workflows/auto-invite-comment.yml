@@ -13,7 +13,7 @@ jobs:
     steps:
 
       - name: Invite user to join OpenIM Community
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5.0.0
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}

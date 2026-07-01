@@ -17,7 +17,7 @@ jobs:
       EXCLUDE_FILES: "*.md *.txt *.html *.css *.min.js *.mdx"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.0
 
       - name: Search for Non-English comments
         run: |
