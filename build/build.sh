@@ -44,7 +44,7 @@ run_or_print() {
 
 build_local() {
   echo -e "${CYAN}Building all services...${NO_COLOR}"
-  RELEASE="$RELEASE" docker compose -f "$COMPOSE_FILE" build
+  RELEASE="$RELEASE" docker compose --parallel 1 -f "$COMPOSE_FILE" build
 
   echo -e "${CYAN}Tagging compatibility images for Kubernetes...${NO_COLOR}"
   while IFS= read -r built_image; do
