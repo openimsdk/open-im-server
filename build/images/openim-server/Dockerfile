@@ -1,14 +1,14 @@
 FROM golang:alpine AS builder
 
-ARG CMD_PATH
-ARG BINARY_NAME
-ARG RELEASE=false
-
 ENV SERVER_DIR=/openim-server
 WORKDIR $SERVER_DIR
 
 COPY . .
 RUN go mod tidy
+
+ARG CMD_PATH
+ARG BINARY_NAME
+ARG RELEASE=false
 
 RUN if [ "$RELEASE" = "true" ]; then \
     go build -trimpath -ldflags "-s -w" -o _output/${BINARY_NAME} ./${CMD_PATH}; \
