@@ -22,14 +22,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        go_version: ["1.25.x"]
+        go_version: ["stable"]
 
     steps:
       - name: Checkout Server repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
 
       - name: Set up Go ${{ matrix.go_version }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6.5.0
         with:
           go-version: ${{ matrix.go_version }}
 
@@ -40,7 +40,7 @@ jobs:
           go mod download
 
       - name: Set up infra services
-        uses: hoverkraft-tech/compose-action@v2.0.1
+        uses: hoverkraft-tech/compose-action@v3.0.0
         with:
           compose-file: "./docker-compose.yml"
 
@@ -67,7 +67,7 @@ jobs:
           mage check
 
       - name: Checkout Chat repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
         with:
           repository: "openimsdk/chat"
           path: "chat-repo"
@@ -188,21 +188,21 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        go_version: ["1.25.x"]
+        go_version: ["stable"]
 
     steps:
       - name: Checkout Server repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
 
       - name: Checkout SDK repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
         with:
           repository: "openimsdk/openim-sdk-core"
           ref: "main"
           path: ${{ env.SDK_DIR }}
 
       - name: Set up Go ${{ matrix.go_version }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6.5.0
         with:
           go-version: ${{ matrix.go_version }}
 
@@ -237,14 +237,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go_version: ["1.25.x"]
+        go_version: ["stable"]
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
 
       - name: Set up Go ${{ matrix.go_version }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6.5.0
         with:
           go-version: ${{ matrix.go_version }}
 
