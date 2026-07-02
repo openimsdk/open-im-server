@@ -24,19 +24,13 @@ fi
 cd "$BASE_DIR/.." || exit 1
 
 split_values() {
-  printf '%s\n' "$1" | tr ', ' '\n\n' | while IFS= read -r value; do
-    [[ -n "$value" ]] && printf '%s\n' "$value"
-  done
-}
-
-print_command() {
-  printf '%q ' "$@"
-  printf '\n'
+  echo "$1" | grep -o '[^, ]\+'
 }
 
 run_or_print() {
   if [[ "$DRY_RUN" == "true" ]]; then
-    print_command "$@"
+    printf '%q ' "$@"
+    printf '\n'
   else
     "$@"
   fi
@@ -44,7 +38,9 @@ run_or_print() {
 
 build_local() {
   echo -e "${CYAN}Building all services...${NO_COLOR}"
-  RELEASE="$RELEASE" docker compose -f "$COMPOSE_FILE" build
+  while IFS= read -r service; do
+    RELEASE="$RELEASE" docker compose -f "$COMPOSE_FILE" build "$service"
+  done < <(docker compose -f "$COMPOSE_FILE" config --services)
 
   echo -e "${CYAN}Tagging compatibility images for Kubernetes...${NO_COLOR}"
   while IFS= read -r built_image; do
