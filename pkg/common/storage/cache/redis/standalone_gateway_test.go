@@ -47,6 +47,6 @@ func TestStandaloneGatewayRedisGetGatewayAddrs(t *testing.T) {
 
 	addrs, err := cache.GetGatewayAddrs(context.Background())
 	require.NoError(t, err)
-	assert.Equal(t, []string{"127.0.0.1:10001", "127.0.0.1:10003"}, addrs)
+	assert.ElementsMatch(t, []string{"127.0.0.1:10001", "127.0.0.1:10003"}, addrs)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }

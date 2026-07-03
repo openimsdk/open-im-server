@@ -6,13 +6,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/openimsdk/tools/log"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/concurrency"
-)
 
-const (
-	lockLeaseTTL = 300
+	"github.com/openimsdk/tools/log"
 )
 
 type EtcdLocker struct {
@@ -35,7 +32,7 @@ func NewEtcdLocker(client *clientv3.Client) (*EtcdLocker, error) {
 }
 
 func (e *EtcdLocker) ExecuteWithLock(ctx context.Context, taskName string, task func()) {
-	session, err := concurrency.NewSession(e.client, concurrency.WithTTL(lockLeaseTTL))
+	session, err := concurrency.NewSession(e.client, concurrency.WithTTL(int(lockLeaseTTL/time.Second)))
 	if err != nil {
 		log.ZWarn(ctx, "Failed to create etcd session", err,
 			"taskName", taskName,

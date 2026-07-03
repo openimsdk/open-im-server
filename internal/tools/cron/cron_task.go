@@ -3,8 +3,12 @@ package cron
 import (
 	"context"
 
+	"github.com/robfig/cron/v3"
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
+	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/third"
@@ -14,14 +18,13 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/runtimeenv"
-	"github.com/robfig/cron/v3"
-	"google.golang.org/grpc"
 )
 
 type Config struct {
-	CronTask  config.CronTask
-	Share     config.Share
-	Discovery config.Discovery
+	CronTask    config.CronTask
+	Share       config.Share
+	Discovery   config.Discovery
+	RedisConfig config.Redis
 }
 
 func Start(ctx context.Context, conf *Config, client discovery.SvcDiscoveryRegistry, service grpc.ServiceRegistrar) error {
@@ -60,10 +63,13 @@ func Start(ctx context.Context, conf *Config, client discovery.SvcDiscoveryRegis
 		if err != nil {
 			return err
 		}
-	}
-
-	if locker == nil {
-		locker = emptyLocker{}
+	} else {
+		builder := dbbuild.NewBuilder(nil, &conf.RedisConfig)
+		rdb, err := builder.Redis(ctx)
+		if err != nil {
+			return err
+		}
+		locker = NewRedisLocker(rdb)
 	}
 
 	srv := &cronServer{
@@ -93,16 +99,6 @@ func Start(ctx context.Context, conf *Config, client discovery.SvcDiscoveryRegis
 	srv.cron.Stop()
 
 	return nil
-}
-
-type Locker interface {
-	ExecuteWithLock(ctx context.Context, taskName string, task func())
-}
-
-type emptyLocker struct{}
-
-func (emptyLocker) ExecuteWithLock(ctx context.Context, taskName string, task func()) {
-	task()
 }
 
 type cronServer struct {
