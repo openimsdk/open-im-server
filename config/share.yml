@@ -9,6 +9,14 @@ imAdminUser:
   # Each entry here corresponds by index to the matching entry in the userIDs list above.
   nicknames: [superAdmin]
 
+# queue: choose message queue engine
+# Supported values:
+# - kafka (default)
+# - redis
+# - memory (standalone only; microservices cannot use memory)
+queue: kafka
+
+
 # 1: For Android, iOS, Windows, Mac, and web platforms, only one instance can be online at a time
 multiLogin:
   policy: 1

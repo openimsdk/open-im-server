@@ -37,6 +37,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/inprocess"
@@ -458,16 +460,50 @@ func startRedisServerRegister(ctx context.Context, cfg *serverConfig, client dis
 	if err != nil {
 		return err
 	}
-	addr := net.JoinHostPort(registerIP, strconv.Itoa(apiPort))
-	inprocess.SetLocalTarget(addr)
-	timer := time.NewTimer(time.Second * 5)
-	defer timer.Stop()
+	const validTime = time.Second * 10
+	dbb := dbbuild.NewBuilder(nil, &cfg.RedisConfig)
+	rdb, err := dbb.Redis(ctx)
+	if err != nil {
+		return err
+	}
+	gateway := redis.NewStandaloneGatewayRedis(rdb, validTime)
+	selfAddr := net.JoinHostPort(registerIP, strconv.Itoa(apiPort))
+	inprocess.SetLocalTarget(selfAddr)
+	inprocess.SetBroadcastAddress(cfg.Share.Secret, func(ctx context.Context) ([]string, error) {
+		address, err := gateway.GetGatewayAddrs(ctx)
+		if err != nil {
+			return nil, err
+		}
+		notSelf := make([]string, 0, len(address))
+		for _, addr := range address {
+			if addr != selfAddr {
+				notSelf = append(notSelf, addr)
+			}
+		}
+		return notSelf, nil
+	})
+	register := func() {
+		ctx, cancel := context.WithTimeout(ctx, validTime/2)
+		defer cancel()
+		if err := gateway.RegisterGateway(ctx, selfAddr); err != nil {
+			log.ZWarn(ctx, "gateway register failed", err, "address", selfAddr)
+		}
+	}
+	timer := time.NewTimer(validTime / 2)
+	defer func() {
+		timer.Stop()
+		ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), time.Second)
+		defer cancel()
+		if err := gateway.UnregisterGateway(ctx, selfAddr); err != nil {
+			log.ZWarn(ctx, "gateway unregister failed", err, "address", selfAddr)
+		}
+	}()
 	for {
 		select {
 		case <-timer.C:
+			register()
 		case <-ctx.Done():
 			return context.Cause(ctx)
 		}
-
 	}
 }
