@@ -178,7 +178,7 @@ func (x *cmds) loadFileConfig(name string, val any) error {
 		return err
 	}
 	v := viper.New()
-	v.SetConfigType("yaml")
+	v.SetConfigType(config.StructTagName)
 	if err := v.ReadConfig(bytes.NewReader(confData)); err != nil {
 		return err
 	}
