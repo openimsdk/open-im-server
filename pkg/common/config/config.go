@@ -142,6 +142,7 @@ type API struct {
 	Api struct {
 		ListenIP         string `yaml:"listenIP"`
 		Ports            []int  `yaml:"ports"`
+		RegisterIP       string `yaml:"registerIP"`
 		CompressionLevel int    `yaml:"compressionLevel"`
 	} `yaml:"api"`
 	Prometheus struct {

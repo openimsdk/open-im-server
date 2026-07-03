@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"net"
@@ -12,6 +13,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -41,6 +43,7 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/network"
 )
 
 func init() {
@@ -75,6 +78,7 @@ func main() {
 	putCmd(cmd, true, msgtransfer.Start)
 	putCmd(cmd, true, api.Start)
 	putCmd(cmd, true, cron.Start)
+	putCmd(cmd, true, startRedisServerRegister)
 	ctx := context.Background()
 	if err := cmd.run(ctx); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "server exit %s", err)
@@ -433,4 +437,37 @@ func (x *cmdManger) Running() []string {
 		names = append(names, name)
 	}
 	return names
+}
+
+type serverConfig struct {
+	API         config.API
+	Share       config.Share
+	RedisConfig config.Redis
+	Index       config.Index
+}
+
+func startRedisServerRegister(ctx context.Context, cfg *serverConfig, client discovery.SvcDiscoveryRegistry, service grpc.ServiceRegistrar) error {
+	apiPort, err := datautil.GetElemByIndex(cfg.API.Api.Ports, int(cfg.Index))
+	if err != nil {
+		return err
+	}
+	if apiPort <= 0 {
+		return errors.New("standalone api port is 0")
+	}
+	registerIP, err := network.GetRpcRegisterIP(cfg.API.Api.RegisterIP)
+	if err != nil {
+		return err
+	}
+	addr := net.JoinHostPort(registerIP, strconv.Itoa(apiPort))
+	inprocess.SetLocalTarget(addr)
+	timer := time.NewTimer(time.Second * 5)
+	defer timer.Stop()
+	for {
+		select {
+		case <-timer.C:
+		case <-ctx.Done():
+			return context.Cause(ctx)
+		}
+
+	}
 }

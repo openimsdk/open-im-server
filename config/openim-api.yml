@@ -3,6 +3,8 @@ api:
   listenIP: 0.0.0.0
   # Listening ports; if multiple are configured, multiple instances will be launched, must be consistent with the number of prometheus.ports
   ports: [ 10002 ]
+  # Fallback for IP resolution issues in multi-instance standalone mode.
+  # registerIP:
   # API compression level; 0: default compression, 1: best compression, 2: best speed, -1: no compression
   compressionLevel: 0
 
