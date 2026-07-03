@@ -3,12 +3,14 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/viper"
+
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/runtimeenv"
-	"github.com/spf13/viper"
 )
 
 func Load(configDirectory string, configFileName string, envPrefix string, config any) error {
@@ -35,10 +37,27 @@ func loadConfig(path string, envPrefix string, config any) error {
 		return errs.WrapMsg(err, "failed to read config file", "path", path, "envPrefix", envPrefix)
 	}
 
-	if err := v.Unmarshal(config, func(config *mapstructure.DecoderConfig) {
-		config.TagName = StructTagName
-	}); err != nil {
+	if err := v.Unmarshal(config, ApplyDecoderConfig); err != nil {
 		return errs.WrapMsg(err, "failed to unmarshal config", "path", path, "envPrefix", envPrefix)
 	}
 	return nil
+}
+
+func ApplyDecoderConfig(config *mapstructure.DecoderConfig) {
+	config.TagName = StructTagName
+	config.DecodeHook = mapstructure.ComposeDecodeHookFunc(
+		mapstructure.StringToTimeDurationHookFunc(),
+		mapstructure.StringToSliceHookFunc(","),
+		stringToEngineSelectorHookFunc(),
+	)
+}
+
+func stringToEngineSelectorHookFunc() mapstructure.DecodeHookFuncType {
+	engineSelectorType := reflect.TypeOf(EngineSelector{})
+	return func(from reflect.Type, to reflect.Type, data any) (any, error) {
+		if to != engineSelectorType || from.Kind() != reflect.String {
+			return data, nil
+		}
+		return EngineSelector{Engine: data.(string)}, nil
+	}
 }

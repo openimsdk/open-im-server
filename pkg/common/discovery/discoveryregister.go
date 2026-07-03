@@ -17,11 +17,12 @@ package discovery
 import (
 	"time"
 
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/discovery/standalone"
+	"github.com/openimsdk/tools/discovery/inprocess"
 	"github.com/openimsdk/tools/utils/runtimeenv"
-	"google.golang.org/grpc"
 
 	"github.com/openimsdk/tools/discovery/kubernetes"
 
@@ -32,7 +33,7 @@ import (
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
 func NewDiscoveryRegister(discovery *config.Discovery, watchNames []string) (discovery.SvcDiscoveryRegistry, error) {
 	if config.Standalone() {
-		return standalone.GetSvcDiscoveryRegistry(), nil
+		return inprocess.GetSvcDiscoveryRegistry(), nil
 	}
 	if runtimeenv.RuntimeEnvironment() == config.KUBERNETES {
 		return kubernetes.NewConnManager(discovery.Kubernetes.Namespace, nil,

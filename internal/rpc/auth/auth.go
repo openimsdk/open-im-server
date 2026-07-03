@@ -19,18 +19,18 @@ import (
 	"errors"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
+	"github.com/redis/go-redis/v9"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/redis/go-redis/v9"
+
+	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -43,7 +43,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/tokenverify"
-	"google.golang.org/grpc"
 )
 
 type authServer struct {
@@ -71,20 +70,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	var token cache.TokenModel
-	if rdb == nil {
-		mdb, err := dbb.Mongo(ctx)
-		if err != nil {
-			return err
-		}
-		mc, err := mgo.NewCacheMgo(mdb.GetDB())
-		if err != nil {
-			return err
-		}
-		token = mcache.NewTokenCacheModel(mc, config.RpcConfig.TokenPolicy.Expire)
-	} else {
-		token = redis2.NewTokenCacheModel(rdb, &config.LocalCacheConfig, config.RpcConfig.TokenPolicy.Expire)
-	}
+	token := redis2.NewTokenCacheModel(rdb, &config.LocalCacheConfig, config.RpcConfig.TokenPolicy.Expire)
 	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err

@@ -18,13 +18,14 @@ import (
 	"context"
 	"time"
 
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/runtimeenv"
-	"google.golang.org/grpc"
 
 	"github.com/openimsdk/tools/log"
 )
@@ -76,42 +77,3 @@ func Start(ctx context.Context, conf *Config, client discovery.SvcDiscoveryRegis
 
 	return hubServer.LongConnServer.Run(ctx)
 }
-
-//
-//// Start run ws server.
-//func Start(ctx context.Context, index int, conf *Config) error {
-//	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "runtimeEnv", runtimeenv.RuntimeEnvironment(),
-//		"rpcPorts", conf.MsgGateway.RPC.Ports,
-//		"wsPort", conf.MsgGateway.LongConnSvr.Ports, "prometheusPorts", conf.MsgGateway.Prometheus.Ports)
-//	wsPort, err := datautil.GetElemByIndex(conf.MsgGateway.LongConnSvr.Ports, index)
-//	if err != nil {
-//		return err
-//	}
-//
-//	rdb, err := redisutil.NewRedisClient(ctx, conf.RedisConfig.Build())
-//	if err != nil {
-//		return err
-//	}
-//	longServer := NewWsServer(
-//		conf,
-//		WithPort(wsPort),
-//		WithMaxConnNum(int64(conf.MsgGateway.LongConnSvr.WebsocketMaxConnNum)),
-//		WithHandshakeTimeout(time.Duration(conf.MsgGateway.LongConnSvr.WebsocketTimeout)*time.Second),
-//		WithMessageMaxMsgLength(conf.MsgGateway.LongConnSvr.WebsocketMaxMsgLen),
-//	)
-//
-//	hubServer := NewServer(longServer, conf, func(srv *Server) error {
-//		var err error
-//		longServer.online, err = rpccache.NewOnlineCache(srv.userClient, nil, rdb, false, longServer.subscriberUserOnlineStatusChanges)
-//		return err
-//	})
-//
-//	go longServer.ChangeOnlineStatus(4)
-//
-//	netDone := make(chan error)
-//	go func() {
-//		err = hubServer.Start(ctx, index, conf)
-//		netDone <- err
-//	}()
-//	return hubServer.LongConnServer.Run(netDone)
-//}

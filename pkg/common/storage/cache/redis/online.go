@@ -7,20 +7,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/redis/go-redis/v9"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/redis/go-redis/v9"
 )
 
 func NewUserOnline(rdb redis.UniversalClient) cache.OnlineCache {
-	if rdb == nil || config.Standalone() {
-		return mcache.NewOnlineCache()
-	}
 	return &userOnline{
 		rdb:         rdb,
 		expire:      cachekey.OnlineExpire,

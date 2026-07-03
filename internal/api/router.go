@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	clientv3 "go.etcd.io/etcd/client/v3"
+
 	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -23,13 +25,15 @@ import (
 	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/a2r"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
+	"github.com/openimsdk/tools/discovery/inprocess"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mw"
 	"github.com/openimsdk/tools/mw/api"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 const (
@@ -341,7 +345,53 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 	{
 		r.POST("/restart", cm.CheckAdmin, cm.Restart)
 	}
+
+	if config.Standalone() {
+		a := internalApi{secret: cfg.Share.Secret, client: client}
+		r.POST(inprocess.BroadcastPath, a.RpcInvoke)
+	}
 	return r, nil
+}
+
+type internalApi struct {
+	secret string
+	client discovery.SvcDiscoveryRegistry
+}
+
+func (x *internalApi) RpcInvoke(c *gin.Context) {
+	req, err := a2r.ParseRequestNotCheck[inprocess.InvokeRequest](c)
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+	// Request length is deliberately not validated: a proto request whose fields
+	// are all default values marshals to zero bytes.
+	if req.Service == "" || req.Method == "" || req.Secret == "" {
+		apiresp.GinError(c, servererrs.ErrArgs)
+		return
+	}
+	if req.Secret != x.secret {
+		apiresp.GinError(c, servererrs.ErrNoPermission.WrapMsg("secret not match"))
+		return
+	}
+	ctx := context.Context(c)
+	if req.OpUserID != "" {
+		ctx = mcontext.SetOpUserID(ctx, req.OpUserID)
+	}
+	if req.Admin {
+		ctx = authverify.WithTempAdmin(ctx)
+	}
+	cc, err := x.client.GetConn(ctx, req.Service)
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+	var resp []byte
+	if err := cc.Invoke(ctx, req.Method, req.Request, &resp); err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+	apiresp.GinSuccess(c, resp)
 }
 
 func GinParseToken(authClient *rpcli.AuthClient) gin.HandlerFunc {
@@ -385,4 +435,6 @@ func setGinIsAdmin(imAdminUserID []string) gin.HandlerFunc {
 var Whitelist = []string{
 	"/auth/get_admin_token",
 	"/auth/parse_token",
+	// cross-instance rpc invoke authenticates with share.secret instead of token
+	inprocess.BroadcastPath,
 }
