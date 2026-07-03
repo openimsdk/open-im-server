@@ -11,14 +11,13 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4.2.0
+      uses: actions/checkout@v7.0.0
 
     - name: Get the PR title and extract PR numbers
       id: extract_pr_numbers
+      env:
+        PR_TITLE: ${{ github.event.pull_request.title }}
       run: |
-        # Get the PR title
-        PR_TITLE="${{ github.event.pull_request.title }}"
-
         echo "PR Title: $PR_TITLE"
 
         # Extract PR numbers from the title
@@ -57,9 +56,8 @@ jobs:
 
     - name: Delete branch after PR close
       if: steps.extract_pr_numbers.outputs.proceed == 'true' || contains(github.event.pull_request.labels.*.name, 'milestone-merge')
+      env:
+        BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
       run: |
-        BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
         echo "Branch to delete: $BRANCH_NAME"
         git push origin --delete "$BRANCH_NAME"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

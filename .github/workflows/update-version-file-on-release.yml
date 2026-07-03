@@ -12,7 +12,7 @@ jobs:
     steps:
       # Step 1: Checkout the original repository's code
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
         with:
           fetch-depth: 0
           # submodules: "recursive"
@@ -73,7 +73,7 @@ jobs:
 
       # Step 7: Find and Publish Draft Release
       - name: Find and Publish Draft Release
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

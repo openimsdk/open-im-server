@@ -12,11 +12,11 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
 
       - name: Fetch Closed Issues with lifecycle/stale Label
         id: fetch_issues
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -40,7 +40,7 @@ jobs:
           echo "Issue numbers: ${{ steps.fetch_issues.outputs.result }}"
 
       - name: Reopen Issues
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -59,7 +59,7 @@ jobs:
             }
 
       - name: Remove lifecycle/stale Label
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

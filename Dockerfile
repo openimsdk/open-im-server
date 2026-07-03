@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:alpine AS builder
 
 ARG RELEASE=false
 ARG COMPRESS=false
