@@ -489,7 +489,7 @@ func startRedisServerRegister(ctx context.Context, cfg *serverConfig, client dis
 			log.ZWarn(ctx, "gateway register failed", err, "address", selfAddr)
 		}
 	}
-	timer := time.NewTimer(validTime / 2)
+	timer := time.NewTicker(validTime / 2)
 	defer func() {
 		timer.Stop()
 		ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), time.Second)
