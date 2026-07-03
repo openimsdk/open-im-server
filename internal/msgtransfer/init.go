@@ -73,11 +73,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	mongoProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToMongoTopic)
+	mongoProducer, err := builder.GetTopicProducer(ctx, mqbuild.TopicToMongo)
 	if err != nil {
 		return err
 	}
-	pushProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToPushTopic)
+	pushProducer, err := builder.GetTopicProducer(ctx, mqbuild.TopicToPush)
 	if err != nil {
 		return err
 	}
@@ -100,11 +100,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	historyConsumer, err := builder.GetTopicConsumer(ctx, config.KafkaConfig.ToRedisTopic)
+	historyConsumer, err := builder.GetTopicConsumer(ctx, mqbuild.TopicToRedis)
 	if err != nil {
 		return err
 	}
-	historyMongoConsumer, err := builder.GetTopicConsumer(ctx, config.KafkaConfig.ToMongoTopic)
+	historyMongoConsumer, err := builder.GetTopicConsumer(ctx, mqbuild.TopicToMongo)
 	if err != nil {
 		return err
 	}

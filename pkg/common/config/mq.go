@@ -14,7 +14,7 @@ const (
 
 func NormalizeQueueEngine(engine string) string {
 	switch strings.ToLower(strings.TrimSpace(engine)) {
-	case "kafka":
+	case "", "kafka":
 		return QueueEngineKafka
 	case "redis":
 		return QueueEngineRedis

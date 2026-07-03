@@ -498,6 +498,7 @@ func startRedisServerRegister(ctx context.Context, cfg *serverConfig, client dis
 			log.ZWarn(ctx, "gateway unregister failed", err, "address", selfAddr)
 		}
 	}()
+	register()
 	for {
 		select {
 		case <-timer.C:

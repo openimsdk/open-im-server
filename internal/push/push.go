@@ -65,17 +65,17 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	offlinePushProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToOfflinePushTopic)
+	offlinePushProducer, err := builder.GetTopicProducer(ctx, mqbuild.TopicToOfflinePush)
 	if err != nil {
 		return err
 	}
 	database := controller.NewPushDatabase(cacheModel, offlinePushProducer)
 
-	pushConsumer, err := builder.GetTopicConsumer(ctx, config.KafkaConfig.ToPushTopic)
+	pushConsumer, err := builder.GetTopicConsumer(ctx, mqbuild.TopicToPush)
 	if err != nil {
 		return err
 	}
-	offlinePushConsumer, err := builder.GetTopicConsumer(ctx, config.KafkaConfig.ToOfflinePushTopic)
+	offlinePushConsumer, err := builder.GetTopicConsumer(ctx, mqbuild.TopicToOfflinePush)
 	if err != nil {
 		return err
 	}

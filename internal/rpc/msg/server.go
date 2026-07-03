@@ -92,7 +92,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	redisProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToRedisTopic)
+	redisProducer, err := builder.GetTopicProducer(ctx, mqbuild.TopicToRedis)
 	if err != nil {
 		return err
 	}
