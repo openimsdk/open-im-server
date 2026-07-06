@@ -26,8 +26,30 @@ on:
         type: string
 
 jobs:
-  build-and-push:
+  services:
     runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.services.outputs.services }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.0
+        with:
+          ref: ${{ inputs.checkout_sha || inputs.tag || github.event.inputs.tag }}
+
+      - name: Resolve service matrix
+        id: services
+        run: |
+          set -euo pipefail
+          services=$(docker compose -f build/images/openim-server/docker-compose.build.yml config --services | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "services=$services" >> "$GITHUB_OUTPUT"
+
+  build-and-push:
+    needs: services
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJson(needs.services.outputs.services) }}
     permissions:
       contents: read
       packages: write
@@ -121,6 +143,7 @@ jobs:
         env:
           RELEASE: "true"
           PUSH: "true"
+          SERVICE: ${{ matrix.service }}
           PLATFORMS: linux/amd64,linux/arm64
           IMAGE_TAGS: ${{ steps.tags.outputs.tags }}
           IMAGE_REGISTRIES: |
@@ -128,4 +151,4 @@ jobs:
             ghcr.io/${{ github.repository_owner }}
             registry.cn-hangzhou.aliyuncs.com/openimsdk
         run: |
-          bash build/build.sh
+          bash build/build_single.sh
