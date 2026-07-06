@@ -1,21 +1,65 @@
 name: Update Version File on Release
 
 on:
-  release:
-    types: [created]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag version to update"
+        required: true
+      target_branch:
+        description: "Branch that the release tag was created from"
+        required: true
+  workflow_call:
+    inputs:
+      tag:
+        description: "Tag version to update"
+        required: true
+        type: string
+      target_branch:
+        description: "Branch that the release tag was created from"
+        required: true
+        type: string
+    outputs:
+      updated_sha:
+        description: "Commit SHA after updating version and moving the tag"
+        value: ${{ jobs.update-version.outputs.updated_sha }}
+      updated_short_sha:
+        description: "Short commit SHA after updating version and moving the tag"
+        value: ${{ jobs.update-version.outputs.updated_short_sha }}
+
+permissions:
+  contents: write
 
 jobs:
   update-version:
     runs-on: ubuntu-latest
+    outputs:
+      updated_sha: ${{ steps.resolve-tag.outputs.updated_sha }}
+      updated_short_sha: ${{ steps.resolve-tag.outputs.updated_short_sha }}
     env:
-      TAG_VERSION: ${{ github.event.release.tag_name }}
+      TAG_VERSION: ${{ inputs.tag || github.event.inputs.tag }}
+      TARGET_BRANCH: ${{ inputs.target_branch || github.event.inputs.target_branch }}
     steps:
       # Step 1: Checkout the original repository's code
       - name: Checkout code
         uses: actions/checkout@v7.0.0
         with:
+          ref: ${{ inputs.target_branch || github.event.inputs.target_branch }}
           fetch-depth: 0
           # submodules: "recursive"
+
+      - name: Validate target branch
+        run: |
+          set -euo pipefail
+          if [[ -z "${TARGET_BRANCH}" ]]; then
+            echo "target_branch is required"
+            exit 1
+          fi
+          if ! git ls-remote --exit-code --heads origin "${TARGET_BRANCH}" >/dev/null; then
+            echo "target_branch must be an existing branch: ${TARGET_BRANCH}"
+            exit 1
+          fi
+          git checkout -B "${TARGET_BRANCH}" "origin/${TARGET_BRANCH}"
 
       - name: Safe submodule initialization
         run: |
@@ -48,7 +92,6 @@ jobs:
         run: |
           if git rev-parse ${{ env.TAG_VERSION }} >/dev/null 2>&1; then
             git tag -d ${{ env.TAG_VERSION }}
-            git push --delete origin ${{ env.TAG_VERSION }}
           fi
 
       # Step 4: Update version file
@@ -62,14 +105,28 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           git add version/version
-          git commit -m "Update version to ${{ env.TAG_VERSION }}"
+          if git diff --cached --quiet; then
+            echo "version/version already matches ${TAG_VERSION}"
+          else
+            git commit -m "Update version to ${{ env.TAG_VERSION }}"
+            git push origin HEAD:${TARGET_BRANCH}
+          fi
 
       # Step 6: Update tag
       - name: Update tag
         run: |
+          set -euo pipefail
           git tag -fa ${{ env.TAG_VERSION }} -m "Update version to ${{ env.TAG_VERSION }}"
-          git push origin ${{ env.TAG_VERSION }} --force
+          git push origin refs/tags/${{ env.TAG_VERSION }}:refs/tags/${{ env.TAG_VERSION }} --force
+
+      - name: Resolve updated tag SHA
+        id: resolve-tag
+        run: |
+          updated_sha="$(git rev-parse "${TAG_VERSION}^{commit}")"
+          echo "updated_sha=$updated_sha" >> "$GITHUB_OUTPUT"
+          echo "updated_short_sha=${updated_sha:0:12}" >> "$GITHUB_OUTPUT"
 
       # Step 7: Find and Publish Draft Release
       - name: Find and Publish Draft Release

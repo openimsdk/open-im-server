@@ -4,14 +4,26 @@ on:
   push:
     branches:
       - release-*
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       tag:
         description: "Tag version to be used for Docker image"
         required: true
         default: "v3.8.3"
+  workflow_call:
+    inputs:
+      tag:
+        description: "Tag version to be used for Docker image"
+        required: true
+        type: string
+      checkout_sha:
+        description: "Commit SHA to checkout"
+        required: true
+        type: string
+      checkout_short_sha:
+        description: "Short commit SHA for image tags"
+        required: true
+        type: string
 
 env:
   IMAGE_NAME: "openim-server"
@@ -21,11 +33,15 @@ env:
 jobs:
   publish-docker-images:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.merged == false) }}
     steps:
       - name: Checkout main repository
         uses: actions/checkout@v7.0.0
         with:
+          ref: ${{ inputs.checkout_sha || inputs.tag || github.event.inputs.tag }}
           path: main-repo
 
       - name: Set up QEMU
@@ -54,7 +70,10 @@ jobs:
             type=semver,pattern=v{{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha
+            type=sha,enable=${{ inputs.checkout_short_sha == '' }}
+            type=raw,value=sha-${{ inputs.checkout_short_sha }},enable=${{ inputs.checkout_short_sha != '' }}
+            type=raw,value=${{ inputs.tag || github.event.inputs.tag }}
+            type=raw,value=latest,enable=${{ github.event_name == 'release' && !github.event.release.prerelease }}
 
       - name: Install skopeo
         run: |

@@ -4,14 +4,26 @@ on:
   push:
     branches:
       - release-*
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       tag:
         description: "Tag version to be used for Docker image"
         required: true
         default: "v3.8.3"
+  workflow_call:
+    inputs:
+      tag:
+        description: "Tag version to be used for Docker image"
+        required: true
+        type: string
+      checkout_sha:
+        description: "Commit SHA to checkout"
+        required: true
+        type: string
+      checkout_short_sha:
+        description: "Short commit SHA for image tags"
+        required: true
+        type: string
 
 jobs:
   build-and-push:
@@ -23,6 +35,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7.0.0
+        with:
+          ref: ${{ inputs.checkout_sha || inputs.tag || github.event.inputs.tag }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4.1.0
@@ -53,8 +67,9 @@ jobs:
       - name: Resolve Docker image tags
         id: tags
         env:
-          INPUT_TAG: ${{ github.event.inputs.tag }}
+          INPUT_TAG: ${{ inputs.tag || github.event.inputs.tag }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
+          CHECKOUT_SHORT_SHA: ${{ inputs.checkout_short_sha }}
         run: |
           set -euo pipefail
 
@@ -84,13 +99,17 @@ jobs:
           add_tag_with_semver_alias "${INPUT_TAG:-}"
           add_tag_with_semver_alias "${RELEASE_TAG:-}"
 
+          if [[ "${GITHUB_EVENT_NAME:-}" == "release" && "${{ github.event.release.prerelease }}" != "true" ]]; then
+            add_tag "latest"
+          fi
+
           if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
             add_tag_with_semver_alias "${GITHUB_REF_NAME}"
           elif [[ "${GITHUB_REF_TYPE:-}" == "branch" ]]; then
             add_tag "${GITHUB_REF_NAME}"
           fi
 
-          add_tag "sha-${GITHUB_SHA::7}"
+          add_tag "sha-${CHECKOUT_SHORT_SHA:-${GITHUB_SHA::7}}"
 
           {
             echo "tags<<EOF"
