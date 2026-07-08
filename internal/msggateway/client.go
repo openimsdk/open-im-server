@@ -91,7 +91,6 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn ClientConn, longConnServ
 	c.UserID = ctx.GetUserID()
 	c.ctx = ctx
 	c.longConnServer = longConnServer
-	c.IsBackground = false
 	c.closed.Store(false)
 	c.closedErr = nil
 	c.token = ctx.GetToken()
