@@ -79,12 +79,13 @@ func getMsgDataDescriptor() []protoreflect.FieldDescriptor {
 type MessageApi struct {
 	Client        msg.MsgClient
 	userClient    *rpcli.UserClient
+	authClient    *rpcli.AuthClient
 	imAdminUserID []string
 	validate      *validator.Validate
 }
 
-func NewMessageApi(client msg.MsgClient, userClient *rpcli.UserClient, imAdminUserID []string) MessageApi {
-	return MessageApi{Client: client, userClient: userClient, imAdminUserID: imAdminUserID, validate: validator.New()}
+func NewMessageApi(client msg.MsgClient, userClient *rpcli.UserClient, authClient *rpcli.AuthClient, imAdminUserID []string) MessageApi {
+	return MessageApi{Client: client, userClient: userClient, authClient: authClient, imAdminUserID: imAdminUserID, validate: validator.New()}
 }
 
 func (*MessageApi) SetOptions(options map[string]bool, value bool) {
@@ -219,6 +220,8 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 		data = &apistruct.CustomElem{}
 	case constant.MarkdownText:
 		data = &apistruct.MarkdownTextElem{}
+	case constant.Stream:
+		data = &apistruct.StreamMsgElem{}
 	case constant.Quote:
 		data = &apistruct.QuoteElem{}
 	case constant.OANotification:

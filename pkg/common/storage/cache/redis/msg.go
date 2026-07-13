@@ -9,6 +9,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
@@ -89,6 +90,15 @@ func (c *msgCache) SetMessageBySeqs(ctx context.Context, conversationID string, 
 		if err := c.rcClient.GetClient().RawSet(ctx, cachekey.GetMsgCacheKey(conversationID, msg.Msg.Seq), string(data), msgCacheTimeout); err != nil {
 			return err
 		}
+		if msg.Msg.ContentType == constant.Stream {
+			if err := c.rcClient.GetRedis().Set(ctx, cachekey.GetMsgSeqKey(conversationID, msg.Msg.ClientMsgID), msg.Msg.Seq, msgCacheTimeout).Err(); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
+}
+
+func (c *msgCache) GetMessageSeq(ctx context.Context, conversationID string, clientMsgID string) (int64, error) {
+	return c.rcClient.GetRedis().Get(ctx, cachekey.GetMsgSeqKey(conversationID, clientMsgID)).Int64()
 }

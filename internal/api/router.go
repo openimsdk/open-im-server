@@ -253,7 +253,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 		objectGroup.GET("/*name", t.ObjectRedirect)
 	}
 	// Message
-	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), cfg.Share.IMAdminUser.UserIDs)
+	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), rpcli.NewAuthClient(authConn), cfg.Share.IMAdminUser.UserIDs)
 	{
 		msgGroup := r.Group("/msg")
 		msgGroup.POST("/newest_seq", m.GetSeq)
@@ -277,6 +277,9 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 		msgGroup.POST("/send_simple_msg", m.SendSimpleMessage)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 		msgGroup.POST("/get_server_time", m.GetServerTime)
+		msgGroup.POST("/get_stream_msg", m.GetStreamMsg)
+		msgGroup.POST("/append_stream_msg", m.AppendStreamMsg)
+		msgGroup.PUT("/append_stream_msg", m.PutStreamMsg)
 	}
 	// Conversation
 	{
