@@ -15,6 +15,7 @@
 package discovery
 
 import (
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
