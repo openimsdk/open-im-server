@@ -46,10 +46,14 @@ func NewDiscoveryRegister(discovery *config.Discovery, watchNames []string) (dis
 	}
 	switch discoveryType {
 	case config.KUBERNETES:
+		for i := range watchNames {
+			watchNames[i] = strings.Split(watchNames[i], ":")[0]
+		}
 		return kubernetes.NewConnManager(discovery.Kubernetes.Namespace, watchNames,
 			grpc.WithDefaultCallOptions(
 				grpc.MaxCallSendMsgSize(1024*1024*20),
 			),
+			grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"round_robin"}`),
 		)
 	case config.ETCD:
 		return etcd.NewSvcDiscoveryRegistry(
