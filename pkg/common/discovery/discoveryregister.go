@@ -46,7 +46,7 @@ func NewDiscoveryRegister(discovery *config.Discovery, watchNames []string) (dis
 	}
 	switch discoveryType {
 	case config.KUBERNETES:
-		return kubernetes.NewConnManager(discovery.Kubernetes.Namespace, nil,
+		return kubernetes.NewConnManager(discovery.Kubernetes.Namespace, watchNames,
 			grpc.WithDefaultCallOptions(
 				grpc.MaxCallSendMsgSize(1024*1024*20),
 			),
