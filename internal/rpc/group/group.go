@@ -23,9 +23,10 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"github.com/openimsdk/tools/utils/stringutil"
-	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/common"
@@ -42,7 +43,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/notification/grouphash"
 	"github.com/openimsdk/protocol/constant"
-	pbconversation "github.com/openimsdk/protocol/conversation"
+	pbconv "github.com/openimsdk/protocol/conversation"
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/protocol/wrapperspb"
@@ -1090,7 +1091,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	if req.GroupInfoForSet.Notification != "" {
 		num -= 3
 		func() {
-			conversation := &pbconversation.ConversationReq{
+			conversation := &pbconv.ConversationReq{
 				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupInfoForSet.GroupID),
 				ConversationType: constant.ReadGroupChatType,
 				GroupID:          req.GroupInfoForSet.GroupID,
@@ -1197,7 +1198,7 @@ func (s *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 
 	if notificationFlag {
 		if req.Notification.Value != "" {
-			conversation := &pbconversation.ConversationReq{
+			conversation := &pbconv.ConversationReq{
 				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
 				ConversationType: constant.ReadGroupChatType,
 				GroupID:          req.GroupID,
@@ -1300,6 +1301,9 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 }
 
 func (s *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) (*pbgroup.GetGroupsResp, error) {
+	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	var (
 		group []*model.Group
 		err   error
