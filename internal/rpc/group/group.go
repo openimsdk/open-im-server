@@ -23,8 +23,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openimsdk/tools/utils/stringutil"
 	"google.golang.org/grpc"
+
+	"github.com/openimsdk/tools/utils/stringutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
@@ -1315,6 +1316,9 @@ func (g *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 }
 
 func (g *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) (*pbgroup.GetGroupsResp, error) {
+	if err := authverify.CheckAdmin(ctx); err != nil {
+		return nil, err
+	}
 	var (
 		group []*model.Group
 		err   error

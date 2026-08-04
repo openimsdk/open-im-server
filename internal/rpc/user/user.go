@@ -22,6 +22,8 @@ import (
 	"sync"
 	"time"
 
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -46,7 +48,6 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/grpc"
 )
 
 const (
@@ -268,6 +269,9 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 }
 
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
+	if err = authverify.CheckAdmin(ctx); err != nil {
+		return nil, err
+	}
 	if req.UserID == "" && req.NickName == "" {
 		total, users, err := s.db.PageFindUser(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.Pagination)
 		if err != nil {
@@ -353,6 +357,9 @@ func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Ge
 
 // GetAllUserID Get user account by page.
 func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDReq) (resp *pbuser.GetAllUserIDResp, err error) {
+	if err = authverify.CheckAdmin(ctx); err != nil {
+		return nil, err
+	}
 	total, userIDs, err := s.db.GetAllUserID(ctx, req.Pagination)
 	if err != nil {
 		return nil, err
