@@ -103,3 +103,13 @@ type CallbackSingleMsgReadReq struct {
 type CallbackSingleMsgReadResp struct {
 	CommonCallbackResp
 }
+
+type CallbackAfterMsgSaveDBReq struct {
+	CommonCallbackReq
+	RecvID  string `json:"recvID"`
+	GroupID string `json:"groupID"`
+}
+
+type CallbackAfterMsgSaveDBResp struct {
+	CommonCallbackResp
+}

@@ -22,6 +22,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/tools/log"
 	"google.golang.org/protobuf/proto"
@@ -30,9 +31,11 @@ import (
 type OnlineHistoryMongoConsumerHandler struct {
 	historyConsumerGroup *kafka.MConsumerGroup
 	msgTransferDatabase  controller.MsgTransferDatabase
+	config               *Config
+	webhookClient        *webhook.Client
 }
 
-func NewOnlineHistoryMongoConsumerHandler(kafkaConf *config.Kafka, database controller.MsgTransferDatabase) (*OnlineHistoryMongoConsumerHandler, error) {
+func NewOnlineHistoryMongoConsumerHandler(kafkaConf *config.Kafka, database controller.MsgTransferDatabase, config *Config) (*OnlineHistoryMongoConsumerHandler, error) {
 	historyConsumerGroup, err := kafka.NewMConsumerGroup(kafkaConf.Build(), kafkaConf.ToMongoGroupID, []string{kafkaConf.ToMongoTopic}, true)
 	if err != nil {
 		return nil, err
@@ -41,6 +44,8 @@ func NewOnlineHistoryMongoConsumerHandler(kafkaConf *config.Kafka, database cont
 	mc := &OnlineHistoryMongoConsumerHandler{
 		historyConsumerGroup: historyConsumerGroup,
 		msgTransferDatabase:  database,
+		config:               config,
+		webhookClient:        webhook.NewWebhookClient(config.WebhooksConfig.URL),
 	}
 	return mc, nil
 }
@@ -72,6 +77,9 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Cont
 		prommetrics.MsgInsertMongoFailedCounter.Inc()
 	} else {
 		prommetrics.MsgInsertMongoSuccessCounter.Inc()
+		for _, msgData := range msgFromMQ.MsgData {
+			mc.webhookAfterMsgSaveDB(ctx, &mc.config.WebhooksConfig.AfterMsgSaveDB, msgData)
+		}
 	}
 	//var seqs []int64
 	//for _, msg := range msgFromMQ.MsgData {

@@ -49,6 +49,12 @@ afterSendGroupMsg:
   # See beforeSendSingleMsg comment.
   allowedTypes: []
   deniedTypes: []
+afterMsgSaveDB:
+  enable: false
+  timeout: 5
+  attentionIds: []
+  allowedTypes: []
+  deniedTypes: []
 afterUserOnline:
   enable: false
   timeout: 5
