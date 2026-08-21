@@ -67,7 +67,7 @@ func (m *msgServer) webhookBeforeSendSingleMsg(ctx context.Context, before *conf
 		if msg.MsgData.ContentType == constant.Typing {
 			return nil
 		}
-		if !filterBeforeMsg(msg, before) {
+		if !webhook.FilterBeforeMsg(msg.MsgData, before) {
 			return nil
 		}
 		cbReq := &cbapi.CallbackBeforeSendSingleMsgReq{
@@ -87,7 +87,7 @@ func (m *msgServer) webhookAfterSendSingleMsg(ctx context.Context, after *config
 	if msg.MsgData.ContentType == constant.Typing {
 		return
 	}
-	if !filterAfterMsg(msg, after) {
+	if !webhook.FilterAfterMsg(msg.MsgData, after, msg.MsgData.RecvID) {
 		return
 	}
 	cbReq := &cbapi.CallbackAfterSendSingleMsgReq{
@@ -99,7 +99,7 @@ func (m *msgServer) webhookAfterSendSingleMsg(ctx context.Context, after *config
 
 func (m *msgServer) webhookBeforeSendGroupMsg(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
-		if !filterBeforeMsg(msg, before) {
+		if !webhook.FilterBeforeMsg(msg.MsgData, before) {
 			return nil
 		}
 		if msg.MsgData.ContentType == constant.Typing {
@@ -121,7 +121,7 @@ func (m *msgServer) webhookAfterSendGroupMsg(ctx context.Context, after *config.
 	if msg.MsgData.ContentType == constant.Typing {
 		return
 	}
-	if !filterAfterMsg(msg, after) {
+	if !webhook.FilterAfterMsg(msg.MsgData, after, msg.MsgData.RecvID) {
 		return
 	}
 	cbReq := &cbapi.CallbackAfterSendGroupMsgReq{
@@ -136,7 +136,7 @@ func (m *msgServer) webhookBeforeMsgModify(ctx context.Context, before *config.B
 		if msg.MsgData.ContentType != constant.Text {
 			return nil
 		}
-		if !filterBeforeMsg(msg, before) {
+		if !webhook.FilterBeforeMsg(msg.MsgData, before) {
 			return nil
 		}
 		cbReq := &cbapi.CallbackMsgModifyCommandReq{

@@ -28,7 +28,8 @@ func TestLoadWebhooksConfig(t *testing.T) {
 	err := LoadConfig("../../../config/webhooks.yml", "IMENV_WEBHOOKS", &webhooks)
 	assert.Nil(t, err)
 	assert.Equal(t, 5, webhooks.BeforeAddBlack.Timeout)
-
+	assert.Equal(t, 5, webhooks.AfterMsgSaveDB.Timeout)
+	assert.Equal(t, false, webhooks.AfterMsgSaveDB.Enable)
 }
 
 func TestLoadDiscoveryKubernetesConfig(t *testing.T) {

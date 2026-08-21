@@ -433,6 +433,7 @@ type Webhooks struct {
 	BeforeSendGroupMsg       BeforeConfig `mapstructure:"beforeSendGroupMsg"`
 	BeforeMsgModify          BeforeConfig `mapstructure:"beforeMsgModify"`
 	AfterSendGroupMsg        AfterConfig  `mapstructure:"afterSendGroupMsg"`
+	AfterMsgSaveDB           AfterConfig  `mapstructure:"afterMsgSaveDB"`
 	AfterUserOnline          AfterConfig  `mapstructure:"afterUserOnline"`
 	AfterUserOffline         AfterConfig  `mapstructure:"afterUserOffline"`
 	AfterUserKickOff         AfterConfig  `mapstructure:"afterUserKickOff"`
