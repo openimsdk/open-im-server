@@ -17,6 +17,8 @@ package webhook
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -25,7 +27,6 @@ import (
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mq/memamq"
 	"github.com/openimsdk/tools/utils/httputil"
-	"net/http"
 )
 
 type Client struct {
@@ -62,13 +63,7 @@ func (c *Client) SyncPost(ctx context.Context, command string, req callbackstruc
 
 func (c *Client) AsyncPost(ctx context.Context, command string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, after *config.AfterConfig) {
 	if after.Enable {
-		if err := c.queue.NotWaitPush(func() {
-			if err := c.post(ctx, command, req, resp, after.Timeout); err != nil {
-				log.ZError(ctx, "async webhook post failed", err, "url", c.url, "command", command)
-			}
-		}); err != nil {
-			log.ZError(ctx, "async webhook enqueue failed", err, "url", c.url, "command", command)
-		}
+		c.queue.Push(func() { c.post(ctx, command, req, resp, after.Timeout) })
 	}
 }
 
