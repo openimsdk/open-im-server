@@ -840,6 +840,25 @@ func (db *commonMsgDatabase) GetLastMessage(ctx context.Context, conversationIDs
 			}
 			return nil, err
 		}
+		if msg == nil || msg.Msg == nil {
+			continue
+		}
+		if userID != "" {
+			userMinSeq, err := db.seqUser.GetUserMinSeq(ctx, conversationID, userID)
+			if err != nil {
+				return nil, err
+			}
+			minSeq, err := db.seqConversation.GetMinSeq(ctx, conversationID)
+			if err != nil {
+				return nil, err
+			}
+			if userMinSeq > minSeq {
+				minSeq = userMinSeq
+			}
+			if msg.Msg.Seq < minSeq {
+				continue
+			}
+		}
 		tmp := []*model.MsgInfoModel{msg}
 		db.handlerDeleteAndRevoked(ctx, userID, tmp)
 		db.handlerQuote(ctx, userID, conversationID, tmp)
