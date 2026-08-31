@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 ARG RELEASE=false
 ARG COMPRESS=false
@@ -13,7 +13,7 @@ RUN go mod download
 RUN RELEASE=${RELEASE} COMPRESS=${COMPRESS} mage build
 RUN mage -compile ./mage -ldflags "-s -w"
 
-FROM alpine:latest
+FROM alpine:3.23
 
 WORKDIR /openim-server
 
