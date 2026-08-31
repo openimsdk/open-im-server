@@ -287,6 +287,19 @@ func (s *groupServer) webhookAfterJoinGroup(ctx context.Context, after *config.A
 	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &callbackstruct.CallbackAfterJoinGroupResp{}, after)
 }
 
+func afterJoinGroupRequests(members []*model.GroupMember, reqMessage string) []*group.JoinGroupReq {
+	requests := make([]*group.JoinGroupReq, 0, len(members))
+	for _, member := range members {
+		requests = append(requests, &group.JoinGroupReq{
+			GroupID:       member.GroupID,
+			ReqMessage:    reqMessage,
+			JoinSource:    member.JoinSource,
+			InviterUserID: member.UserID,
+		})
+	}
+	return requests
+}
+
 func (s *groupServer) webhookBeforeSetGroupInfo(ctx context.Context, before *config.BeforeConfig, req *group.SetGroupInfoReq) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		cbReq := &callbackstruct.CallbackBeforeSetGroupInfoReq{

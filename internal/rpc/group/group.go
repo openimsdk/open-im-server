@@ -478,6 +478,9 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 			return nil, err
 		}
 	}
+	for _, joinReq := range afterJoinGroupRequests(groupMembers, req.Reason) {
+		s.webhookAfterJoinGroup(ctx, &s.config.WebhooksConfig.AfterJoinGroup, joinReq)
+	}
 	return &pbgroup.InviteUserToGroupResp{}, nil
 }
 
@@ -897,6 +900,9 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 			}
 			if err := s.setMemberJoinSeq(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
 				return nil, err
+			}
+			for _, joinReq := range afterJoinGroupRequests([]*model.GroupMember{member}, groupRequest.ReqMsg) {
+				s.webhookAfterJoinGroup(ctx, &s.config.WebhooksConfig.AfterJoinGroup, joinReq)
 			}
 		}
 	case constant.GroupResponseRefuse:
