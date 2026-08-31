@@ -101,6 +101,11 @@ type CommonMsgDatabase interface {
 	GetLastMessageSeqByTime(ctx context.Context, conversationID string, time int64) (int64, error)
 
 	GetLastMessage(ctx context.Context, conversationIDS []string, userID string) (map[string]*sdkws.MsgData, error)
+
+	GetMessageBySeqs(ctx context.Context, conversationID string, userID string, seqs []int64) ([]*sdkws.MsgData, error)
+	GetMessageBySeqsDB(ctx context.Context, conversationID string, userID string, seqs []int64) ([]*model.MsgInfoModel, error)
+	GetMessageSeq(ctx context.Context, conversationID string, clientMsgID string) (int64, error)
+	UpdateMsg(ctx context.Context, conversationID string, msg *model.MsgDataModel) error
 }
 
 func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUser cache.SeqUser, seqConversation cache.SeqConversationCache, producer mq.Producer) CommonMsgDatabase {
@@ -820,6 +825,29 @@ func (db *commonMsgDatabase) GetMessageBySeqs(ctx context.Context, conversationI
 		}
 	}
 	return res, nil
+}
+
+func (db *commonMsgDatabase) GetMessageBySeqsDB(ctx context.Context, conversationID string, userID string, seqs []int64) ([]*model.MsgInfoModel, error) {
+	msgs, err := db.msgCache.GetMessageBySeqs(ctx, conversationID, seqs)
+	if err != nil {
+		return nil, err
+	}
+	db.handlerDeleteAndRevoked(ctx, userID, msgs)
+	db.handlerQuote(ctx, userID, conversationID, msgs)
+	return msgs, nil
+}
+
+func (db *commonMsgDatabase) GetMessageSeq(ctx context.Context, conversationID string, clientMsgID string) (int64, error) {
+	return db.msgCache.GetMessageSeq(ctx, conversationID, clientMsgID)
+}
+
+func (db *commonMsgDatabase) UpdateMsg(ctx context.Context, conversationID string, msg *model.MsgDataModel) error {
+	docID := db.msgTable.GetDocID(conversationID, msg.Seq)
+	index := db.msgTable.GetMsgIndex(msg.Seq)
+	if _, err := db.msgDocDatabase.UpdateMsg(ctx, docID, index, "msg", msg); err != nil {
+		return err
+	}
+	return db.msgCache.DelMessageBySeqs(ctx, conversationID, []int64{msg.Seq})
 }
 
 func (db *commonMsgDatabase) GetLastMessage(ctx context.Context, conversationIDs []string, userID string) (map[string]*sdkws.MsgData, error) {

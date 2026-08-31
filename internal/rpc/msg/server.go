@@ -24,6 +24,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
@@ -69,6 +70,8 @@ type msgServer struct {
 	config                 *Config                          // Global configuration settings.
 	webhookClient          *webhook.Client
 	conversationClient     *rpcli.ConversationClient
+	lock                   cache.Lock
+	StreamMsgDatabase      controller.StreamMsgDatabase
 
 	adminUserIDs []string
 }
@@ -139,6 +142,8 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		config:                 config,
 		webhookClient:          webhook.NewWebhookClient(config.WebhooksConfig.URL),
 		conversationClient:     conversationClient,
+		lock:                   redis.NewLock(rdb),
+		StreamMsgDatabase:      controller.NewStreamMsgDatabase(redis.NewStreamMsg(rdb)),
 		adminUserIDs:           config.Share.IMAdminUser.UserIDs,
 	}
 

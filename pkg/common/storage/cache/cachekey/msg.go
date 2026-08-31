@@ -21,6 +21,7 @@ import (
 const (
 	sendMsgFailedFlag = "SEND_MSG_FAILED_FLAG:"
 	messageCache      = "MSG_CACHE:"
+	messageSeq        = "MSG_SEQ:"
 )
 
 func GetMsgCacheKey(conversationID string, seq int64) string {
@@ -29,4 +30,8 @@ func GetMsgCacheKey(conversationID string, seq int64) string {
 
 func GetSendMsgKey(id string) string {
 	return sendMsgFailedFlag + id
+}
+
+func GetMsgSeqKey(conversationID string, clientMsgID string) string {
+	return messageSeq + conversationID + ":" + clientMsgID
 }
