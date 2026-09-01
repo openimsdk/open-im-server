@@ -71,7 +71,15 @@ type ConversationMgo struct {
 
 func (c *ConversationMgo) Create(ctx context.Context, conversations []*model.Conversation) (err error) {
 	return mongoutil.IncrVersion(func() error {
-		return mongoutil.InsertMany(ctx, c.coll, conversations)
+		err := mongoutil.InsertMany(ctx, c.coll, conversations, options.InsertMany().SetOrdered(false))
+		// Conversation creation is a derived, idempotent operation. A concurrent
+		// request may create the same (owner_user_id, conversation_id) document
+		// between the caller's read and this insert. In that case MongoDB reports a
+		// duplicate-key error even though the desired state already exists.
+		if mongo.IsDuplicateKeyError(err) {
+			return nil
+		}
+		return err
 	}, func() error {
 		userConversation := make(map[string][]string)
 		for _, conversation := range conversations {
