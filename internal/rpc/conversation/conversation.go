@@ -54,8 +54,19 @@ type conversationServer struct {
 
 	webhookClient *webhook.Client
 	userClient    *rpcli.UserClient
-	msgClient     *rpcli.MsgClient
+	msgClient     messageClient
 	groupClient   *rpcli.GroupClient
+}
+
+type messageClient interface {
+	GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
+	GetMsgByConversationIDs(ctx context.Context, conversationIDs []string, maxSeqs map[string]int64) (map[string]*sdkws.MsgData, error)
+	GetHasReadSeqs(ctx context.Context, conversationIDs []string, userID string) (map[string]int64, error)
+	GetConversationsFullSyncSeqs(ctx context.Context, req *msg.GetConversationsFullSyncSeqsReq) (*msg.GetConversationsFullSyncSeqsResp, error)
+	SetUserConversationMaxSeq(ctx context.Context, conversationID string, ownerUserIDs []string, maxSeq int64) error
+	SetUserConversationMin(ctx context.Context, conversationID string, ownerUserIDs []string, minSeq int64) error
+	GetLastMessageSeqByTime(ctx context.Context, conversationID string, lastTime int64) (int64, error)
+	GetLastMessage(ctx context.Context, in *msg.GetLastMessageReq, opts ...grpc.CallOption) (*msg.GetLastMessageResp, error)
 }
 
 type Config struct {

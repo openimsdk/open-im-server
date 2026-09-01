@@ -61,6 +61,32 @@ func (s *seqUserCacheRedis) GetUserMinSeq(ctx context.Context, conversationID st
 	})
 }
 
+func (s *seqUserCacheRedis) GetUserMinSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
+	res, err := batchGetCache2(ctx, s.rocks, s.expireTime, conversationIDs, func(conversationID string) string {
+		return s.getSeqUserMinSeqKey(conversationID, userID)
+	}, func(v *readSeqModel) string {
+		return v.ConversationID
+	}, func(ctx context.Context, conversationIDs []string) ([]*readSeqModel, error) {
+		seqs, err := s.mgo.GetUserMinSeqs(ctx, userID, conversationIDs)
+		if err != nil {
+			return nil, err
+		}
+		res := make([]*readSeqModel, 0, len(seqs))
+		for conversationID, seq := range seqs {
+			res = append(res, &readSeqModel{ConversationID: conversationID, Seq: seq})
+		}
+		return res, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	data := make(map[string]int64)
+	for _, v := range res {
+		data[v.ConversationID] = v.Seq
+	}
+	return data, nil
+}
+
 func (s *seqUserCacheRedis) SetUserMinSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
 	return s.SetUserMinSeqs(ctx, userID, map[string]int64{conversationID: seq})
 }
