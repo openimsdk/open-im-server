@@ -17,6 +17,7 @@ package msgtransfer
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
@@ -31,6 +32,11 @@ import (
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/tools/log"
+)
+
+const (
+	mongoPersistenceRetryInitial = time.Second
+	mongoPersistenceRetryMax     = 30 * time.Second
 )
 
 type MsgTransfer struct {
@@ -140,8 +146,8 @@ func (m *MsgTransfer) Start(ctx context.Context) error {
 
 	go func() {
 		fn := func(msg mq.Message) error {
-			m.historyMongoHandler.HandleChatWs2Mongo(msg)
-			return nil
+			return consumeMongoMessage(m.ctx, msg, m.historyMongoHandler.HandleChatWs2Mongo,
+				mongoPersistenceRetryInitial, mongoPersistenceRetryMax)
 		}
 		for {
 			if err := m.historyMongoConsumer.Subscribe(m.ctx, fn); err != nil {
@@ -160,4 +166,35 @@ func (m *MsgTransfer) Start(ctx context.Context) error {
 	}
 	<-m.ctx.Done()
 	return context.Cause(m.ctx)
+}
+
+// consumeMongoMessage leaves a Kafka message unacknowledged until its MongoDB
+// persistence succeeds. Since the subscription loop is serial, later messages
+// cannot call Mark and advance the partition offset past a failed message.
+func consumeMongoMessage(ctx context.Context, msg mq.Message, handle func(mq.Message) error, initial, max time.Duration) error {
+	delay := initial
+	for {
+		if err := handle(msg); err == nil {
+			msg.Mark()
+			return nil
+		} else {
+			log.ZError(ctx, "persist to MongoDB failed; retrying without acknowledging Kafka message", err, "key", msg.Key(), "retryAfter", delay)
+		}
+
+		timer := time.NewTimer(delay)
+		select {
+		case <-ctx.Done():
+			if !timer.Stop() {
+				<-timer.C
+			}
+			return context.Cause(ctx)
+		case <-timer.C:
+		}
+		if delay < max {
+			delay *= 2
+			if delay > max {
+				delay = max
+			}
+		}
+	}
 }

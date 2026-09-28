@@ -15,6 +15,8 @@
 package msgtransfer
 
 import (
+	"fmt"
+
 	"github.com/openimsdk/tools/mq"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -39,7 +41,7 @@ func NewOnlineHistoryMongoConsumerHandler(database controller.MsgTransferDatabas
 	}
 }
 
-func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(val mq.Message) {
+func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(val mq.Message) error {
 	ctx := val.Context()
 	key := val.Key()
 	msg := val.Value()
@@ -47,21 +49,20 @@ func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(val mq.Message) 
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
 		log.ZError(ctx, "unmarshall failed", err, "key", key, "len", len(msg))
-		return
+		return fmt.Errorf("unmarshal toMongo message: %w", err)
 	}
 	if len(msgFromMQ.MsgData) == 0 {
 		log.ZError(ctx, "msgFromMQ.MsgData is empty", nil, "key", key, "msg", msg)
-		return
+		return fmt.Errorf("toMongo message has no message data")
 	}
 	log.ZDebug(ctx, "mongo consumer recv msg", "msgs", msgFromMQ.String())
 	err = mc.msgTransferDatabase.BatchInsertChat2DB(ctx, msgFromMQ.ConversationID, msgFromMQ.MsgData, msgFromMQ.LastSeq)
 	if err != nil {
 		log.ZError(ctx, "batch data insert to mongo err", err, "msg", msgFromMQ.MsgData, "conversationID", msgFromMQ.ConversationID)
 		prommetrics.MsgInsertMongoFailedCounter.Inc()
-	} else {
-		prommetrics.MsgInsertMongoSuccessCounter.Inc()
-		val.Mark()
+		return fmt.Errorf("persist to MongoDB: %w", err)
 	}
+	prommetrics.MsgInsertMongoSuccessCounter.Inc()
 
 	for _, msgData := range msgFromMQ.MsgData {
 		mc.webhookAfterMsgSaveDB(ctx, &mc.config.WebhooksConfig.AfterMsgSaveDB, msgData)
@@ -75,4 +76,5 @@ func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(val mq.Message) 
 	//	log.ZError(ctx, "remove cache msg from redis err", err, "msg",
 	//		msgFromMQ.MsgData, "conversationID", msgFromMQ.ConversationID)
 	//}
+	return nil
 }
