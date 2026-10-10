@@ -80,7 +80,9 @@ services:
       - "12380:2380"
     environment:
       - ETCD_NAME=s1
-      - ETCD_DATA_DIR=/etcd-data
+      - ETCD_DATA_DIR=/bitnami/etcd/data
+      # No authentication requires a trusted, isolated network.
+      - ALLOW_NONE_AUTHENTICATION=yes
       - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
       - ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379
       - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
@@ -165,6 +167,7 @@ services:
 
   minio:
     image: "${MINIO_IMAGE}"
+    user: "0:0"
     ports:
       - "10005:9000"
       - "19090:9090"
