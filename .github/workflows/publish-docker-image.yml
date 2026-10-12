@@ -173,13 +173,46 @@ jobs:
 
       - name: Push multi-architecture images
         if: success()
+        env:
+          IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
         run: |
-          docker buildx build \
-            --platform linux/amd64,linux/arm64 \
-            $(echo "${{ steps.meta.outputs.tags }}" | sed 's/,/ --tag /g' | sed 's/^/--tag /') \
-            --cache-from type=local,src=/tmp/docker-cache \
-            --push \
-            ./main-repo
+          set -euo pipefail
+          tag_args=()
+          while IFS= read -r tag; do
+            [[ -n "$tag" ]] || continue
+            [[ "${tag%%/*}" != *.aliyuncs.com ]] || continue
+            tag_args+=(--tag "$tag")
+          done < <(printf '%s\n' "$IMAGE_TAGS" | tr ',' '\n')
+
+          if [[ ${#tag_args[@]} -gt 0 ]]; then
+            docker buildx build \
+              --platform linux/amd64,linux/arm64 \
+              "${tag_args[@]}" \
+              --cache-from type=local,src=/tmp/docker-cache \
+              --push ./main-repo
+          fi
+
+      - name: Push multi-architecture images to ACR
+        if: success()
+        env:
+          BUILDX_NO_DEFAULT_ATTESTATIONS: '1'
+          IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          tag_args=()
+          while IFS= read -r tag; do
+            [[ -n "$tag" ]] || continue
+            [[ "${tag%%/*}" == *.aliyuncs.com ]] || continue
+            tag_args+=(--tag "$tag")
+          done < <(printf '%s\n' "$IMAGE_TAGS" | tr ',' '\n')
+
+          if [[ ${#tag_args[@]} -gt 0 ]]; then
+            docker buildx build \
+              --platform linux/amd64,linux/arm64 \
+              "${tag_args[@]}" \
+              --cache-from type=local,src=/tmp/docker-cache \
+              --push ./main-repo
+          fi
 
       - name: Verify multi-platform support
         run: |
