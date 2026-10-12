@@ -80,6 +80,24 @@ func (s *seqUserMongo) GetUserMinSeq(ctx context.Context, conversationID string,
 	return s.getSeq(ctx, conversationID, userID, "min_seq")
 }
 
+func (s *seqUserMongo) GetUserMinSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
+	if len(conversationIDs) == 0 {
+		return map[string]int64{}, nil
+	}
+	filter := bson.M{"user_id": userID, "conversation_id": bson.M{"$in": conversationIDs}}
+	opt := options.Find().SetProjection(bson.M{"_id": 0, "conversation_id": 1, "min_seq": 1})
+	seqs, err := mongoutil.Find[*model.SeqUser](ctx, s.coll, filter, opt)
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[string]int64)
+	for _, seq := range seqs {
+		res[seq.ConversationID] = seq.MinSeq
+	}
+	s.notFoundSet0(res, conversationIDs)
+	return res, nil
+}
+
 func (s *seqUserMongo) SetUserMinSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
 	return s.setSeq(ctx, conversationID, userID, seq, "min_seq")
 }
