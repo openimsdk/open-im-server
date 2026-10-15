@@ -226,7 +226,8 @@ func (f *friendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest 
 		"Arg_FriendRequest": friendRequest,
 	})
 
-	// Mark the friend request as refused and update the handle time.
+	// Mark the friend request as refused, record the operator, and update the handle time.
+	friendRequest.HandlerUserID = mcontext.GetOpUserID(ctx)
 	friendRequest.HandleResult = constant.FriendResponseRefuse
 	friendRequest.HandleTime = time.Now()
 	if err := f.friendRequest.Update(ctx, friendRequest); err != nil {
