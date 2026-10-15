@@ -2,11 +2,14 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/utils/datautil"
+
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
@@ -16,7 +19,6 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type MsgTransferDatabase interface {
@@ -238,6 +240,8 @@ func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conver
 	if lenList < 1 {
 		return 0, false, nil, errs.New("no messages to insert", "minCount", 1).Wrap()
 	}
+	//force to lead time as same
+	sendTime := time.Now().UnixMilli()
 	currentMaxSeq, err := db.seqConversation.Malloc(ctx, conversationID, int64(len(msgs)))
 	if err != nil {
 		log.ZError(ctx, "storage.seq.Malloc", err)
@@ -250,6 +254,7 @@ func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conver
 	for _, m := range msgs {
 		currentMaxSeq++
 		m.Seq = currentMaxSeq
+		m.SendTime = sendTime
 		userSeqMap[m.SendID] = m.Seq
 		seqs = append(seqs, m.Seq)
 	}
