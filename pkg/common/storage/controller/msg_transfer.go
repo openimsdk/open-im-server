@@ -4,22 +4,20 @@ import (
 	"context"
 	"time"
 
+	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/tools/mq"
-	"github.com/openimsdk/tools/utils/datautil"
-
-	"go.mongodb.org/mongo-driver/mongo"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/protocol/constant"
 	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mq"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 type MsgTransferDatabase interface {
