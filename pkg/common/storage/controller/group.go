@@ -188,8 +188,9 @@ func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*model.Group, 
 	if len(groups)+len(groupMembers) == 0 {
 		return nil
 	}
-	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
-		c := g.cache.CloneGroupCache()
+	var c cache.GroupCache
+	if err := g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
+		c = g.cache.CloneGroupCache()
 		if len(groups) > 0 {
 			if err := g.groupDB.Create(ctx, groups); err != nil {
 				return err
@@ -218,8 +219,12 @@ func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*model.Group, 
 					DelMaxGroupMemberVersion(groupMember.GroupID)
 			}
 		}
-		return c.ChainExecDel(ctx)
-	})
+		return nil
+	}); err != nil {
+		return err
+	}
+	// Invalidate after commit so concurrent readers cannot cache the old membership.
+	return c.ChainExecDel(ctx)
 }
 
 func (g *groupDatabase) FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error) {
