@@ -16,6 +16,7 @@ package cache
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 )
 
@@ -26,4 +27,5 @@ type MsgCache interface {
 	GetMessageBySeqs(ctx context.Context, conversationID string, seqs []int64) ([]*model.MsgInfoModel, error)
 	DelMessageBySeqs(ctx context.Context, conversationID string, seqs []int64) error
 	SetMessageBySeqs(ctx context.Context, conversationID string, msgs []*model.MsgInfoModel) error
+	GetMessageSeq(ctx context.Context, conversationID string, clientMsgID string) (int64, error)
 }
