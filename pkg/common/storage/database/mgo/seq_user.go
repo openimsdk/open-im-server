@@ -3,9 +3,11 @@ package mgo
 import (
 	"context"
 	"errors"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,9 +20,13 @@ func NewSeqUserMongo(db *mongo.Database) (database.SeqUser, error) {
 			{Key: "user_id", Value: 1},
 			{Key: "conversation_id", Value: 1},
 		},
+		// A distinct name allows the old non-unique index to coexist on
+		// supported MongoDB versions. Existing duplicate rows must be resolved
+		// before rollout; never silently pick one read sequence from duplicates.
+		Options: options.Index().SetName("user_conversation_unique").SetUnique(true),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errs.WrapMsg(err, "ensure unique seq_user index; check duplicate user_id/conversation_id rows before rollout")
 	}
 	return &seqUserMongo{coll: coll}, nil
 }
@@ -30,6 +36,10 @@ type seqUserMongo struct {
 }
 
 func (s *seqUserMongo) setSeq(ctx context.Context, conversationID string, userID string, seq int64, field string) error {
+	return s.updateSeq(ctx, conversationID, userID, seq, field, "$set")
+}
+
+func (s *seqUserMongo) updateSeq(ctx context.Context, conversationID, userID string, seq int64, field, operator string) error {
 	filter := map[string]any{
 		"user_id":         userID,
 		"conversation_id": conversationID,
@@ -43,13 +53,19 @@ func (s *seqUserMongo) setSeq(ctx context.Context, conversationID string, userID
 	}
 	delete(insert, field)
 	update := map[string]any{
-		"$set": bson.M{
+		operator: bson.M{
 			field: seq,
 		},
 		"$setOnInsert": insert,
 	}
 	opt := options.Update().SetUpsert(true)
-	return mongoutil.UpdateOne(ctx, s.coll, filter, update, false, opt)
+	err := mongoutil.UpdateOne(ctx, s.coll, filter, update, false, opt)
+	if mongo.IsDuplicateKeyError(err) {
+		// Another writer may have inserted the same user/conversation during
+		// this upsert. Retry against that row without creating another one.
+		return mongoutil.UpdateOne(ctx, s.coll, filter, update, true)
+	}
+	return err
 }
 
 func (s *seqUserMongo) getSeq(ctx context.Context, conversationID string, userID string, failed string) (int64, error) {
@@ -115,12 +131,8 @@ func (s *seqUserMongo) GetUserReadSeqs(ctx context.Context, userID string, conve
 }
 
 func (s *seqUserMongo) SetUserReadSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
-	dbSeq, err := s.GetUserReadSeq(ctx, conversationID, userID)
-	if err != nil {
-		return err
+	if seq < 0 {
+		return errs.ErrArgs.WrapMsg("read seq must not be negative")
 	}
-	if dbSeq > seq {
-		return nil
-	}
-	return s.setSeq(ctx, conversationID, userID, seq, "read_seq")
+	return s.updateSeq(ctx, conversationID, userID, seq, "read_seq", "$max")
 }
