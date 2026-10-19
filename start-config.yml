@@ -1,4 +1,4 @@
-serviceBinaries:
+services:
   openim-api: 1
   openim-crontask: 4
   openim-rpc-user: 1
@@ -11,7 +11,7 @@ serviceBinaries:
   openim-rpc-friend: 1
   openim-rpc-msg: 1
   openim-rpc-third: 1
-toolBinaries:
+tools:
   - check-free-memory
   - check-component
   - seq
