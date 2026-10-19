@@ -238,9 +238,12 @@ func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conver
 
 func (db *msgTransferDatabase) SetHasReadSeqs(ctx context.Context, conversationID string, userSeqMap map[string]int64) error {
 	for userID, seq := range userSeqMap {
-		if err := db.seqUser.SetUserReadSeq(ctx, conversationID, userID, seq); err != nil {
+		effectiveSeq, err := db.seqUser.SetUserReadSeq(ctx, conversationID, userID, seq)
+		if err != nil {
 			return err
 		}
+		// The same map is queued for asynchronous persistence by msgtransfer.
+		userSeqMap[userID] = effectiveSeq
 	}
 	return nil
 }
