@@ -1,9 +1,10 @@
 package msggateway
 
 import (
-	"github.com/openimsdk/tools/utils/datautil"
 	"sync"
 	"time"
+
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 type UserMap interface {
@@ -146,7 +147,7 @@ func (u *userMap) DeleteClients(userID string, clients []*Client) (isDeleteUser 
 		return client.ctx.GetRemoteAddr()
 	})
 	tmp := result.Clients
-	result.Clients = result.Clients[:0]
+	result.Clients = result.Clients[:0:0]
 	for _, client := range tmp {
 		if _, delCli := deleteAddr[client.ctx.GetRemoteAddr()]; delCli {
 			offline = append(offline, int32(client.PlatformID))
