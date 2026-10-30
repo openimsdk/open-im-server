@@ -209,6 +209,9 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	return resp, nil
 }
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.SetGlobalRecvMessageOptReq) (resp *pbuser.SetGlobalRecvMessageOptResp, err error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	resp = &pbuser.SetGlobalRecvMessageOptResp{}
 	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
 		return nil, err
@@ -688,6 +691,9 @@ func (s *userServer) NotificationUserInfoUpdate(ctx context.Context, userID stri
 }
 
 func (s *userServer) SortQuery(ctx context.Context, req *pbuser.SortQueryReq) (*pbuser.SortQueryResp, error) {
+	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	users, err := s.db.SortQuery(ctx, req.UserIDName, req.Asc)
 	if err != nil {
 		return nil, err

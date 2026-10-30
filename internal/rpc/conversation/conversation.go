@@ -19,6 +19,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -28,6 +29,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/tools/db/redisutil"
+
+	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -40,7 +43,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/grpc"
 )
 
 type conversationServer struct {
@@ -93,6 +95,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	msgClient := rpcli.NewMsgClient(msgConn)
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	pbconversation.RegisterConversationServer(server, &conversationServer{
+		config:                         config,
 		conversationNotificationSender: NewConversationNotificationSender(&config.NotificationConfig, msgClient),
 		conversationDatabase: controller.NewConversationDatabase(conversationDB,
 			redis.NewConversationRedis(rdb, &config.LocalCacheConfig, redis.GetRocksCacheOptions(), conversationDB), mgocli.GetTx()),
@@ -201,6 +204,9 @@ func (c *conversationServer) GetSortedConversationList(ctx context.Context, req 
 }
 
 func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbconversation.GetAllConversationsReq) (*pbconversation.GetAllConversationsResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, c.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	conversations, err := c.conversationDatabase.GetUserAllConversation(ctx, req.OwnerUserID)
 	if err != nil {
 		return nil, err

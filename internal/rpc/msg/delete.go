@@ -93,6 +93,9 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 }
 
 func (m *msgServer) DeleteMsgPhysicalBySeq(ctx context.Context, req *msg.DeleteMsgPhysicalBySeqReq) (*msg.DeleteMsgPhysicalBySeqResp, error) {
+	if err := authverify.CheckAdmin(ctx, m.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	err := m.MsgDatabase.DeleteMsgsPhysicalBySeqs(ctx, req.ConversationID, req.Seqs)
 	if err != nil {
 		return nil, err
