@@ -18,11 +18,15 @@ import (
 	"context"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	pbuser "github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/errs"
 )
 
 func (s *userServer) UserRegisterCount(ctx context.Context, req *pbuser.UserRegisterCountReq) (*pbuser.UserRegisterCountResp, error) {
+	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	if req.Start > req.End {
 		return nil, errs.ErrArgs.WrapMsg("start > end")
 	}

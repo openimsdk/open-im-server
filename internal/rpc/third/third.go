@@ -25,6 +25,7 @@ import (
 
 	"google.golang.org/grpc"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
@@ -121,6 +122,9 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 }
 
 func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {
+	if err := authverify.CheckAccessV3(ctx, req.Account, t.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	err = t.thirdDatabase.FcmUpdateToken(ctx, req.Account, int(req.PlatformID), req.FcmToken, req.ExpireTime)
 	if err != nil {
 		return nil, err
@@ -129,6 +133,9 @@ func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTo
 }
 
 func (t *thirdServer) SetAppBadge(ctx context.Context, req *third.SetAppBadgeReq) (resp *third.SetAppBadgeResp, err error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, t.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	err = t.thirdDatabase.SetAppBadge(ctx, req.UserID, int(req.AppUnreadCount))
 	if err != nil {
 		return nil, err
