@@ -150,6 +150,9 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 }
 
 func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (resp *msg.SearchMessageResp, err error) {
+	if err := authverify.CheckAdmin(ctx); err != nil {
+		return nil, err
+	}
 	// var chatLogs []*sdkws.MsgData
 	var chatLogs []*msg.SearchedMsgData
 	var total int64
