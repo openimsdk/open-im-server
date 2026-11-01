@@ -60,6 +60,7 @@ type WsServer struct {
 	onlineUserNum     atomic.Int64
 	onlineUserConnNum atomic.Int64
 	handshakeTimeout  time.Duration
+	wsMaxMsgLength    int64
 	writeBufferSize   int
 	validate          *validator.Validate
 	disCov            discovery.Conn
@@ -150,6 +151,7 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 		msgGatewayConfig: msgGatewayConfig,
 		port:             config.port,
 		wsMaxConnNum:     config.maxConnNum,
+		wsMaxMsgLength:   int64(config.messageMaxMsgLength),
 		writeBufferSize:  config.writeBufferSize,
 		handshakeTimeout: config.handshakeTimeout,
 		clientPool: sync.Pool{
@@ -541,7 +543,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := new(Client)
-	client.ResetClient(connContext, NewWebSocketClientConn(conn, maxMessageSize, pongWait, pingInterval), ws)
+	client.ResetClient(connContext, NewWebSocketClientConn(conn, ws.wsMaxMsgLength, pongWait, pingInterval), ws)
 
 	// Register the client with the server and start message processing
 	ws.registerChan <- client
