@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenIM Local Message Tester</title>
+    <style>
+      :root {
+        --bg: #f4f1ea;
+        --panel: #fffaf2;
+        --panel-2: #f0e7d8;
+        --border: #d8c8aa;
+        --text: #1f1b16;
+        --muted: #645948;
+        --accent: #b24c2f;
+        --accent-2: #284b63;
+        --ok: #1e6f5c;
+        --err: #aa2e25;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Avenir Next", "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(178, 76, 47, 0.12), transparent 30%),
+          radial-gradient(circle at bottom right, rgba(40, 75, 99, 0.16), transparent 35%),
+          linear-gradient(180deg, #f8f3ea 0%, var(--bg) 100%);
+      }
+
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(28px, 4vw, 44px);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+      }
+
+      p.lead {
+        margin: 0 0 24px;
+        max-width: 760px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 16px;
+      }
+
+      .card {
+        grid-column: span 12;
+        background: color-mix(in srgb, var(--panel) 92%, white);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 10px 30px rgba(31, 27, 22, 0.06);
+      }
+
+      .card.half {
+        grid-column: span 6;
+      }
+
+      .card h2 {
+        margin: 0 0 14px;
+        font-size: 18px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .row.single {
+        grid-template-columns: 1fr;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 11px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #fffdf8;
+        color: var(--text);
+        font: inherit;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 16px;
+        font: inherit;
+        cursor: pointer;
+        color: white;
+        background: var(--accent);
+        transition: transform 120ms ease, opacity 120ms ease;
+      }
+
+      button.alt {
+        background: var(--accent-2);
+      }
+
+      button.ghost {
+        background: #73624d;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: progress;
+        transform: none;
+      }
+
+      .hint {
+        margin-top: 10px;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .status {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        font-size: 14px;
+        background: var(--panel-2);
+      }
+
+      .status.ok {
+        color: var(--ok);
+        border: 1px solid color-mix(in srgb, var(--ok) 28%, white);
+      }
+
+      .status.err {
+        color: var(--err);
+        border: 1px solid color-mix(in srgb, var(--err) 28%, white);
+      }
+
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-family: "SFMono-Regular", "Consolas", monospace;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 860px) {
+        .card.half {
+          grid-column: span 12;
+        }
+
+        .row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>OpenIM Local Message Tester</h1>
+      <p class="lead">
+        这个页面只依赖浏览器和本地 OpenIM HTTP API。默认对接
+        <code>http://127.0.0.1:10002</code>，用于快速拿 token、发文本消息、查看原始响应。
+      </p>
+
+      <div class="grid">
+        <section class="card half">
+          <h2>连接配置</h2>
+          <div class="row">
+            <div>
+              <label for="apiBase">API Base URL</label>
+              <input id="apiBase" value="http://127.0.0.1:10002" />
+            </div>
+            <div>
+              <label for="wsBase">WebSocket Gateway</label>
+              <input id="wsBase" value="ws://127.0.0.1:10001" />
+            </div>
+          </div>
+          <div class="row single" style="margin-top: 12px">
+            <div>
+              <label for="operationID">Operation ID</label>
+              <input id="operationID" />
+            </div>
+          </div>
+          <div class="hint">
+            当前页面实际调用的是 HTTP API。WebSocket 地址先展示出来，后续如果你要测推送回包，可以直接在这个页面上扩展。
+          </div>
+        </section>
+
+        <section class="card half">
+          <h2>管理员 Token</h2>
+          <div class="row">
+            <div>
+              <label for="adminUserID">Admin User ID</label>
+              <input id="adminUserID" value="imAdmin" />
+            </div>
+            <div>
+              <label for="adminSecret">Secret</label>
+              <input id="adminSecret" value="openIM123" />
+            </div>
+          </div>
+          <div class="row single" style="margin-top: 12px">
+            <div>
+              <label for="adminToken">Admin Token</label>
+              <textarea id="adminToken" placeholder="点击按钮自动获取，或手动粘贴"></textarea>
+            </div>
+          </div>
+          <div class="actions">
+            <button id="getAdminTokenBtn">获取 Admin Token</button>
+          </div>
+          <div class="hint">
+            这里命中 <code>/auth/get_admin_token</code>。注意：
+            <code>imAdmin</code> 必须已经在你的本地环境里存在。
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>用户 Token</h2>
+          <div class="row">
+            <div>
+              <label for="userID">User ID</label>
+              <input id="userID" placeholder="例如 user_1" />
+            </div>
+            <div>
+              <label for="platformID">Platform ID</label>
+              <input id="platformID" type="number" value="5" />
+            </div>
+          </div>
+          <div class="row single" style="margin-top: 12px">
+            <div>
+              <label for="userToken">User Token</label>
+              <textarea id="userToken" placeholder="可选，用于单独验证 token 获取链路"></textarea>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="alt" id="getUserTokenBtn">获取 User Token</button>
+          </div>
+          <div class="hint">
+            这里命中 <code>/auth/get_user_token</code>，请求头使用上面的 admin token。
+            页面发消息本身不依赖 user token。
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>发送文本消息</h2>
+          <div class="row">
+            <div>
+              <label for="sendID">Send ID</label>
+              <input id="sendID" value="imAdmin" />
+            </div>
+            <div>
+              <label for="recvID">Recv ID</label>
+              <input id="recvID" placeholder="例如 user_2" />
+            </div>
+          </div>
+          <div class="row" style="margin-top: 12px">
+            <div>
+              <label for="sessionType">Session Type</label>
+              <select id="sessionType">
+                <option value="1" selected>1 - SingleChatType</option>
+              </select>
+            </div>
+            <div>
+              <label for="contentType">Content Type</label>
+              <select id="contentType">
+                <option value="101" selected>101 - Text</option>
+              </select>
+            </div>
+          </div>
+          <div class="row single" style="margin-top: 12px">
+            <div>
+              <label for="textContent">Text Content</label>
+              <textarea id="textContent">hello from localhost web</textarea>
+            </div>
+          </div>
+          <div class="actions">
+            <button id="sendTextBtn">发送文本消息</button>
+          </div>
+          <div class="hint">
+            这里命中 <code>/msg/send_msg</code>，当前只封装最简单的文本消息格式：
+            <code>{"content":{"content":"..."}}</code>。
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>状态</h2>
+          <div id="status" class="status"><pre>Ready.</pre></div>
+        </section>
+
+        <section class="card">
+          <h2>最后一次请求</h2>
+          <pre id="lastRequest">{}</pre>
+        </section>
+
+        <section class="card">
+          <h2>最后一次响应</h2>
+          <pre id="lastResponse">{}</pre>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+
+      const els = {
+        apiBase: $("apiBase"),
+        operationID: $("operationID"),
+        adminUserID: $("adminUserID"),
+        adminSecret: $("adminSecret"),
+        adminToken: $("adminToken"),
+        userID: $("userID"),
+        platformID: $("platformID"),
+        userToken: $("userToken"),
+        sendID: $("sendID"),
+        recvID: $("recvID"),
+        sessionType: $("sessionType"),
+        contentType: $("contentType"),
+        textContent: $("textContent"),
+        lastRequest: $("lastRequest"),
+        lastResponse: $("lastResponse"),
+        status: $("status"),
+        getAdminTokenBtn: $("getAdminTokenBtn"),
+        getUserTokenBtn: $("getUserTokenBtn"),
+        sendTextBtn: $("sendTextBtn"),
+      };
+
+      function pretty(value) {
+        return JSON.stringify(value, null, 2);
+      }
+
+      function setStatus(message, type = "ok") {
+        els.status.className = `status ${type}`;
+        els.status.innerHTML = `<pre>${message}</pre>`;
+      }
+
+      function setResponsePayload(payload) {
+        els.lastResponse.textContent = pretty(payload);
+      }
+
+      function ensureOperationID() {
+        if (!els.operationID.value.trim()) {
+          els.operationID.value = `web-${Date.now()}`;
+        }
+        return els.operationID.value.trim();
+      }
+
+      function setBusy(button, busy) {
+        button.disabled = busy;
+      }
+
+      async function postJSON(path, body, token = "") {
+        const url = `${els.apiBase.value.replace(/\/$/, "")}${path}`;
+        const operationID = ensureOperationID();
+        const headers = {
+          "Content-Type": "application/json",
+          operationID,
+          ...(token ? { token } : {}),
+        };
+        els.lastRequest.textContent = pretty({ url, headers, body });
+        setResponsePayload({ pending: true });
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort("Request timeout after 8s"), 8000);
+
+        let response;
+        try {
+          response = await fetch(url, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(body),
+            signal: controller.signal,
+          });
+        } catch (error) {
+          setResponsePayload({
+            networkError: true,
+            name: error instanceof Error ? error.name : "Error",
+            message: error instanceof Error ? error.message : String(error),
+            url,
+          });
+          throw error;
+        } finally {
+          clearTimeout(timeout);
+        }
+
+        const text = await response.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { raw: text };
+        }
+
+        setResponsePayload({
+          status: response.status,
+          ok: response.ok,
+          body: data,
+        });
+
+        return { response, data };
+      }
+
+      async function getAdminToken() {
+        const body = {
+          secret: els.adminSecret.value.trim(),
+          userID: els.adminUserID.value.trim(),
+        };
+        const { data } = await postJSON("/auth/get_admin_token", body);
+        const token = data?.data?.token || data?.token;
+        if (!token) {
+          throw new Error(`admin token missing: ${pretty(data)}`);
+        }
+        els.adminToken.value = token;
+        setStatus("Admin token acquired.", "ok");
+      }
+
+      async function getUserToken() {
+        const adminToken = els.adminToken.value.trim();
+        if (!adminToken) {
+          throw new Error("admin token is required");
+        }
+        const body = {
+          userID: els.userID.value.trim(),
+          platformID: Number(els.platformID.value),
+        };
+        const { data } = await postJSON("/auth/get_user_token", body, adminToken);
+        const token = data?.data?.token || data?.token;
+        if (!token) {
+          throw new Error(`user token missing: ${pretty(data)}`);
+        }
+        els.userToken.value = token;
+        setStatus("User token acquired.", "ok");
+      }
+
+      async function sendTextMessage() {
+        const adminToken = els.adminToken.value.trim();
+        if (!adminToken) {
+          throw new Error("admin token is required");
+        }
+        const recvID = els.recvID.value.trim();
+        if (!recvID) {
+          throw new Error("recvID is required");
+        }
+        const body = {
+          sendID: els.sendID.value.trim(),
+          recvID,
+          sessionType: Number(els.sessionType.value),
+          contentType: Number(els.contentType.value),
+          content: {
+            content: els.textContent.value,
+          },
+        };
+        await postJSON("/msg/send_msg", body, adminToken);
+        setStatus("Message request sent. Inspect the raw response below.", "ok");
+      }
+
+      async function run(button, fn) {
+        try {
+          setBusy(button, true);
+          setStatus("Running...", "ok");
+          await fn();
+        } catch (error) {
+          setResponsePayload({
+            error: true,
+            name: error instanceof Error ? error.name : "Error",
+            message: error instanceof Error ? error.message : String(error),
+          });
+          setStatus(error instanceof Error ? error.message : String(error), "err");
+        } finally {
+          setBusy(button, false);
+        }
+      }
+
+      els.getAdminTokenBtn.addEventListener("click", () => run(els.getAdminTokenBtn, getAdminToken));
+      els.getUserTokenBtn.addEventListener("click", () => run(els.getUserTokenBtn, getUserToken));
+      els.sendTextBtn.addEventListener("click", () => run(els.sendTextBtn, sendTextMessage));
+      ensureOperationID();
+    </script>
+  </body>
+</html>
