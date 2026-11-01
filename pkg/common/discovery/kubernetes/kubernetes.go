@@ -101,6 +101,7 @@ func (k *KubernetesConnManager) GetConns(ctx context.Context, serviceName string
 	// Check if another goroutine has already initialized the connections when we released the read lock
 	conns, exists = k.connMap[serviceName]
 	if exists {
+		k.mu.Unlock()
 		return conns, nil
 	}
 	k.mu.Unlock()
