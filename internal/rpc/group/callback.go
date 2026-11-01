@@ -341,10 +341,19 @@ func (g *groupServer) webhookBeforeSetGroupInfo(ctx context.Context, before *con
 		if resp.ApplyMemberFriend != nil {
 			req.GroupInfoForSet.ApplyMemberFriend = wrapperspb.Int32(*resp.ApplyMemberFriend)
 		}
-		datautil.NotNilReplace(&req.GroupInfoForSet.GroupID, &resp.GroupID)
-		datautil.NotNilReplace(&req.GroupInfoForSet.GroupName, &resp.GroupName)
-		datautil.NotNilReplace(&req.GroupInfoForSet.FaceURL, &resp.FaceURL)
-		datautil.NotNilReplace(&req.GroupInfoForSet.Introduction, &resp.Introduction)
+		// A zero value means the callback did not provide the field; keep the request value.
+		if resp.GroupID != "" {
+			req.GroupInfoForSet.GroupID = resp.GroupID
+		}
+		if resp.GroupName != "" {
+			req.GroupInfoForSet.GroupName = resp.GroupName
+		}
+		if resp.FaceURL != "" {
+			req.GroupInfoForSet.FaceURL = resp.FaceURL
+		}
+		if resp.Introduction != "" {
+			req.GroupInfoForSet.Introduction = resp.Introduction
+		}
 		return nil
 	})
 }
@@ -405,14 +414,31 @@ func (g *groupServer) webhookBeforeSetGroupInfoEx(ctx context.Context, before *c
 			return err
 		}
 
-		datautil.NotNilReplace(&req.GroupID, &resp.GroupID)
-		datautil.NotNilReplace(&req.GroupName, &resp.GroupName)
-		datautil.NotNilReplace(&req.FaceURL, &resp.FaceURL)
-		datautil.NotNilReplace(&req.Introduction, &resp.Introduction)
-		datautil.NotNilReplace(&req.Ex, &resp.Ex)
-		datautil.NotNilReplace(&req.NeedVerification, &resp.NeedVerification)
-		datautil.NotNilReplace(&req.LookMemberInfo, &resp.LookMemberInfo)
-		datautil.NotNilReplace(&req.ApplyMemberFriend, &resp.ApplyMemberFriend)
+		// Only overwrite fields the callback explicitly provided, to avoid wiping the request's partial updates.
+		if resp.GroupID != "" {
+			req.GroupID = resp.GroupID
+		}
+		if resp.GroupName != nil {
+			req.GroupName = resp.GroupName
+		}
+		if resp.FaceURL != nil {
+			req.FaceURL = resp.FaceURL
+		}
+		if resp.Introduction != nil {
+			req.Introduction = resp.Introduction
+		}
+		if resp.Ex != nil {
+			req.Ex = resp.Ex
+		}
+		if resp.NeedVerification != nil {
+			req.NeedVerification = resp.NeedVerification
+		}
+		if resp.LookMemberInfo != nil {
+			req.LookMemberInfo = resp.LookMemberInfo
+		}
+		if resp.ApplyMemberFriend != nil {
+			req.ApplyMemberFriend = resp.ApplyMemberFriend
+		}
 
 		return nil
 	})
