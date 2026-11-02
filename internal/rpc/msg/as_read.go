@@ -33,6 +33,9 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
 	}
+	if err := m.ConversationLocalCache.CheckConversationAccess(ctx, req.UserID, req.ConversationIDs); err != nil {
+		return nil, err
+	}
 	var conversationIDs []string
 	if len(req.ConversationIDs) == 0 {
 		var err error

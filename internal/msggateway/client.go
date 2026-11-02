@@ -23,6 +23,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
@@ -172,6 +173,7 @@ func (c *Client) handleMessage(message []byte) error {
 	ctx := mcontext.WithMustInfoCtx(
 		[]string{binaryReq.OperationID, binaryReq.SendID, constant.PlatformIDToName(c.PlatformID), c.ctx.GetConnID()},
 	)
+	ctx = authverify.WithIMAdminUserIDs(ctx, c.longConnServer.(*WsServer).msgGatewayConfig.Share.IMAdminUser.UserIDs)
 
 	log.ZDebug(ctx, "gateway req message", "req", binaryReq.String())
 

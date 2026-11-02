@@ -17,12 +17,15 @@ package msggateway
 import (
 	"context"
 	"encoding/json"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"sync"
 
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/protocol/sdkws"
@@ -153,6 +156,17 @@ func (g *GrpcHandler) SendMessage(ctx context.Context, data *Req) ([]byte, error
 	if err := proto.Unmarshal(data.Data, &msgData); err != nil {
 		return nil, errs.WrapMsg(err, "SendMessage: error unmarshaling message data", "action", "unmarshal", "dataType", "MsgData")
 	}
+	if err := authverify.CheckAccess(ctx, msgData.SendID); err != nil {
+		return nil, err
+	}
+	if !authverify.IsAdmin(ctx) {
+		if msgData.ContentType >= constant.NotificationBegin && msgData.ContentType <= constant.NotificationEnd {
+			return nil, errs.ErrNoPermission.WrapMsg("SendMessage: clients cannot send notification content types")
+		}
+		if msgData.SessionType == constant.NotificationChatType || msgprocessor.IsNotificationByMsg(&msgData) {
+			return nil, errs.ErrNoPermission.WrapMsg("SendMessage: clients cannot send to notification sessions")
+		}
+	}
 
 	if err := g.validate.Struct(&msgData); err != nil {
 		return nil, errs.WrapMsg(err, "SendMessage: message data validation failed", "action", "validate", "dataType", "MsgData")
@@ -189,6 +203,9 @@ func (g *GrpcHandler) PullMessageBySeqList(ctx context.Context, data *Req) ([]by
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, errs.WrapMsg(err, "err proto unmarshal", "action", "unmarshal", "dataType", "PullMessageBySeqsReq")
 	}
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	if err := g.validate.Struct(data); err != nil {
 		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "PullMessageBySeqsReq")
 	}
@@ -207,6 +224,9 @@ func (g *GrpcHandler) GetConversationsHasReadAndMaxSeq(ctx context.Context, data
 	req := msg.GetConversationsHasReadAndMaxSeqReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, errs.WrapMsg(err, "err proto unmarshal", "action", "unmarshal", "dataType", "GetConversationsHasReadAndMaxSeq")
+	}
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
 	}
 	if err := g.validate.Struct(data); err != nil {
 		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "GetConversationsHasReadAndMaxSeq")
@@ -227,6 +247,9 @@ func (g *GrpcHandler) GetSeqMessage(ctx context.Context, data *Req) ([]byte, err
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, errs.WrapMsg(err, "error unmarshaling request", "action", "unmarshal", "dataType", "GetSeqMessage")
 	}
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	if err := g.validate.Struct(data); err != nil {
 		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "GetSeqMessage")
 	}
@@ -245,6 +268,9 @@ func (g *GrpcHandler) UserLogout(ctx context.Context, data *Req) ([]byte, error)
 	req := push.DelUserPushTokenReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, errs.WrapMsg(err, "error unmarshaling request", "action", "unmarshal", "dataType", "DelUserPushTokenReq")
+	}
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
 	}
 	resp, err := g.pushClient.PushMsgServiceClient.DelUserPushToken(ctx, &req)
 	if err != nil {
@@ -271,6 +297,9 @@ func (g *GrpcHandler) SetUserDeviceBackground(ctx context.Context, data *Req) ([
 func (g *GrpcHandler) GetLastMessage(ctx context.Context, data *Req) ([]byte, error) {
 	var req msg.GetLastMessageReq
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
+		return nil, err
+	}
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	resp, err := g.msgClient.GetLastMessage(ctx, &req)
