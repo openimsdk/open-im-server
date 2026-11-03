@@ -3,18 +3,21 @@ package push
 import (
 	"context"
 
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	pbpush "github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery"
-	"google.golang.org/grpc"
 )
 
 type pushServer struct {
 	pbpush.UnimplementedPushMsgServiceServer
+	imAdminUserID []string
 	database      controller.PushDatabase
 	disCov        discovery.SvcDiscoveryRegistry
 	offlinePusher offlinepush.OfflinePusher
@@ -38,6 +41,9 @@ type Config struct {
 
 func (p pushServer) DelUserPushToken(ctx context.Context,
 	req *pbpush.DelUserPushTokenReq) (resp *pbpush.DelUserPushTokenResp, err error) {
+	if err = authverify.CheckAccessV3(ctx, req.UserID, p.imAdminUserID); err != nil {
+		return nil, err
+	}
 	if err = p.database.DelFcmToken(ctx, req.UserID, int(req.PlatformID)); err != nil {
 		return nil, err
 	}
@@ -68,6 +74,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	}
 
 	pbpush.RegisterPushMsgServiceServer(server, &pushServer{
+		imAdminUserID: config.Share.IMAdminUserID,
 		database:      database,
 		disCov:        client,
 		offlinePusher: offlinePusher,
