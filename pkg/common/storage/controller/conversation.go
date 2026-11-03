@@ -142,7 +142,10 @@ func (c *conversationDatabase) SetUsersConversationFieldTx(ctx context.Context, 
 			if err != nil {
 				return err
 			}
-			cache = cache.DelConversationIDs(NotUserIDs...).DelUserConversationIDsHash(NotUserIDs...).DelConversations(conversation.ConversationID, NotUserIDs...)
+			cache = cache.DelConversationIDs(NotUserIDs...).
+				DelUserConversationIDsHash(NotUserIDs...).
+				DelUsersConversation(conversation.ConversationID, NotUserIDs...).
+				DelConversationVersionUserIDs(NotUserIDs...)
 		}
 		return cache.ChainExecDel(ctx)
 	})
@@ -335,7 +338,9 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 			conversations = append(conversations, &conversation)
 			cache = cache.DelConversations(v, conversationID).DelConversationNotReceiveMessageUserIDs(conversationID)
 		}
-		cache = cache.DelConversationIDs(notExistUserIDs...).DelUserConversationIDsHash(notExistUserIDs...)
+		cache = cache.DelConversationIDs(notExistUserIDs...).
+			DelUserConversationIDsHash(notExistUserIDs...).
+			DelConversationVersionUserIDs(userIDs...)
 		if len(conversations) > 0 {
 			err = c.conversationDB.Create(ctx, conversations)
 			if err != nil {
