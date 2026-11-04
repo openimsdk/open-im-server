@@ -98,7 +98,7 @@ func (ws *WsServer) SetDiscoveryRegistry(ctx context.Context, disCov discovery.S
 	}
 	ws.userClient = rpcli.NewUserClient(userConn)
 	ws.authClient = rpcli.NewAuthClient(authConn)
-	ws.MessageHandler = NewGrpcHandler(ws.validate, rpcli.NewMsgClient(msgConn), rpcli.NewPushMsgServiceClient(pushConn), config.Share.IMAdminUserID)
+	ws.MessageHandler = NewGrpcHandler(ws.validate, rpcli.NewMsgClient(msgConn), rpcli.NewPushMsgServiceClient(pushConn))
 	ws.disCov = disCov
 	return nil
 }

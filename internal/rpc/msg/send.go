@@ -17,6 +17,7 @@ package msg
 import (
 	"context"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
@@ -32,20 +33,23 @@ import (
 )
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.SendMsgResp, error) {
-	if req.MsgData != nil {
-		m.encapsulateMsgData(req.MsgData)
-		switch req.MsgData.SessionType {
-		case constant.SingleChatType:
-			return m.sendMsgSingleChat(ctx, req)
-		case constant.NotificationChatType:
-			return m.sendMsgNotification(ctx, req)
-		case constant.ReadGroupChatType:
-			return m.sendMsgGroupChat(ctx, req)
-		default:
-			return nil, errs.ErrArgs.WrapMsg("unknown sessionType")
-		}
+	if req.MsgData == nil {
+		return nil, errs.ErrArgs.WrapMsg("msgData is nil")
 	}
-	return nil, errs.ErrArgs.WrapMsg("msgData is nil")
+	if err := authverify.CheckAccessV3(ctx, req.MsgData.SendID, m.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	m.encapsulateMsgData(req.MsgData)
+	switch req.MsgData.SessionType {
+	case constant.SingleChatType:
+		return m.sendMsgSingleChat(ctx, req)
+	case constant.NotificationChatType:
+		return m.sendMsgNotification(ctx, req)
+	case constant.ReadGroupChatType:
+		return m.sendMsgGroupChat(ctx, req)
+	default:
+		return nil, errs.ErrArgs.WrapMsg("unknown sessionType")
+	}
 }
 
 func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
