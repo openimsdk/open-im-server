@@ -81,7 +81,7 @@ type GroupDatabase interface {
 	// SearchGroupMember searches for group members based on a keyword, group ID, and pagination settings.
 	SearchGroupMember(ctx context.Context, keyword string, groupID string, pagination pagination.Pagination) (int64, []*model.GroupMember, error)
 	// HandlerGroupRequest processes a group join request with a specified result.
-	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *model.GroupMember) error
+	HandlerGroupRequest(ctx context.Context, request *model.GroupRequest, member *model.GroupMember) error
 	// DeleteGroupMember removes specified users from a group.
 	DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	// MapGroupMemberUserID maps group IDs to their members' simplified user IDs.
@@ -359,9 +359,9 @@ func (g *groupDatabase) SearchGroupMember(ctx context.Context, keyword string, g
 	return g.groupMemberDB.SearchMember(ctx, keyword, groupID, pagination)
 }
 
-func (g *groupDatabase) HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *model.GroupMember) error {
+func (g *groupDatabase) HandlerGroupRequest(ctx context.Context, request *model.GroupRequest, member *model.GroupMember) error {
 	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
-		if err := g.groupRequestDB.UpdateHandler(ctx, groupID, userID, handledMsg, handleResult); err != nil {
+		if err := g.groupRequestDB.UpdateHandler(ctx, request); err != nil {
 			return err
 		}
 		if member != nil {
@@ -369,14 +369,14 @@ func (g *groupDatabase) HandlerGroupRequest(ctx context.Context, groupID string,
 			if err := g.groupMemberDB.Create(ctx, []*model.GroupMember{member}); err != nil {
 				return err
 			}
-			c = c.DelGroupMembersHash(groupID).
-				DelGroupMembersInfo(groupID, member.UserID).
-				DelGroupMemberIDs(groupID).
-				DelGroupsMemberNum(groupID).
+			c = c.DelGroupMembersHash(request.GroupID).
+				DelGroupMembersInfo(request.GroupID, member.UserID).
+				DelGroupMemberIDs(request.GroupID).
+				DelGroupsMemberNum(request.GroupID).
 				DelJoinedGroupID(member.UserID).
-				DelGroupRoleLevel(groupID, []int32{member.RoleLevel}).
-				DelMaxJoinGroupVersion(userID).
-				DelMaxGroupMemberVersion(groupID)
+				DelGroupRoleLevel(request.GroupID, []int32{member.RoleLevel}).
+				DelMaxJoinGroupVersion(request.UserID).
+				DelMaxGroupMemberVersion(request.GroupID)
 			if err := c.ChainExecDel(ctx); err != nil {
 				return err
 			}
