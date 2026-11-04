@@ -24,11 +24,16 @@ import (
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
 	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	conversationIDs := datautil.Slice(req.SeqRanges, func(e *sdkws.SeqRange) string { return e.ConversationID })
+	if err := m.ConversationLocalCache.CheckConversationAccess(ctx, req.UserID, conversationIDs, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	resp := &sdkws.PullMessageBySeqsResp{}
@@ -89,6 +94,13 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 }
 
 func (m *msgServer) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq) (*msg.GetSeqMessageResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	conversationIDs := datautil.Slice(req.Conversations, func(e *msg.ConversationSeqs) string { return e.ConversationID })
+	if err := m.ConversationLocalCache.CheckConversationAccess(ctx, req.UserID, conversationIDs, m.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	resp := &msg.GetSeqMessageResp{
 		Msgs:             make(map[string]*sdkws.PullMsgs),
 		NotificationMsgs: make(map[string]*sdkws.PullMsgs),
@@ -267,6 +279,12 @@ func (m *msgServer) GetServerTime(ctx context.Context, _ *msg.GetServerTimeReq) 
 }
 
 func (m *msgServer) GetLastMessage(ctx context.Context, req *msg.GetLastMessageReq) (*msg.GetLastMessageResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	if err := m.ConversationLocalCache.CheckConversationAccess(ctx, req.UserID, req.ConversationIDs, m.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	msgs, err := m.MsgDatabase.GetLastMessage(ctx, req.ConversationIDs, req.UserID)
 	if err != nil {
 		return nil, err

@@ -18,6 +18,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/redis/go-redis/v9"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
@@ -25,10 +28,15 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/redis/go-redis/v9"
 )
 
 func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *msg.GetConversationsHasReadAndMaxSeqReq) (*msg.GetConversationsHasReadAndMaxSeqResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	if err := m.ConversationLocalCache.CheckConversationAccess(ctx, req.UserID, req.ConversationIDs, m.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	var conversationIDs []string
 	if len(req.ConversationIDs) == 0 {
 		var err error
