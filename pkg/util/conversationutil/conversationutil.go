@@ -52,3 +52,16 @@ func GetSeqsBeginEnd(seqs []int64) (int64, int64) {
 	}
 	return seqs[0], seqs[len(seqs)-1]
 }
+
+func GetPossibleRealConversationIDs(conversationID string) []string {
+	if !IsNotificationConversationID(conversationID) {
+		return []string{conversationID}
+	}
+	suffix := strings.TrimPrefix(conversationID, "n_")
+	return []string{
+		"si_" + suffix,
+		"sn_" + suffix,
+		"g_" + suffix,
+		"sg_" + suffix,
+	}
+}

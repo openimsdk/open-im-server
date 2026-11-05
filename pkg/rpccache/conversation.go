@@ -155,20 +155,11 @@ func (c *ConversationLocalCache) CheckConversationAccess(ctx context.Context, us
 	}
 	candidateSet := make(map[string]struct{}, len(pending))
 	for conversationID := range pending {
-		if conversationutil.IsNotificationConversationID(conversationID) {
-			suffix := conversationID[2:]
-			candidateSet["si_"+suffix] = struct{}{}
-			candidateSet["sn_"+suffix] = struct{}{}
-			candidateSet["g_"+suffix] = struct{}{}
-			candidateSet[conversationutil.GenGroupConversationID(suffix)] = struct{}{}
-		} else {
-			candidateSet[conversationID] = struct{}{}
+		for _, rid := range conversationutil.GetPossibleRealConversationIDs(conversationID) {
+			candidateSet[rid] = struct{}{}
 		}
 	}
-	candidates := make([]string, 0, len(candidateSet))
-	for conversationID := range candidateSet {
-		candidates = append(candidates, conversationID)
-	}
+	candidates := datautil.Keys(candidateSet)
 	owned, err := c.GetConversations(ctx, userID, candidates)
 	if err != nil {
 		return err
