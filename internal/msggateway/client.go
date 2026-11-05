@@ -172,7 +172,6 @@ func (c *Client) handleMessage(message []byte) error {
 	ctx := mcontext.WithMustInfoCtx(
 		[]string{binaryReq.OperationID, binaryReq.SendID, constant.PlatformIDToName(c.PlatformID), c.ctx.GetConnID()},
 	)
-
 	log.ZDebug(ctx, "gateway req message", "req", binaryReq.String())
 
 	var (

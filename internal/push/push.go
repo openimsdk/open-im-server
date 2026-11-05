@@ -44,6 +44,9 @@ type Config struct {
 
 func (p pushServer) DelUserPushToken(ctx context.Context,
 	req *pbpush.DelUserPushTokenReq) (resp *pbpush.DelUserPushTokenResp, err error) {
+	if err = authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	if err = p.database.DelFcmToken(ctx, req.UserID, int(req.PlatformID)); err != nil {
 		return nil, err
 	}

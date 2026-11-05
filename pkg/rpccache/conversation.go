@@ -17,16 +17,19 @@ package rpccache
 import (
 	"context"
 
+	"github.com/redis/go-redis/v9"
+	"golang.org/x/sync/errgroup"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/redis/go-redis/v9"
-	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -136,6 +139,39 @@ func (c *ConversationLocalCache) GetConversations(ctx context.Context, ownerUser
 		conversations = append(conversations, conversation)
 	}
 	return conversations, nil
+}
+
+func (c *ConversationLocalCache) CheckConversationAccess(ctx context.Context, userID string, conversationIDs []string) error {
+	if len(conversationIDs) == 0 || authverify.IsAdmin(ctx) {
+		return nil
+	}
+	pending := make(map[string]struct{}, len(conversationIDs))
+	for _, conversationID := range conversationIDs {
+		pending[conversationID] = struct{}{}
+	}
+	delete(pending, conversationutil.GetSelfNotificationConversationID(userID))
+	if len(pending) == 0 {
+		return nil
+	}
+	candidateSet := make(map[string]struct{}, len(pending))
+	for conversationID := range pending {
+		for _, rid := range conversationutil.GetPossibleRealConversationIDs(conversationID) {
+			candidateSet[rid] = struct{}{}
+		}
+	}
+	candidates := datautil.Keys(candidateSet)
+	owned, err := c.GetConversations(ctx, userID, candidates)
+	if err != nil {
+		return err
+	}
+	for _, conversation := range owned {
+		delete(pending, conversation.ConversationID)
+		delete(pending, conversationutil.GetNotificationConversationIDByConversationID(conversation.ConversationID))
+	}
+	if len(pending) > 0 {
+		return errs.ErrNoPermission.WrapMsg("conversation does not belong to user")
+	}
+	return nil
 }
 
 func (c *ConversationLocalCache) getConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) (val *pbconversation.GetConversationNotReceiveMessageUserIDsResp, err error) {

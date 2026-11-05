@@ -32,6 +32,10 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
 	}
+	conversationIDs := datautil.Slice(req.SeqRanges, func(e *sdkws.SeqRange) string { return e.ConversationID })
+	if err := m.ConversationLocalCache.CheckConversationAccess(ctx, req.UserID, conversationIDs); err != nil {
+		return nil, err
+	}
 	resp := &sdkws.PullMessageBySeqsResp{}
 	resp.Msgs = make(map[string]*sdkws.PullMsgs)
 	resp.NotificationMsgs = make(map[string]*sdkws.PullMsgs)
@@ -90,6 +94,13 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 }
 
 func (m *msgServer) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq) (*msg.GetSeqMessageResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
+	conversationIDs := datautil.Slice(req.Conversations, func(e *msg.ConversationSeqs) string { return e.ConversationID })
+	if err := m.ConversationLocalCache.CheckConversationAccess(ctx, req.UserID, conversationIDs); err != nil {
+		return nil, err
+	}
 	resp := &msg.GetSeqMessageResp{
 		Msgs:             make(map[string]*sdkws.PullMsgs),
 		NotificationMsgs: make(map[string]*sdkws.PullMsgs),
@@ -253,6 +264,12 @@ func (m *msgServer) GetServerTime(ctx context.Context, _ *msg.GetServerTimeReq) 
 }
 
 func (m *msgServer) GetLastMessage(ctx context.Context, req *msg.GetLastMessageReq) (*msg.GetLastMessageResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
+	if err := m.ConversationLocalCache.CheckConversationAccess(ctx, req.UserID, req.ConversationIDs); err != nil {
+		return nil, err
+	}
 	msgs, err := m.MsgDatabase.GetLastMessage(ctx, req.ConversationIDs, req.UserID)
 	if err != nil {
 		return nil, err

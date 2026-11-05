@@ -17,12 +17,14 @@ package msggateway
 import (
 	"context"
 	"encoding/json"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"sync"
 
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/protocol/sdkws"
@@ -152,6 +154,12 @@ func (g *GrpcHandler) SendMessage(ctx context.Context, data *Req) ([]byte, error
 	var msgData sdkws.MsgData
 	if err := proto.Unmarshal(data.Data, &msgData); err != nil {
 		return nil, errs.WrapMsg(err, "SendMessage: error unmarshaling message data", "action", "unmarshal", "dataType", "MsgData")
+	}
+	if msgData.ContentType >= constant.NotificationBegin && msgData.ContentType <= constant.NotificationEnd {
+		return nil, errs.ErrNoPermission.WrapMsg("SendMessage: clients cannot send notification content types")
+	}
+	if msgData.SessionType == constant.NotificationChatType || msgprocessor.IsNotificationByMsg(&msgData) {
+		return nil, errs.ErrNoPermission.WrapMsg("SendMessage: clients cannot send to notification sessions")
 	}
 
 	if err := g.validate.Struct(&msgData); err != nil {
