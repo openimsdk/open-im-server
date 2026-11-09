@@ -20,11 +20,11 @@ import (
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"github.com/openimsdk/tools/s3/disable"
+
+	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -40,7 +40,6 @@ import (
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
-	"google.golang.org/grpc"
 )
 
 type thirdServer struct {
@@ -83,30 +82,12 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	var thirdCache cache.ThirdCache
-	if rdb == nil {
-		tc, err := mgo.NewCacheMgo(mgocli.GetDB())
-		if err != nil {
-			return err
-		}
-		thirdCache = mcache.NewThirdCache(tc)
-	} else {
-		thirdCache = redis.NewThirdCache(rdb)
-	}
+	thirdCache := redis.NewThirdCache(rdb)
 	// Select the oss method according to the profile policy
 	var o s3.Interface
 	switch enable := config.RpcConfig.Object.Enable; enable {
 	case "minio":
-		var minioCache minio.Cache
-		if rdb == nil {
-			mc, err := mgo.NewCacheMgo(mgocli.GetDB())
-			if err != nil {
-				return err
-			}
-			minioCache = mcache.NewMinioCache(mc)
-		} else {
-			minioCache = redis.NewMinioCache(rdb)
-		}
+		minioCache := redis.NewMinioCache(rdb)
 		o, err = minio.NewMinio(ctx, minioCache, *config.MinioConfig.Build())
 	case "cos":
 		o, err = cos.NewCos(*config.RpcConfig.Object.Cos.Build())
@@ -141,6 +122,9 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 }
 
 func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {
+	if err := authverify.CheckAccess(ctx, req.Account); err != nil {
+		return nil, err
+	}
 	err = t.thirdDatabase.FcmUpdateToken(ctx, req.Account, int(req.PlatformID), req.FcmToken, req.ExpireTime)
 	if err != nil {
 		return nil, err

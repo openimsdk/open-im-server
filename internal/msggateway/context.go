@@ -15,6 +15,8 @@
 package msggateway
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -24,9 +26,20 @@ import (
 
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/utils/encrypt"
-	"github.com/openimsdk/tools/utils/stringutil"
 	"github.com/openimsdk/tools/utils/timeutil"
 )
+
+type UserConnContextInfo struct {
+	Token        string `json:"token"`
+	UserID       string `json:"userID"`
+	PlatformID   int    `json:"platformID"`
+	OperationID  string `json:"operationID"`
+	Compression  string `json:"compression"`
+	SDKType      string `json:"sdkType"`
+	SendResponse bool   `json:"sendResponse"`
+	Background   bool   `json:"background"`
+	SDKVersion   string `json:"sdkVersion"`
+}
 
 type UserConnContext struct {
 	RespWriter http.ResponseWriter
@@ -35,6 +48,7 @@ type UserConnContext struct {
 	Method     string
 	RemoteAddr string
 	ConnID     string
+	info       *UserConnContextInfo
 }
 
 func (c *UserConnContext) Deadline() (deadline time.Time, ok bool) {
@@ -58,9 +72,11 @@ func (c *UserConnContext) Value(key any) any {
 	case constant.ConnID:
 		return c.GetConnID()
 	case constant.OpUserPlatform:
-		return constant.PlatformIDToName(stringutil.StringToInt(c.GetPlatformID()))
+		return c.GetPlatformID()
 	case constant.RemoteAddr:
 		return c.RemoteAddr
+	case SDKVersion:
+		return c.info.SDKVersion
 	default:
 		return ""
 	}
@@ -83,28 +99,90 @@ func newContext(respWriter http.ResponseWriter, req *http.Request) *UserConnCont
 
 func newTempContext() *UserConnContext {
 	return &UserConnContext{
-		Req: &http.Request{URL: &url.URL{}},
+		Req:  &http.Request{URL: &url.URL{}},
+		info: &UserConnContextInfo{},
 	}
+}
+
+func (c *UserConnContext) ParseEssentialArgs() error {
+	query := c.Req.URL.Query()
+	if data := query.Get("v"); data != "" {
+		return c.parseByJson(data)
+	} else {
+		return c.parseByQuery(query, c.Req.Header)
+	}
+}
+
+func (c *UserConnContext) parseByQuery(query url.Values, header http.Header) error {
+	info := UserConnContextInfo{
+		Token:       query.Get(Token),
+		UserID:      query.Get(WsUserID),
+		OperationID: query.Get(OperationID),
+		Compression: query.Get(Compression),
+		SDKType:     query.Get(SDKType),
+		SDKVersion:  query.Get(SDKVersion),
+	}
+	platformID, err := strconv.Atoi(query.Get(PlatformID))
+	if err != nil {
+		return servererrs.ErrConnArgsErr.WrapMsg("platformID is not int")
+	}
+	info.PlatformID = platformID
+	if val := query.Get(SendResponse); val != "" {
+		ok, err := strconv.ParseBool(val)
+		if err != nil {
+			return servererrs.ErrConnArgsErr.WrapMsg("isMsgResp is not bool")
+		}
+		info.SendResponse = ok
+	}
+	if info.Compression == "" {
+		info.Compression = header.Get(Compression)
+	}
+	background, err := strconv.ParseBool(query.Get(BackgroundStatus))
+	if err != nil {
+		return err
+	}
+	info.Background = background
+	return c.checkInfo(&info)
+}
+
+func (c *UserConnContext) parseByJson(data string) error {
+	reqInfo, err := base64.RawURLEncoding.DecodeString(data)
+	if err != nil {
+		return servererrs.ErrConnArgsErr.WrapMsg("data is not base64")
+	}
+	var info UserConnContextInfo
+	if err := json.Unmarshal(reqInfo, &info); err != nil {
+		return servererrs.ErrConnArgsErr.WrapMsg("data is not json", "info", err.Error())
+	}
+	return c.checkInfo(&info)
+}
+
+func (c *UserConnContext) checkInfo(info *UserConnContextInfo) error {
+	if info.OperationID == "" {
+		return servererrs.ErrConnArgsErr.WrapMsg("operationID is empty")
+	}
+	if info.Token == "" {
+		return servererrs.ErrConnArgsErr.WrapMsg("token is empty")
+	}
+	if info.UserID == "" {
+		return servererrs.ErrConnArgsErr.WrapMsg("sendID is empty")
+	}
+	if _, ok := constant.PlatformID2Name[info.PlatformID]; !ok {
+		return servererrs.ErrConnArgsErr.WrapMsg("platformID is invalid")
+	}
+	switch info.SDKType {
+	case "":
+		info.SDKType = GoSDK
+	case GoSDK, JsSDK:
+	default:
+		return servererrs.ErrConnArgsErr.WrapMsg("sdkType is invalid")
+	}
+	c.info = info
+	return nil
 }
 
 func (c *UserConnContext) GetRemoteAddr() string {
 	return c.RemoteAddr
-}
-
-func (c *UserConnContext) Query(key string) (string, bool) {
-	var value string
-	if value = c.Req.URL.Query().Get(key); value == "" {
-		return value, false
-	}
-	return value, true
-}
-
-func (c *UserConnContext) GetHeader(key string) (string, bool) {
-	var value string
-	if value = c.Req.Header.Get(key); value == "" {
-		return value, false
-	}
-	return value, true
 }
 
 func (c *UserConnContext) SetHeader(key, value string) {
@@ -120,97 +198,76 @@ func (c *UserConnContext) GetConnID() string {
 }
 
 func (c *UserConnContext) GetUserID() string {
-	return c.Req.URL.Query().Get(WsUserID)
+	if c == nil || c.info == nil {
+		return ""
+	}
+	return c.info.UserID
 }
 
-func (c *UserConnContext) GetPlatformID() string {
-	return c.Req.URL.Query().Get(PlatformID)
+func (c *UserConnContext) GetPlatformID() int {
+	if c == nil || c.info == nil {
+		return 0
+	}
+	return c.info.PlatformID
 }
 
 func (c *UserConnContext) GetOperationID() string {
-	return c.Req.URL.Query().Get(OperationID)
+	if c == nil || c.info == nil {
+		return ""
+	}
+	return c.info.OperationID
 }
 
 func (c *UserConnContext) SetOperationID(operationID string) {
-	values := c.Req.URL.Query()
-	values.Set(OperationID, operationID)
-	c.Req.URL.RawQuery = values.Encode()
+	if c.info == nil {
+		c.info = &UserConnContextInfo{}
+	}
+	c.info.OperationID = operationID
 }
 
 func (c *UserConnContext) GetToken() string {
-	return c.Req.URL.Query().Get(Token)
-}
-
-func (c *UserConnContext) GetSDKVersion() string {
-	return c.Req.URL.Query().Get(SDKVersion)
+	if c == nil || c.info == nil {
+		return ""
+	}
+	return c.info.Token
 }
 
 func (c *UserConnContext) GetCompression() bool {
-	compression, exists := c.Query(Compression)
-	if exists && compression == GzipCompressionProtocol {
-		return true
-	} else {
-		compression, exists := c.GetHeader(Compression)
-		if exists && compression == GzipCompressionProtocol {
-			return true
-		}
-	}
-	return false
+	return c != nil && c.info != nil && c.info.Compression == GzipCompressionProtocol
 }
 
 func (c *UserConnContext) GetSDKType() string {
-	sdkType := c.Req.URL.Query().Get(SDKType)
-	if sdkType == "" {
-		sdkType = GoSDK
+	if c == nil || c.info == nil {
+		return GoSDK
 	}
-	return sdkType
+	switch c.info.SDKType {
+	case "", GoSDK:
+		return GoSDK
+	case JsSDK:
+		return JsSDK
+	default:
+		return ""
+	}
+}
+
+func (c *UserConnContext) GetSDKVersion() string {
+	if c == nil || c.info == nil {
+		return ""
+	}
+	return c.info.SDKVersion
 }
 
 func (c *UserConnContext) ShouldSendResp() bool {
-	errResp, exists := c.Query(SendResponse)
-	if exists {
-		b, err := strconv.ParseBool(errResp)
-		if err != nil {
-			return false
-		} else {
-			return b
-		}
-	}
-	return false
+	return c != nil && c.info != nil && c.info.SendResponse
 }
 
 func (c *UserConnContext) SetToken(token string) {
-	c.Req.URL.RawQuery = Token + "=" + token
+	if c.info == nil {
+		c.info = &UserConnContextInfo{}
+	}
+	c.info.Token = token
 }
 
 func (c *UserConnContext) GetBackground() bool {
-	b, err := strconv.ParseBool(c.Req.URL.Query().Get(BackgroundStatus))
-	if err != nil {
-		return false
-	}
-	return b
-}
-func (c *UserConnContext) ParseEssentialArgs() error {
-	_, exists := c.Query(Token)
-	if !exists {
-		return servererrs.ErrConnArgsErr.WrapMsg("token is empty")
-	}
-	_, exists = c.Query(WsUserID)
-	if !exists {
-		return servererrs.ErrConnArgsErr.WrapMsg("sendID is empty")
-	}
-	platformIDStr, exists := c.Query(PlatformID)
-	if !exists {
-		return servererrs.ErrConnArgsErr.WrapMsg("platformID is empty")
-	}
-	_, err := strconv.Atoi(platformIDStr)
-	if err != nil {
-		return servererrs.ErrConnArgsErr.WrapMsg("platformID is not int")
-	}
-	switch sdkType, _ := c.Query(SDKType); sdkType {
-	case "", GoSDK, JsSDK:
-	default:
-		return servererrs.ErrConnArgsErr.WrapMsg("sdkType is not go or js")
-	}
-	return nil
+	return c != nil && c.info != nil && c.info.Background
 }

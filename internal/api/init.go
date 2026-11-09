@@ -23,13 +23,14 @@ import (
 	"strconv"
 	"time"
 
+	"google.golang.org/grpc"
+
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/network"
 	"github.com/openimsdk/tools/utils/runtimeenv"
-	"google.golang.org/grpc"
 )
 
 type Config struct {
@@ -77,18 +78,6 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		apiCancel(err)
 	}()
 
-	//if config.Discovery.Enable == conf.ETCD {
-	//	cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), config.GetConfigNames())
-	//	cm.Watch(ctx)
-	//}
-	//sigs := make(chan os.Signal, 1)
-	//signal.Notify(sigs, syscall.SIGTERM)
-	//select {
-	//case val := <-sigs:
-	//	log.ZDebug(ctx, "recv exit", "signal", val.String())
-	//	cancel(fmt.Errorf("signal %s", val.String()))
-	//case <-ctx.Done():
-	//}
 	<-apiCtx.Done()
 	exitCause := context.Cause(apiCtx)
 	log.ZWarn(ctx, "api server exit", exitCause)

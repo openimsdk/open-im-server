@@ -4,13 +4,14 @@
 package main
 
 import (
-	"flag"
-	"os"
+	"fmt"
 
 	"github.com/openimsdk/gomake/mageutil"
+	"github.com/openimsdk/open-im-server/v3/version"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
-var Default = Build
+var Default = BuildAll
 
 var Aliases = map[string]any{
 	"buildcc": BuildWithCustomConfig,
@@ -25,26 +26,21 @@ var (
 	customToolsDir  = "tools"   // tools source code directory, default is "tools"
 )
 
+func BuildAll() error { return Build(nil, nil) }
 
 // Build support specifical binary build.
 //
 // Example: `mage build openim-api openim-rpc-user seq`
-func Build() {
-	flag.Parse()
-	bin := flag.Args()
-	if len(bin) != 0 {
-		bin = bin[1:]
-	}
+func Build(services, tools *string) (err error) {
+	defer mageutil.PrintErrPtr(&err)
 
-	mageutil.Build(bin, nil)
+	return mageutil.WithSpinnerR("Building binaries...", func() error {
+		return mageutil.Build(mageutil.ParseArgList(services), mageutil.ParseArgList(tools), nil, nil)
+	})
 }
 
-func BuildWithCustomConfig() {
-	flag.Parse()
-	bin := flag.Args()
-	if len(bin) != 0 {
-		bin = bin[1:]
-	}
+func BuildWithCustomConfig(services, tools *string) (err error) {
+	defer mageutil.PrintErrPtr(&err)
 
 	config := &mageutil.PathOptions{
 		RootDir:   &customRootDir,
@@ -53,39 +49,21 @@ func BuildWithCustomConfig() {
 		ToolsDir:  &customToolsDir,
 	}
 
-	mageutil.Build(bin, config)
+	return mageutil.WithSpinnerR("Building binaries with custom config...", func() error {
+		return mageutil.Build(mageutil.ParseArgList(services), mageutil.ParseArgList(tools), config, nil)
+	})
 }
 
-func Start() {
-	mageutil.InitForSSC()
-	err := setMaxOpenFiles()
-	if err != nil {
-		mageutil.PrintRed("setMaxOpenFiles failed " + err.Error())
-		os.Exit(1)
-	}
+func Start() (err error) {
+	defer mageutil.PrintErrPtr(&err)
 
-	flag.Parse()
-	bin := flag.Args()
-	if len(bin) != 0 {
-		bin = bin[1:]
-	}
-
-	mageutil.StartToolsAndServices(bin, nil)
+	return mageutil.WithSpinnerR("Starting...", func() error {
+		return mageutil.StartToolsAndServices(nil, nil, nil)
+	})
 }
 
-func StartWithCustomConfig() {
-	mageutil.InitForSSC()
-	err := setMaxOpenFiles()
-	if err != nil {
-		mageutil.PrintRed("setMaxOpenFiles failed " + err.Error())
-		os.Exit(1)
-	}
-
-	flag.Parse()
-	bin := flag.Args()
-	if len(bin) != 0 {
-		bin = bin[1:]
-	}
+func StartWithCustomConfig(services, tools *string) (err error) {
+	defer mageutil.PrintErrPtr(&err)
 
 	config := &mageutil.PathOptions{
 		RootDir:   &customRootDir,
@@ -93,13 +71,46 @@ func StartWithCustomConfig() {
 		ConfigDir: &customConfigDir,
 	}
 
-	mageutil.StartToolsAndServices(bin, config)
+	return mageutil.WithSpinnerR("Starting with custom config...", func() error {
+		return mageutil.StartToolsAndServices(mageutil.ParseArgList(tools), mageutil.ParseArgList(services), config)
+	})
 }
 
-func Stop() {
-	mageutil.StopAndCheckBinaries()
+func Stop() (err error) {
+	defer mageutil.PrintErrPtr(&err)
+	return mageutil.WithSpinnerR("Stopping...", mageutil.StopAndCheckServices)
 }
 
-func Check() {
-	mageutil.CheckAndReportBinariesStatus()
+func Check() (err error) {
+	defer mageutil.PrintErrPtr(&err)
+	return mageutil.WithSpinnerR("Checking binaries...", mageutil.CheckAndReportServicesStatus)
+}
+
+func Export() (err error) {
+	defer mageutil.PrintErrPtr(&err)
+
+	mappingPaths, err := mageutil.GetDefaultExportMappingPaths([]string{
+		"cmd",
+		"internal",
+		"pkg",
+		"test",
+		"tools",
+		"**/*.go",
+		"go.mod",
+		"go.sum",
+		"go.work",
+	})
+	if err != nil {
+		return fmt.Errorf("GetDefaultExportMappingPaths failed: %v", err)
+	}
+
+	return mageutil.WithSpinnerR("Exporting...", func() error {
+		return mageutil.ExportMageLauncherArchived(mappingPaths, &mageutil.ExportOptions{
+			ProjectName: datautil.ToPtr(fmt.Sprintf("open-im-server_%s", version.Version)),
+			BuildOpt: &mageutil.BuildOptions{
+				Release:  datautil.ToPtr(true),
+				Compress: datautil.ToPtr(true),
+			},
+		})
+	})
 }

@@ -70,6 +70,7 @@ const (
 	BlockedByPeer            = 1302 // Blocked by the peer
 	NotPeersFriend           = 1303 // Not the peer's friend
 	RelationshipAlreadyError = 1304 // Already in a friend relationship
+	FriendRequestHandled     = 1305 // Friend request has already been handled
 
 	// Message error codes.
 	MessageHasReadDisable = 1401

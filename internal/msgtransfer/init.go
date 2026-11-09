@@ -18,8 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
@@ -28,10 +26,11 @@ import (
 	"github.com/openimsdk/tools/mq"
 	"github.com/openimsdk/tools/utils/runtimeenv"
 
+	"google.golang.org/grpc"
+
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/tools/log"
-	"google.golang.org/grpc"
 )
 
 type MsgTransfer struct {
@@ -59,8 +58,6 @@ type Config struct {
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
-	builder := mqbuild.NewBuilder(&config.KafkaConfig)
-
 	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "runTimeEnv", runtimeenv.RuntimeEnvironment(), "prometheusPorts",
 		config.MsgTransfer.Prometheus.Ports, "index", config.Index)
 	dbb := dbbuild.NewBuilder(&config.MongodbConfig, &config.RedisConfig)
@@ -72,25 +69,15 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-
-	//if config.Discovery.Enable == conf.ETCD {
-	//	cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), []string{
-	//		config.MsgTransfer.GetConfigFileName(),
-	//		config.RedisConfig.GetConfigFileName(),
-	//		config.MongodbConfig.GetConfigFileName(),
-	//		config.KafkaConfig.GetConfigFileName(),
-	//		config.Share.GetConfigFileName(),
-	//		config.WebhooksConfig.GetConfigFileName(),
-	//		config.Discovery.GetConfigFileName(),
-	//		conf.LogConfigFileName,
-	//	})
-	//	cm.Watch(ctx)
-	//}
-	mongoProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToMongoTopic)
+	builder, err := mqbuild.NewBuilder(config.Share.Queue, &config.KafkaConfig, rdb)
 	if err != nil {
 		return err
 	}
-	pushProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToPushTopic)
+	mongoProducer, err := builder.GetTopicProducer(ctx, mqbuild.TopicToMongo)
+	if err != nil {
+		return err
+	}
+	pushProducer, err := builder.GetTopicProducer(ctx, mqbuild.TopicToPush)
 	if err != nil {
 		return err
 	}
@@ -98,16 +85,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	var msgModel cache.MsgCache
-	if rdb == nil {
-		cm, err := mgo.NewCacheMgo(mgocli.GetDB())
-		if err != nil {
-			return err
-		}
-		msgModel = mcache.NewMsgCache(cm, msgDocModel)
-	} else {
-		msgModel = redis.NewMsgCache(rdb, msgDocModel)
-	}
+	msgModel := redis.NewMsgCache(rdb, msgDocModel)
 	seqConversation, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return err
@@ -122,11 +100,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	historyConsumer, err := builder.GetTopicConsumer(ctx, config.KafkaConfig.ToRedisTopic)
+	historyConsumer, err := builder.GetTopicConsumer(ctx, mqbuild.TopicToRedis)
 	if err != nil {
 		return err
 	}
-	historyMongoConsumer, err := builder.GetTopicConsumer(ctx, config.KafkaConfig.ToMongoTopic)
+	historyMongoConsumer, err := builder.GetTopicConsumer(ctx, mqbuild.TopicToMongo)
 	if err != nil {
 		return err
 	}

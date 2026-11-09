@@ -32,7 +32,7 @@ func TestCompressDecompress(t *testing.T) {
 
 	compressor := NewGzipCompressor()
 
-	for i := 0; i < 2000; i++ {
+	for range 2000 {
 		src := mockRandom()
 
 		// compress
@@ -58,10 +58,8 @@ func TestCompressDecompressWithConcurrency(t *testing.T) {
 	wg := sync.WaitGroup{}
 	compressor := NewGzipCompressor()
 
-	for i := 0; i < 200; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range 200 {
+		wg.Go(func() {
 			src := mockRandom()
 
 			// compress
@@ -80,8 +78,7 @@ func TestCompressDecompressWithConcurrency(t *testing.T) {
 
 			// check
 			assert.EqualValues(t, src, res)
-
-		}()
+		})
 	}
 	wg.Wait()
 }
@@ -90,7 +87,7 @@ func BenchmarkCompress(b *testing.B) {
 	src := mockRandom()
 	compressor := NewGzipCompressor()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := compressor.Compress(src)
 		assert.Equal(b, nil, err)
 	}
@@ -100,7 +97,7 @@ func BenchmarkCompressWithSyncPool(b *testing.B) {
 	src := mockRandom()
 
 	compressor := NewGzipCompressor()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := compressor.CompressWithPool(src)
 		assert.Equal(b, nil, err)
 	}
@@ -114,7 +111,7 @@ func BenchmarkDecompress(b *testing.B) {
 
 	assert.Equal(b, nil, err)
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := compressor.DeCompress(comdata)
 		assert.Equal(b, nil, err)
 	}
@@ -127,7 +124,7 @@ func BenchmarkDecompressWithSyncPool(b *testing.B) {
 	comdata, err := compressor.Compress(src)
 	assert.Equal(b, nil, err)
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := compressor.DecompressWithPool(comdata)
 		assert.Equal(b, nil, err)
 	}

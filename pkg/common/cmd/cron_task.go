@@ -17,12 +17,13 @@ package cmd
 import (
 	"context"
 
+	"github.com/spf13/cobra"
+
 	"github.com/openimsdk/open-im-server/v3/internal/tools/cron"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
-	"github.com/spf13/cobra"
 )
 
 type CronTaskCmd struct {
@@ -39,6 +40,7 @@ func NewCronTaskCmd() *CronTaskCmd {
 		config.OpenIMCronTaskCfgFileName: &cronTaskConfig.CronTask,
 		config.ShareFileName:             &cronTaskConfig.Share,
 		config.DiscoveryConfigFilename:   &cronTaskConfig.Discovery,
+		config.RedisConfigFileName:       &cronTaskConfig.RedisConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

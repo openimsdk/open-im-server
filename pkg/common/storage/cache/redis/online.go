@@ -7,20 +7,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/redis/go-redis/v9"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/redis/go-redis/v9"
 )
 
 func NewUserOnline(rdb redis.UniversalClient) cache.OnlineCache {
-	if rdb == nil || config.Standalone() {
-		return mcache.NewOnlineCache()
-	}
 	return &userOnline{
 		rdb:         rdb,
 		expire:      cachekey.OnlineExpire,
@@ -112,7 +108,7 @@ func (s *userOnline) SetUserOnline(ctx context.Context, userID string, online, o
 	end
 `
 	now := time.Now()
-	argv := make([]any, 0, 2+len(online)+len(offline))
+	argv := make([]any, 0, 4+len(online)+len(offline))
 	argv = append(argv, int32(s.expire/time.Second), now.Unix(), now.Add(s.expire).Unix(), int32(len(offline)))
 	for _, platformID := range offline {
 		argv = append(argv, platformID)

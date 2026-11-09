@@ -57,6 +57,7 @@ type GroupCache interface {
 	GetGroupRoleLevelMemberInfo(ctx context.Context, groupID string, roleLevel int32) ([]*model.GroupMember, error)
 	GetGroupRolesLevelMemberInfo(ctx context.Context, groupID string, roleLevels []int32) ([]*model.GroupMember, error)
 	GetGroupMemberNum(ctx context.Context, groupID string) (memberNum int64, err error)
+	GetGroupMemberNums(ctx context.Context, groupIDs []string) (memberNumMap map[string]int64, err error)
 	DelGroupsMemberNum(groupID ...string) GroupCache
 
 	//FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error)

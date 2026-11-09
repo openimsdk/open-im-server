@@ -2,25 +2,24 @@ package push
 
 import (
 	"context"
-	"github.com/openimsdk/tools/mq"
 	"math/rand"
 	"strconv"
+
+	"github.com/openimsdk/tools/mq"
+
+	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	pbpush "github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"google.golang.org/grpc"
 )
 
 type pushServer struct {
@@ -57,37 +56,26 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	var cacheModel cache.ThirdCache
-	if rdb == nil {
-		mdb, err := dbb.Mongo(ctx)
-		if err != nil {
-			return err
-		}
-		mc, err := mgo.NewCacheMgo(mdb.GetDB())
-		if err != nil {
-			return err
-		}
-		cacheModel = mcache.NewThirdCache(mc)
-	} else {
-		cacheModel = redis.NewThirdCache(rdb)
-	}
+	cacheModel := redis.NewThirdCache(rdb)
 	offlinePusher, err := offlinepush.NewOfflinePusher(&config.RpcConfig, cacheModel, string(config.FcmConfigPath))
 	if err != nil {
 		return err
 	}
-	builder := mqbuild.NewBuilder(&config.KafkaConfig)
-
-	offlinePushProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToOfflinePushTopic)
+	builder, err := mqbuild.NewBuilder(config.Share.Queue, &config.KafkaConfig, rdb)
+	if err != nil {
+		return err
+	}
+	offlinePushProducer, err := builder.GetTopicProducer(ctx, mqbuild.TopicToOfflinePush)
 	if err != nil {
 		return err
 	}
 	database := controller.NewPushDatabase(cacheModel, offlinePushProducer)
 
-	pushConsumer, err := builder.GetTopicConsumer(ctx, config.KafkaConfig.ToPushTopic)
+	pushConsumer, err := builder.GetTopicConsumer(ctx, mqbuild.TopicToPush)
 	if err != nil {
 		return err
 	}
-	offlinePushConsumer, err := builder.GetTopicConsumer(ctx, config.KafkaConfig.ToOfflinePushTopic)
+	offlinePushConsumer, err := builder.GetTopicConsumer(ctx, mqbuild.TopicToOfflinePush)
 	if err != nil {
 		return err
 	}

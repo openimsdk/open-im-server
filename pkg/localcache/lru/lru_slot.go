@@ -35,7 +35,7 @@ type slotLRU[K comparable, V any] struct {
 func (x *slotLRU[K, V]) GetBatch(keys []K, fetch func(keys []K) (map[K]V, error)) (map[K]V, error) {
 	var (
 		slotKeys = make(map[uint64][]K)
-		kVs       = make(map[K]V)
+		vs       = make(map[K]V)
 	)
 
 	for _, k := range keys {
@@ -49,10 +49,10 @@ func (x *slotLRU[K, V]) GetBatch(keys []K, fetch func(keys []K) (map[K]V, error)
 			return nil, err
 		}
 		for key, value := range batches {
-			kVs[key] = value
+			vs[key] = value
 		}
 	}
-	return kVs, nil
+	return vs, nil
 }
 
 func (x *slotLRU[K, V]) getIndex(k K) uint64 {

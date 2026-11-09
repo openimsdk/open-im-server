@@ -4,88 +4,162 @@ on:
   push:
     branches:
       - release-*
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       tag:
         description: "Tag version to be used for Docker image"
         required: true
         default: "v3.8.3"
+  workflow_call:
+    inputs:
+      tag:
+        description: "Tag version to be used for Docker image"
+        required: true
+        type: string
+      checkout_sha:
+        description: "Commit SHA to checkout"
+        required: true
+        type: string
+      checkout_short_sha:
+        description: "Short commit SHA for image tags"
+        required: true
+        type: string
 
 jobs:
-  build-and-push:
+  services:
     runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.services.outputs.services }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.0
+        with:
+          ref: ${{ inputs.checkout_sha || inputs.tag || github.event.inputs.tag }}
+
+      - name: Resolve service matrix
+        id: services
+        run: |
+          set -euo pipefail
+          services=$(docker compose -f build/images/openim-server/docker-compose.build.yml config --services | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "services=$services" >> "$GITHUB_OUTPUT"
+
+  build-and-push:
+    needs: services
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJson(needs.services.outputs.services) }}
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
+        with:
+          ref: ${{ inputs.checkout_sha || inputs.tag || github.event.inputs.tag }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4.1.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.8.0
+        uses: docker/setup-buildx-action@v4.1.0
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@v4.2.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@v4.2.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log in to Aliyun Container Registry
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@v4.2.0
         with:
           registry: registry.cn-hangzhou.aliyuncs.com
           username: ${{ secrets.ALIREGISTRY_USERNAME }}
           password: ${{ secrets.ALIREGISTRY_TOKEN }}
 
-      - name: Extract metadata for Docker (tags, labels)
-        id: meta
-        uses: docker/metadata-action@v5.6.0
-        with:
-          tags: |
-            type=ref,event=tag
-            type=schedule
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=semver,pattern=v{{version}}
-            type=semver,pattern=release-{{raw}}
-            type=sha
-            type=raw,value=${{ github.event.inputs.tag }}
+      - name: Resolve Docker image tags
+        id: tags
+        env:
+          INPUT_TAG: ${{ inputs.tag || github.event.inputs.tag }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          CHECKOUT_SHORT_SHA: ${{ inputs.checkout_short_sha }}
+        run: |
+          set -euo pipefail
+
+          tags=()
+          declare -A seen=()
+
+          add_tag() {
+            local tag="$1"
+            [[ -n "$tag" ]] || return 0
+
+            tag="${tag//\//-}"
+            if [[ -z "${seen[$tag]+x}" ]]; then
+              tags+=("$tag")
+              seen["$tag"]=1
+            fi
+          }
+
+          add_tag_with_semver_alias() {
+            local tag="$1"
+            add_tag "$tag"
+            if [[ "$tag" =~ ^v([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+              add_tag "${BASH_REMATCH[1]}"
+              add_tag "release-$tag"
+            fi
+          }
+
+          add_tag_with_semver_alias "${INPUT_TAG:-}"
+          add_tag_with_semver_alias "${RELEASE_TAG:-}"
+
+          if [[ "${GITHUB_EVENT_NAME:-}" == "release" && "${{ github.event.release.prerelease }}" != "true" ]]; then
+            add_tag "latest"
+          fi
+
+          if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
+            add_tag_with_semver_alias "${GITHUB_REF_NAME}"
+          elif [[ "${GITHUB_REF_TYPE:-}" == "branch" ]]; then
+            add_tag "${GITHUB_REF_NAME}"
+          fi
+
+          add_tag "sha-${CHECKOUT_SHORT_SHA:-${GITHUB_SHA::7}}"
+
+          {
+            echo "tags<<EOF"
+            printf '%s\n' "${tags[@]}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Build and push Docker images
+        env:
+          RELEASE: "true"
+          PUSH: "true"
+          SERVICE: ${{ matrix.service }}
+          PLATFORMS: linux/amd64,linux/arm64
+          IMAGE_TAGS: ${{ steps.tags.outputs.tags }}
+          IMAGE_REGISTRIES: |
+            ${{ secrets.DOCKER_USERNAME }}
+            ghcr.io/${{ github.repository_owner }}
         run: |
-          IMG_DIR="build/images"
-          for dir in "$IMG_DIR"/*/; do
-              # Find Dockerfile or *.dockerfile in a case-insensitive manner
-              dockerfile=$(find "$dir" -maxdepth 1 -type f \( -iname 'dockerfile' -o -iname '*.dockerfile' \) | head -n 1)
-              
-              if [ -n "$dockerfile" ] && [ -f "$dockerfile" ]; then
-                  IMAGE_NAME=$(basename "$dir")
-                  echo "Building Docker image for $IMAGE_NAME with tags:"
-                  
-                  # Initialize tag arguments
-                  tag_args=()
+          bash build/build_single.sh
 
-                  # Read each tag and append --tag arguments
-                  while IFS= read -r tag; do
-                      tag_args+=(--tag "${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$tag")
-                      tag_args+=(--tag "ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME:$tag")
-                      tag_args+=(--tag "registry.cn-hangzhou.aliyuncs.com/openimsdk/$IMAGE_NAME:$tag")
-                  done <<< "${{ steps.meta.outputs.tags }}"
-
-                  # Build and push the Docker image with all tags
-                  docker buildx build --platform linux/amd64,linux/arm64 \
-                    --file "$dockerfile" \
-                    "${tag_args[@]}" \
-                    --push \
-                    "."
-              else
-                  echo "No valid Dockerfile found in $dir"
-              fi
-          done
+      - name: Build and push Docker images to ACR
+        env:
+          BUILDX_NO_DEFAULT_ATTESTATIONS: '1'
+          RELEASE: "true"
+          PUSH: "true"
+          SERVICE: ${{ matrix.service }}
+          PLATFORMS: linux/amd64,linux/arm64
+          IMAGE_TAGS: ${{ steps.tags.outputs.tags }}
+          IMAGE_REGISTRIES: registry.cn-hangzhou.aliyuncs.com/openimsdk
+        run: |
+          bash build/build_single.sh

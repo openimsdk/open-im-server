@@ -4,17 +4,28 @@ on:
   push:
     branches:
       - release-*
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       tag:
         description: "Tag version to be used for Docker image"
         required: true
         default: "v3.8.3"
+  workflow_call:
+    inputs:
+      tag:
+        description: "Tag version to be used for Docker image"
+        required: true
+        type: string
+      checkout_sha:
+        description: "Commit SHA to checkout"
+        required: true
+        type: string
+      checkout_short_sha:
+        description: "Short commit SHA for image tags"
+        required: true
+        type: string
 
 env:
-  GO_VERSION: "1.22"
   IMAGE_NAME: "openim-server"
   # IMAGE_NAME: ${{ github.event.repository.name }}
   DOCKER_BUILDKIT: 1
@@ -22,25 +33,29 @@ env:
 jobs:
   publish-docker-images:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.merged == false) }}
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
         with:
+          ref: ${{ inputs.checkout_sha || inputs.tag || github.event.inputs.tag }}
           path: main-repo
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3.3.0
+        uses: docker/setup-qemu-action@v4.1.0
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4.1.0
         with:
           driver-opts: network=host
 
       - name: Extract metadata for Docker
         id: meta
-        uses: docker/metadata-action@v5.6.0
+        uses: docker/metadata-action@v6.1.0
         with:
           images: |
             ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}
@@ -55,7 +70,10 @@ jobs:
             type=semver,pattern=v{{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha
+            type=sha,enable=${{ inputs.checkout_short_sha == '' }}
+            type=raw,value=sha-${{ inputs.checkout_short_sha }},enable=${{ inputs.checkout_short_sha != '' }}
+            type=raw,value=${{ inputs.tag || github.event.inputs.tag }}
+            type=raw,value=latest,enable=${{ github.event_name == 'release' && !github.event.release.prerelease }}
 
       - name: Install skopeo
         run: |
@@ -80,7 +98,7 @@ jobs:
           docker image ls | grep openim
 
       - name: Checkout compose repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
         with:
           repository: "openimsdk/openim-docker"
           path: "compose-repo"
@@ -134,20 +152,20 @@ jobs:
       #       fi
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@v4.2.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@v4.2.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log in to Aliyun Container Registry
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@v4.2.0
         with:
           registry: registry.cn-hangzhou.aliyuncs.com
           username: ${{ secrets.ALIREGISTRY_USERNAME }}
@@ -155,13 +173,46 @@ jobs:
 
       - name: Push multi-architecture images
         if: success()
+        env:
+          IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
         run: |
-          docker buildx build \
-            --platform linux/amd64,linux/arm64 \
-            $(echo "${{ steps.meta.outputs.tags }}" | sed 's/,/ --tag /g' | sed 's/^/--tag /') \
-            --cache-from type=local,src=/tmp/docker-cache \
-            --push \
-            ./main-repo
+          set -euo pipefail
+          tag_args=()
+          while IFS= read -r tag; do
+            [[ -n "$tag" ]] || continue
+            [[ "${tag%%/*}" != *.aliyuncs.com ]] || continue
+            tag_args+=(--tag "$tag")
+          done < <(printf '%s\n' "$IMAGE_TAGS" | tr ',' '\n')
+
+          if [[ ${#tag_args[@]} -gt 0 ]]; then
+            docker buildx build \
+              --platform linux/amd64,linux/arm64 \
+              "${tag_args[@]}" \
+              --cache-from type=local,src=/tmp/docker-cache \
+              --push ./main-repo
+          fi
+
+      - name: Push multi-architecture images to ACR
+        if: success()
+        env:
+          BUILDX_NO_DEFAULT_ATTESTATIONS: '1'
+          IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          tag_args=()
+          while IFS= read -r tag; do
+            [[ -n "$tag" ]] || continue
+            [[ "${tag%%/*}" == *.aliyuncs.com ]] || continue
+            tag_args+=(--tag "$tag")
+          done < <(printf '%s\n' "$IMAGE_TAGS" | tr ',' '\n')
+
+          if [[ ${#tag_args[@]} -gt 0 ]]; then
+            docker buildx build \
+              --platform linux/amd64,linux/arm64 \
+              "${tag_args[@]}" \
+              --cache-from type=local,src=/tmp/docker-cache \
+              --push ./main-repo
+          fi
 
       - name: Verify multi-platform support
         run: |

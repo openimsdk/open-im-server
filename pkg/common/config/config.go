@@ -28,6 +28,13 @@ import (
 	"github.com/openimsdk/tools/s3/oss"
 )
 
+// FileConfig is implemented by every config struct that is backed by a config
+// file; GetConfigFileName reports that file's name (e.g. "redis.yml"). It is the
+// single marker used to decide whether a struct field is loaded from a file.
+type FileConfig interface {
+	GetConfigFileName() string
+}
+
 const StructTagName = "yaml"
 
 type Path string
@@ -135,6 +142,7 @@ type API struct {
 	Api struct {
 		ListenIP         string `yaml:"listenIP"`
 		Ports            []int  `yaml:"ports"`
+		RegisterIP       string `yaml:"registerIP"`
 		CompressionLevel int    `yaml:"compressionLevel"`
 	} `yaml:"api"`
 	Prometheus struct {
@@ -418,7 +426,8 @@ type AfterConfig struct {
 }
 
 type Share struct {
-	Secret      string `yaml:"secret"`
+	Secret      string         `yaml:"secret"`
+	Queue       EngineSelector `yaml:"queue"`
 	IMAdminUser struct {
 		UserIDs   []string `yaml:"userIDs"`
 		Nicknames []string `yaml:"nicknames"`

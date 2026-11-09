@@ -53,10 +53,6 @@ package direct
 //	return nil
 //}
 //
-//func (cd *ConnDirect) GetUserIdHashGatewayHost(ctx context.Context, userId string) (string, error) {
-//	return "", nil
-//}
-//
 //func (cd *ConnDirect) Register(serviceName, host string, port int, opts ...grpc.DialOption) error {
 //	return nil
 //}

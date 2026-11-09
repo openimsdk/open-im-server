@@ -16,7 +16,6 @@ package msggateway
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -31,7 +30,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils/stringutil"
 )
 
 var (
@@ -64,7 +62,7 @@ type PingPongHandler func(string) error
 
 type Client struct {
 	w              *sync.Mutex
-	conn           LongConn
+	conn           ClientConn
 	PlatformID     int    `json:"platformID"`
 	IsCompress     bool   `json:"isCompress"`
 	UserID         string `json:"userID"`
@@ -84,10 +82,10 @@ type Client struct {
 }
 
 // ResetClient updates the client's state with new connection and context information.
-func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer LongConnServer) {
+func (c *Client) ResetClient(ctx *UserConnContext, conn ClientConn, longConnServer LongConnServer) {
 	c.w = new(sync.Mutex)
 	c.conn = conn
-	c.PlatformID = stringutil.StringToInt(ctx.GetPlatformID())
+	c.PlatformID = ctx.GetPlatformID()
 	c.IsCompress = ctx.GetCompression()
 	c.IsBackground = ctx.GetBackground()
 	c.UserID = ctx.GetUserID()
@@ -112,22 +110,6 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer
 	c.subUserIDs = make(map[string]struct{})
 }
 
-func (c *Client) pingHandler(appData string) error {
-	if err := c.conn.SetReadDeadline(pongWait); err != nil {
-		return err
-	}
-
-	log.ZDebug(c.ctx, "ping Handler Success.", "appData", appData)
-	return c.writePongMsg(appData)
-}
-
-func (c *Client) pongHandler(_ string) error {
-	if err := c.conn.SetReadDeadline(pongWait); err != nil {
-		return err
-	}
-	return nil
-}
-
 // readMessage continuously reads messages from the connection.
 func (c *Client) readMessage() {
 	defer func() {
@@ -138,52 +120,25 @@ func (c *Client) readMessage() {
 		c.close()
 	}()
 
-	c.conn.SetReadLimit(maxMessageSize)
-	_ = c.conn.SetReadDeadline(pongWait)
-	c.conn.SetPongHandler(c.pongHandler)
-	c.conn.SetPingHandler(c.pingHandler)
-	c.activeHeartbeat(c.hbCtx)
-
 	for {
 		log.ZDebug(c.ctx, "readMessage")
-		messageType, message, returnErr := c.conn.ReadMessage()
+		message, returnErr := c.conn.ReadMessage()
 		if returnErr != nil {
-			log.ZWarn(c.ctx, "readMessage", returnErr, "messageType", messageType)
+			log.ZWarn(c.ctx, "readMessage", returnErr)
 			c.closedErr = returnErr
 			return
 		}
 
-		log.ZDebug(c.ctx, "readMessage", "messageType", messageType)
 		if c.closed.Load() {
 			// The scenario where the connection has just been closed, but the coroutine has not exited
 			c.closedErr = ErrConnClosed
 			return
 		}
 
-		switch messageType {
-		case MessageBinary:
-			_ = c.conn.SetReadDeadline(pongWait)
-			parseDataErr := c.handleMessage(message)
-			if parseDataErr != nil {
-				c.closedErr = parseDataErr
-				return
-			}
-		case MessageText:
-			_ = c.conn.SetReadDeadline(pongWait)
-			parseDataErr := c.handlerTextMessage(message)
-			if parseDataErr != nil {
-				c.closedErr = parseDataErr
-				return
-			}
-		case PingMessage:
-			err := c.writePongMsg("")
-			log.ZError(c.ctx, "writePongMsg", err)
-
-		case CloseMessage:
-			c.closedErr = ErrClientClosed
+		parseDataErr := c.handleMessage(message)
+		if parseDataErr != nil {
+			c.closedErr = parseDataErr
 			return
-
-		default:
 		}
 	}
 }
@@ -358,109 +313,13 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 	c.w.Lock()
 	defer c.w.Unlock()
 
-	err = c.conn.SetWriteDeadline(writeWait)
-	if err != nil {
-		return err
-	}
-
 	if c.IsCompress {
 		resultBuf, compressErr := c.longConnServer.CompressWithPool(encodedBuf)
 		if compressErr != nil {
 			return compressErr
 		}
-		return c.conn.WriteMessage(MessageBinary, resultBuf)
+		return c.conn.WriteMessage(resultBuf)
 	}
 
-	return c.conn.WriteMessage(MessageBinary, encodedBuf)
-}
-
-// Actively initiate Heartbeat when platform in Web.
-func (c *Client) activeHeartbeat(ctx context.Context) {
-	if c.PlatformID == constant.WebPlatformID {
-		go func() {
-			defer func() {
-				if r := recover(); r != nil {
-					log.ZPanic(ctx, "activeHeartbeat Panic", errs.ErrPanic(r))
-				}
-			}()
-			log.ZDebug(ctx, "server initiative send heartbeat start.")
-			ticker := time.NewTicker(pingPeriod)
-			defer ticker.Stop()
-
-			for {
-				select {
-				case <-ticker.C:
-					if err := c.writePingMsg(); err != nil {
-						log.ZWarn(c.ctx, "send Ping Message error.", err)
-						return
-					}
-				case <-c.hbCtx.Done():
-					return
-				}
-			}
-		}()
-	}
-}
-func (c *Client) writePingMsg() error {
-	if c.closed.Load() {
-		return nil
-	}
-
-	c.w.Lock()
-	defer c.w.Unlock()
-
-	err := c.conn.SetWriteDeadline(writeWait)
-	if err != nil {
-		return err
-	}
-
-	return c.conn.WriteMessage(PingMessage, nil)
-}
-
-func (c *Client) writePongMsg(appData string) error {
-	log.ZDebug(c.ctx, "write Pong Msg in Server", "appData", appData)
-	if c.closed.Load() {
-		log.ZWarn(c.ctx, "is closed in server", nil, "appdata", appData, "closed err", c.closedErr)
-		return nil
-	}
-
-	c.w.Lock()
-	defer c.w.Unlock()
-
-	err := c.conn.SetWriteDeadline(writeWait)
-	if err != nil {
-		log.ZWarn(c.ctx, "SetWriteDeadline in Server have error", errs.Wrap(err), "writeWait", writeWait, "appData", appData)
-		return errs.Wrap(err)
-	}
-	err = c.conn.WriteMessage(PongMessage, []byte(appData))
-	if err != nil {
-		log.ZWarn(c.ctx, "Write Message have error", errs.Wrap(err), "Pong msg", PongMessage)
-	}
-
-	return errs.Wrap(err)
-}
-
-func (c *Client) handlerTextMessage(b []byte) error {
-	var msg TextMessage
-	if err := json.Unmarshal(b, &msg); err != nil {
-		return err
-	}
-	switch msg.Type {
-	case TextPong:
-		return nil
-	case TextPing:
-		msg.Type = TextPong
-		msgData, err := json.Marshal(msg)
-		if err != nil {
-			return err
-		}
-		c.w.Lock()
-		defer c.w.Unlock()
-		if err := c.conn.SetWriteDeadline(writeWait); err != nil {
-			return err
-		}
-		return c.conn.WriteMessage(MessageText, msgData)
-	default:
-		return fmt.Errorf("not support message type %s", msg.Type)
-	}
+	return c.conn.WriteMessage(encodedBuf)
 }

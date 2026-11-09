@@ -17,12 +17,11 @@ package msg
 import (
 	"context"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
-	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -80,11 +79,6 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
-	builder := mqbuild.NewBuilder(&config.KafkaConfig)
-	redisProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToRedisTopic)
-	if err != nil {
-		return err
-	}
 	dbb := dbbuild.NewBuilder(&config.MongodbConfig, &config.RedisConfig)
 	mgocli, err := dbb.Mongo(ctx)
 	if err != nil {
@@ -94,20 +88,19 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	builder, err := mqbuild.NewBuilder(config.Share.Queue, &config.KafkaConfig, rdb)
+	if err != nil {
+		return err
+	}
+	redisProducer, err := builder.GetTopicProducer(ctx, mqbuild.TopicToRedis)
+	if err != nil {
+		return err
+	}
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
-	var msgModel cache.MsgCache
-	if rdb == nil {
-		cm, err := mgo.NewCacheMgo(mgocli.GetDB())
-		if err != nil {
-			return err
-		}
-		msgModel = mcache.NewMsgCache(cm, msgDocModel)
-	} else {
-		msgModel = redis.NewMsgCache(rdb, msgDocModel)
-	}
+	msgModel := redis.NewMsgCache(rdb, msgDocModel)
 	seqConversation, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return err

@@ -1,0 +1,120 @@
+services:
+  openim-api:
+    build:
+      context: ../../..
+      dockerfile: build/images/openim-server/Dockerfile
+      args:
+        CMD_PATH: cmd/openim-api
+        BINARY_NAME: openim-api
+        RELEASE: ${RELEASE:-false}
+    image: openim-api:test
+
+  openim-crontask:
+    build:
+      context: ../../..
+      dockerfile: build/images/openim-server/Dockerfile
+      args:
+        CMD_PATH: cmd/openim-crontask
+        BINARY_NAME: openim-crontask
+        RELEASE: ${RELEASE:-false}
+    image: openim-crontask:test
+
+  openim-msggateway:
+    build:
+      context: ../../..
+      dockerfile: build/images/openim-server/Dockerfile
+      args:
+        CMD_PATH: cmd/openim-msggateway
+        BINARY_NAME: openim-msggateway
+        RELEASE: ${RELEASE:-false}
+    image: openim-msggateway:test
+
+  openim-msgtransfer:
+    build:
+      context: ../../..
+      dockerfile: build/images/openim-server/Dockerfile
+      args:
+        CMD_PATH: cmd/openim-msgtransfer
+        BINARY_NAME: openim-msgtransfer
+        RELEASE: ${RELEASE:-false}
+    image: openim-msgtransfer:test
+
+  openim-push:
+    build:
+      context: ../../..
+      dockerfile: build/images/openim-server/Dockerfile
+      args:
+        CMD_PATH: cmd/openim-push
+        BINARY_NAME: openim-push
+        RELEASE: ${RELEASE:-false}
+    image: openim-push:test
+
+  openim-rpc-auth:
+    build:
+      context: ../../..
+      dockerfile: build/images/openim-server/Dockerfile
+      args:
+        CMD_PATH: cmd/openim-rpc/openim-rpc-auth
+        BINARY_NAME: openim-rpc-auth
+        RELEASE: ${RELEASE:-false}
+    image: openim-rpc-auth:test
+
+  openim-rpc-conversation:
+    build:
+      context: ../../..
+      dockerfile: build/images/openim-server/Dockerfile
+      args:
+        CMD_PATH: cmd/openim-rpc/openim-rpc-conversation
+        BINARY_NAME: openim-rpc-conversation
+        RELEASE: ${RELEASE:-false}
+    image: openim-rpc-conversation:test
+
+  openim-rpc-friend:
+    build:
+      context: ../../..
+      dockerfile: build/images/openim-server/Dockerfile
+      args:
+        CMD_PATH: cmd/openim-rpc/openim-rpc-friend
+        BINARY_NAME: openim-rpc-friend
+        RELEASE: ${RELEASE:-false}
+    image: openim-rpc-friend:test
+
+  openim-rpc-group:
+    build:
+      context: ../../..
+      dockerfile: build/images/openim-server/Dockerfile
+      args:
+        CMD_PATH: cmd/openim-rpc/openim-rpc-group
+        BINARY_NAME: openim-rpc-group
+        RELEASE: ${RELEASE:-false}
+    image: openim-rpc-group:test
+
+  openim-rpc-msg:
+    build:
+      context: ../../..
+      dockerfile: build/images/openim-server/Dockerfile
+      args:
+        CMD_PATH: cmd/openim-rpc/openim-rpc-msg
+        BINARY_NAME: openim-rpc-msg
+        RELEASE: ${RELEASE:-false}
+    image: openim-rpc-msg:test
+
+  openim-rpc-third:
+    build:
+      context: ../../..
+      dockerfile: build/images/openim-server/Dockerfile
+      args:
+        CMD_PATH: cmd/openim-rpc/openim-rpc-third
+        BINARY_NAME: openim-rpc-third
+        RELEASE: ${RELEASE:-false}
+    image: openim-rpc-third:test
+
+  openim-rpc-user:
+    build:
+      context: ../../..
+      dockerfile: build/images/openim-server/Dockerfile
+      args:
+        CMD_PATH: cmd/openim-rpc/openim-rpc-user
+        BINARY_NAME: openim-rpc-user
+        RELEASE: ${RELEASE:-false}
+    image: openim-rpc-user:test

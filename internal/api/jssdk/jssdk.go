@@ -143,14 +143,16 @@ func (x *JSSdk) getActiveConversations(ctx context.Context, req *jssdk.GetActive
 	if err != nil {
 		return nil, err
 	}
-	msgs, err := x.msgClient.GetSeqMessage(ctx, req.OwnerUserID, datautil.Slice(sortList, func(c *msg.ActiveConversation) *msg.ConversationSeqs {
-		return &msg.ConversationSeqs{
-			ConversationID: c.ConversationID,
-			Seqs:           []int64{c.MaxSeq},
+	maxSeqs := datautil.SliceToMapAny(sortList, func(c *msg.ActiveConversation) (string, int64) {
+		return c.ConversationID, c.MaxSeq
+	})
+	conversationSeqs := x.filterConversationSeqs(conversations, maxSeqs)
+	var msgs map[string]*sdkws.PullMsgs
+	if len(conversationSeqs) > 0 {
+		msgs, err = x.msgClient.GetSeqMessage(ctx, req.OwnerUserID, conversationSeqs)
+		if err != nil {
+			return nil, err
 		}
-	}))
-	if err != nil {
-		return nil, err
 	}
 	x.checkMessagesAndGetLastMessage(ctx, req.OwnerUserID, msgs)
 	conversationMap := datautil.SliceToMap(conversations, func(c *conversation.Conversation) string {
@@ -208,15 +210,7 @@ func (x *JSSdk) getConversations(ctx context.Context, req *jssdk.GetConversation
 	if err != nil {
 		return nil, err
 	}
-	conversationSeqs := make([]*msg.ConversationSeqs, 0, len(conversations))
-	for _, c := range conversations {
-		if seq := maxSeqs[c.ConversationID]; seq > 0 {
-			conversationSeqs = append(conversationSeqs, &msg.ConversationSeqs{
-				ConversationID: c.ConversationID,
-				Seqs:           []int64{seq},
-			})
-		}
-	}
+	conversationSeqs := x.filterConversationSeqs(conversations, maxSeqs)
 	var msgs map[string]*sdkws.PullMsgs
 	if len(conversationSeqs) > 0 {
 		msgs, err = x.msgClient.GetSeqMessage(ctx, req.OwnerUserID, conversationSeqs)
@@ -251,6 +245,21 @@ func (x *JSSdk) getConversations(ctx context.Context, req *jssdk.GetConversation
 		Conversations: resp,
 		UnreadCount:   unreadCount,
 	}, nil
+}
+
+func (x *JSSdk) filterConversationSeqs(conversations []*conversation.Conversation, maxSeqs map[string]int64) []*msg.ConversationSeqs {
+	conversationSeqs := make([]*msg.ConversationSeqs, 0, len(conversations))
+	for _, c := range conversations {
+		seq := maxSeqs[c.ConversationID]
+		if seq == 0 || (c.MinSeq > 0 && seq < c.MinSeq) {
+			continue
+		}
+		conversationSeqs = append(conversationSeqs, &msg.ConversationSeqs{
+			ConversationID: c.ConversationID,
+			Seqs:           []int64{seq},
+		})
+	}
+	return conversationSeqs
 }
 
 // This function checks whether the latest MaxSeq message is valid.
