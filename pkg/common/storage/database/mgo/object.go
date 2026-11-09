@@ -20,7 +20,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,10 +30,11 @@ import (
 func NewS3Mongo(db *mongo.Database) (database.ObjectInfo, error) {
 	coll := db.Collection(database.ObjectName)
 
-	// Create index for name
+	// Create new unique index for name + engine
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "name", Value: 1},
+			{Key: "engine", Value: 1},
 		},
 		Options: options.Index().SetUnique(true),
 	})
