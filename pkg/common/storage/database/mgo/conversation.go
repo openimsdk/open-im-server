@@ -29,6 +29,7 @@ import (
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/pagination"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
@@ -70,15 +71,35 @@ type ConversationMgo struct {
 }
 
 func (c *ConversationMgo) Create(ctx context.Context, conversations []*model.Conversation) (err error) {
+	if len(conversations) == 0 {
+		return nil
+	}
 	return mongoutil.IncrVersion(func() error {
-		return mongoutil.InsertMany(ctx, c.coll, conversations)
+		models := make([]mongo.WriteModel, len(conversations))
+		for i, conversation := range conversations {
+			models[i] = mongo.NewUpdateOneModel().
+				SetFilter(bson.M{
+					"owner_user_id":   conversation.OwnerUserID,
+					"conversation_id": conversation.ConversationID,
+				}).
+				SetUpdate(bson.M{"$setOnInsert": conversation}).
+				SetUpsert(true)
+		}
+		err := mongoutil.BulkWrite(ctx, c.coll, models, options.BulkWrite().SetOrdered(false))
+		if err != nil {
+			if IsAllDuplicateKeyError(err) {
+				return nil
+			}
+			return err
+		}
+		return nil
 	}, func() error {
 		userConversation := make(map[string][]string)
 		for _, conversation := range conversations {
 			userConversation[conversation.OwnerUserID] = append(userConversation[conversation.OwnerUserID], conversation.ConversationID)
 		}
 		for userID, conversationIDs := range userConversation {
-			if err := c.version.IncrVersion(ctx, userID, conversationIDs, model.VersionStateInsert); err != nil {
+			if err := c.version.IncrVersion(ctx, userID, datautil.Distinct(conversationIDs), model.VersionStateInsert); err != nil {
 				return err
 			}
 		}

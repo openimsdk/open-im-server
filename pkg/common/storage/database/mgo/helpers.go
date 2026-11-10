@@ -15,10 +15,59 @@
 package mgo
 
 import (
+	"errors"
+	"strings"
+
 	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func IsNotFound(err error) bool {
 	return errs.Unwrap(err) == mongo.ErrNoDocuments
+}
+
+// IsAllDuplicateKeyError returns true if err is a duplicate key error or
+// if err is a bulk write error where all write errors are duplicate key errors.
+func IsAllDuplicateKeyError(err error) bool {
+	if err == nil {
+		return false
+	}
+	var bwe mongo.BulkWriteException
+	if errors.As(err, &bwe) {
+		if bwe.WriteConcernError != nil {
+			return false
+		}
+		if len(bwe.WriteErrors) == 0 {
+			return false
+		}
+		for _, we := range bwe.WriteErrors {
+			if !isDuplicateKeyWriteError(we.WriteError) {
+				return false
+			}
+		}
+		return true
+	}
+	var we mongo.WriteException
+	if errors.As(err, &we) {
+		if we.WriteConcernError != nil {
+			return false
+		}
+		if len(we.WriteErrors) == 0 {
+			return false
+		}
+		for _, w := range we.WriteErrors {
+			if !isDuplicateKeyWriteError(w) {
+				return false
+			}
+		}
+		return true
+	}
+	return mongo.IsDuplicateKeyError(err)
+}
+
+func isDuplicateKeyWriteError(we mongo.WriteError) bool {
+	return we.Code == 11000 || we.Code == 11001 || we.Code == 12582 ||
+		strings.Contains(we.Message, " E11000 ") ||
+		strings.Contains(we.Message, "duplicate key") ||
+		mongo.IsDuplicateKeyError(we)
 }
