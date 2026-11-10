@@ -90,8 +90,11 @@ type MarkdownTextElem struct {
 }
 
 type StreamMsgElem struct {
-	Type    string `mapstructure:"type" validate:"required"`
-	Content string `mapstructure:"content" validate:"required"`
+	Type     string   `mapstructure:"type" json:"type"`
+	Content  string   `mapstructure:"content" json:"content"`
+	Packets  []string `mapstructure:"packets" json:"packets"`
+	End      bool     `mapstructure:"end" json:"end"`
+	Deadline int64    `mapstructure:"deadline" json:"deadline"`
 }
 
 type RevokeElem struct {
