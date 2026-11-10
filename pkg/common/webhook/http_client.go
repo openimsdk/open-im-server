@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"reflect"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -61,12 +62,12 @@ func NewWebhookClient(url string, options ...*memamq.MemoryQueue) *Client {
 }
 
 func (c *Client) SyncPost(ctx context.Context, command string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, before *config.BeforeConfig) error {
-	return c.post(ctx, command, req, resp, before.Timeout)
+	return c.post(ctx, command, req, resp, before.Timeout, before.FailedContinue)
 }
 
 func (c *Client) AsyncPost(ctx context.Context, command string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, after *config.AfterConfig) {
 	if after.Enable {
-		c.queue.Push(func() { c.post(ctx, command, req, resp, after.Timeout) })
+		c.queue.Push(func() { c.post(ctx, command, req, resp, after.Timeout, false) })
 	}
 }
 
@@ -76,16 +77,28 @@ func (c *Client) AsyncPostWithQuery(ctx context.Context, command string, req cal
 	}
 }
 
-func (c *Client) post(ctx context.Context, command string, input interface{}, output callbackstruct.CallbackResp, timeout int) error {
+func (c *Client) post(ctx context.Context, command string, input interface{}, output callbackstruct.CallbackResp, timeout int, failedContinue bool) error {
 	ctx = mcontext.WithMustInfoCtx([]string{mcontext.GetOperationID(ctx), mcontext.GetOpUserID(ctx), mcontext.GetOpUserPlatform(ctx), mcontext.GetConnID(ctx)})
 	fullURL := c.url + "/" + command
 	log.ZInfo(ctx, "webhook", "url", fullURL, "input", input, "config", timeout)
 	operationID, _ := ctx.Value(constant.OperationID).(string)
 	b, err := c.client.Post(ctx, fullURL, map[string]string{constant.OperationID: operationID}, input, timeout)
 	if err != nil {
+		if failedContinue {
+			log.ZWarn(ctx, "webhook failed but continue", err, "url", fullURL)
+			return nil
+		}
 		return servererrs.ErrNetwork.WrapMsg(err.Error(), "post url", fullURL)
 	}
 	if err = json.Unmarshal(b, output); err != nil {
+		if failedContinue {
+			// Callers apply the response after a nil error, so drop any fields decoded before the failure.
+			if v := reflect.ValueOf(output); v.Kind() == reflect.Pointer && !v.IsNil() {
+				v.Elem().SetZero()
+			}
+			log.ZWarn(ctx, "webhook response format error but continue", err, "url", fullURL, "response", string(b))
+			return nil
+		}
 		return servererrs.ErrData.WithDetail(err.Error() + " response format error")
 	}
 	if err := output.Parse(); err != nil {
