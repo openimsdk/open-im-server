@@ -17,6 +17,7 @@ package conversation
 import (
 	"context"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -278,10 +279,26 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbconvers
 }
 
 func (c *conversationServer) SetConversations(ctx context.Context, req *pbconversation.SetConversationsReq) (*pbconversation.SetConversationsResp, error) {
+	if req.Conversation == nil {
+		return nil, errs.ErrArgs.WrapMsg("conversation is nil")
+	}
+	if len(req.UserIDs) == 0 {
+		return &pbconversation.SetConversationsResp{}, nil
+	}
 	for _, userID := range req.UserIDs {
 		if err := authverify.CheckAccess(ctx, userID); err != nil {
 			return nil, err
 		}
+	}
+	if req.Conversation.GroupID == "" {
+		if strings.HasPrefix(req.Conversation.ConversationID, "sg_") {
+			req.Conversation.GroupID = strings.TrimPrefix(req.Conversation.ConversationID, "sg_")
+		} else if strings.HasPrefix(req.Conversation.ConversationID, "g_") {
+			req.Conversation.GroupID = strings.TrimPrefix(req.Conversation.ConversationID, "g_")
+		}
+	}
+	if req.Conversation.ConversationID == "" && req.Conversation.GroupID != "" {
+		req.Conversation.ConversationID = msgprocessor.GetConversationIDBySessionType(int(req.Conversation.ConversationType), req.Conversation.GroupID)
 	}
 	if req.Conversation.ConversationType == constant.WriteGroupChatType {
 		groupInfo, err := c.groupClient.GetGroupInfo(ctx, req.Conversation.GroupID)
@@ -294,6 +311,32 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		if groupInfo.Status == constant.GroupStatusDismissed {
 			return nil, servererrs.ErrDismissedAlready.WrapMsg("group dismissed")
 		}
+	}
+	if req.Conversation.ConversationType == constant.ReadGroupChatType && req.Conversation.GroupID != "" && c.groupClient != nil {
+		memberUserIDs, err := c.groupClient.GetGroupMemberUserIDs(authverify.WithTempAdmin(ctx), req.Conversation.GroupID)
+		if err != nil {
+			return nil, err
+		}
+		memberSet := make(map[string]struct{}, len(memberUserIDs))
+		for _, memberUserID := range memberUserIDs {
+			memberSet[memberUserID] = struct{}{}
+		}
+		var validUserIDs []string
+		var nonMemberUserIDs []string
+		for _, userID := range req.UserIDs {
+			if _, ok := memberSet[userID]; ok {
+				validUserIDs = append(validUserIDs, userID)
+			} else {
+				nonMemberUserIDs = append(nonMemberUserIDs, userID)
+			}
+		}
+		if len(nonMemberUserIDs) > 0 {
+			log.ZWarn(ctx, "SetConversations: user is not a group member, ignoring", nil, "groupID", req.Conversation.GroupID, "nonMemberUserIDs", nonMemberUserIDs)
+		}
+		if len(validUserIDs) == 0 {
+			return &pbconversation.SetConversationsResp{}, nil
+		}
+		req.UserIDs = datautil.Distinct(validUserIDs)
 	}
 
 	conversationMap := make(map[string]*dbModel.Conversation)
@@ -336,8 +379,10 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			return nil, err
 		}
 
-		for _, userID := range needUpdateUsersList {
-			c.conversationNotificationSender.ConversationChangeNotification(ctx, userID, []string{req.Conversation.ConversationID})
+		if c.conversationNotificationSender != nil {
+			for _, userID := range needUpdateUsersList {
+				c.conversationNotificationSender.ConversationChangeNotification(ctx, userID, []string{req.Conversation.ConversationID})
+			}
 		}
 	}
 
@@ -354,9 +399,11 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			return nil, err
 		}
 
-		for _, userID := range req.UserIDs {
-			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
-				req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
+		if c.conversationNotificationSender != nil {
+			for _, userID := range req.UserIDs {
+				c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
+					req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
+			}
 		}
 	}
 
