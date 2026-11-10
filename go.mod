@@ -14,7 +14,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/protocol v0.0.73-alpha.20
 	github.com/openimsdk/tools v0.0.50-alpha.126
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.12.1
 	go.mongodb.org/mongo-driver v1.14.0
