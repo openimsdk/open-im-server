@@ -208,10 +208,6 @@ func (k *KubernetesConnManager) UnRegister() error {
 	return nil
 }
 
-func (k *KubernetesConnManager) GetUserIdHashGatewayHost(ctx context.Context, userId string) (string, error) {
-	return "", nil
-}
-
 func (k *KubernetesConnManager) getServicePort(serviceName string) (int32, error) {
 	var svcPort int32
 

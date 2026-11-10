@@ -74,6 +74,7 @@ services:
 
   etcd:
     image: "${ETCD_IMAGE}"
+    user: root
     container_name: etcd
     ports:
       - "12379:2379"
@@ -81,6 +82,8 @@ services:
     environment:
       - ETCD_NAME=s1
       - ETCD_DATA_DIR=/etcd-data
+      # Authentication is managed below; no-auth requires a trusted, isolated network.
+      - ALLOW_NONE_AUTHENTICATION=yes
       - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
       - ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379
       - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
@@ -88,7 +91,6 @@ services:
       - ETCD_INITIAL_CLUSTER=s1=http://0.0.0.0:2380
       - ETCD_INITIAL_CLUSTER_TOKEN=tkn
       - ETCD_INITIAL_CLUSTER_STATE=new
-      - ALLOW_NONE_AUTHENTICATION=no
 
       ## Optional: Enable etcd authentication by setting the following credentials
       # - ETCD_ROOT_USER=root
@@ -97,74 +99,70 @@ services:
       # - ETCD_PASSWORD=openIM123
     volumes:
       - "${DATA_DIR}/components/etcd:/etcd-data"
-    command: >
-      /bin/sh -c '
-        etcd &
-        export ETCDCTL_API=3
-        echo "Waiting for etcd to become healthy..."
-        until etcdctl --endpoints=http://127.0.0.1:2379 endpoint health &>/dev/null; do
-          echo "Waiting for ETCD to start..."
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        fail() { echo "$$*" >&2; exit 1; }
+        auth=no
+        if [ -n "$${ETCD_ROOT_USER:-}$${ETCD_ROOT_PASSWORD:-}$${ETCD_USERNAME:-}$${ETCD_PASSWORD:-}" ]; then
+          [ -n "$${ETCD_ROOT_USER:-}" ] && [ -n "$${ETCD_ROOT_PASSWORD:-}" ] && [ -n "$${ETCD_USERNAME:-}" ] && [ -n "$${ETCD_PASSWORD:-}" ] || fail "Set all four authentication variables or leave all four empty."
+          [ "$$ETCD_ROOT_USER" = root ] && [ "$$ETCD_USERNAME" != root ] || fail "etcd requires ETCD_ROOT_USER=root and a separate application user."
+          auth=yes
+        fi
+        [ -d /etcd-data ] && [ -w /etcd-data ] && [ -x /etcd-data ] || fail "/etcd-data must be writable and searchable."
+        (unset ETCD_ROOT_USER ETCD_ROOT_PASSWORD ETCD_USERNAME ETCD_PASSWORD; ETCD_DATA_DIR=/etcd-data exec etcd) &
+        daemon=$$!
+        cleanup() {
+          trap - EXIT TERM INT
+          kill -"$${signal:-TERM}" "$$daemon" 2>/dev/null || :
+          wait "$$daemon" 2>/dev/null || :
+        }
+        trap cleanup EXIT
+        trap "signal=TERM; exit 143" TERM
+        trap "signal=INT; exit 130" INT
+        export ETCDCTL_API=3 ETCDCTL_ENDPOINTS=http://127.0.0.1:2379
+        export ETCDCTL_DIAL_TIMEOUT=2s ETCDCTL_COMMAND_TIMEOUT=2s
+        unset ETCDCTL_USER ETCDCTL_PASSWORD
+        attempts=0
+        until etcdctl endpoint status >/dev/null 2>&1; do
+          kill -0 "$$daemon" 2>/dev/null || { wait "$$daemon"; exit $$?; }
+          attempts=$$((attempts + 1))
+          [ "$$attempts" -lt 30 ] || fail "etcd startup timed out."
           sleep 1
         done
-
-        echo "etcd is healthy."
-
-        if [ -n "$${ETCD_ROOT_USER}" ] && [ -n "$${ETCD_ROOT_PASSWORD}" ] && [ -n "$${ETCD_USERNAME}" ] && [ -n "$${ETCD_PASSWORD}" ]; then
-          echo "Authentication credentials provided. Setting up authentication..."
-
-        echo "Checking authentication status..."
-        if ! etcdctl --endpoints=http://127.0.0.1:2379 auth status | grep -q "Authentication Status: true"; then
-          echo "Authentication is disabled. Creating users and enabling..."
-          
-          # Create users and setup permissions
-          etcdctl --endpoints=http://127.0.0.1:2379 user add $${ETCD_ROOT_USER} --new-user-password=$${ETCD_ROOT_PASSWORD} || true
-          etcdctl --endpoints=http://127.0.0.1:2379 user add $${ETCD_USERNAME} --new-user-password=$${ETCD_PASSWORD} || true
-          
-          etcdctl --endpoints=http://127.0.0.1:2379 role add openim-role || true
-          etcdctl --endpoints=http://127.0.0.1:2379 role grant-permission openim-role --prefix=true readwrite / || true
-          etcdctl --endpoints=http://127.0.0.1:2379 role grant-permission openim-role --prefix=true readwrite "" || true
-          etcdctl --endpoints=http://127.0.0.1:2379 user grant-role $${ETCD_USERNAME} openim-role || true
-          
-          etcdctl --endpoints=http://127.0.0.1:2379 user grant-role $${ETCD_ROOT_USER} $${ETCD_USERNAME} root || true
-          
-          echo "Enabling authentication..."
-          etcdctl --endpoints=http://127.0.0.1:2379 auth enable
-          echo "Authentication enabled successfully"
-        else
-          echo "Authentication is already enabled. Checking OpenIM user..."
-          
-          # Check if openIM user exists and can perform operations
-          if ! etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_USERNAME}:$${ETCD_PASSWORD} put /test/auth "auth-check" &>/dev/null; then
-            echo "OpenIM user test failed. Recreating user with root credentials..."
-            
-            # Try to create/update the openIM user using root credentials
-            etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} user add $${ETCD_USERNAME} --new-user-password=$${ETCD_PASSWORD} --no-password-file || true
-            etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} role add openim-role || true
-            etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} role grant-permission openim-role --prefix=true readwrite / || true
-            etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} role grant-permission openim-role --prefix=true readwrite "" || true
-            etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} user grant-role $${ETCD_USERNAME} openim-role || true
-            etcdctl --endpoints=http://127.0.0.1:2379 user grant-role $${ETCD_ROOT_USER} $${ETCD_USERNAME} root || true
-            
-            echo "OpenIM user recreated with required permissions"
+        if [ "$$auth" = yes ]; then
+          export ETCDCTL_USER="$$ETCD_ROOT_USER" ETCDCTL_PASSWORD="$$ETCD_ROOT_PASSWORD"
+        fi
+        status=$$(etcdctl auth status) || fail "Cannot verify authentication; check configured credentials."
+        case "$$status" in
+        *"Authentication Status: false"*)
+          if [ "$$auth" = yes ]; then
+            users=$$(etcdctl user list)
+            [ -z "$$users" ] || fail "Existing users with disabled authentication require manual review."
+            printf "%s\n%s\n" "$$ETCD_ROOT_PASSWORD" "$$ETCD_ROOT_PASSWORD" | etcdctl user add root >/dev/null
+            printf "%s\n%s\n" "$$ETCD_PASSWORD" "$$ETCD_PASSWORD" | etcdctl user add "$$ETCD_USERNAME" >/dev/null
+            etcdctl role add openim-role
+            etcdctl role grant-permission openim-role --prefix readwrite ""
+            etcdctl user grant-role "$$ETCD_USERNAME" openim-role
+            etcdctl user grant-role root root
+            etcdctl auth enable
           else
-            echo "OpenIM user exists and has correct permissions"
-            etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_USERNAME}:$${ETCD_PASSWORD} del /test/auth &>/dev/null
+            echo "etcd authentication is explicitly disabled; restrict access to the published ports."
           fi
+          ;;
+        *"Authentication Status: true"*)
+          [ "$$auth" = yes ] || fail "Existing authentication requires configured credentials."
+          ;;
+        *) fail "Could not determine authentication status." ;;
+        esac
+        if [ "$$auth" = yes ]; then
+          etcdctl user get root >/dev/null
+          ETCDCTL_USER="$$ETCD_USERNAME" ETCDCTL_PASSWORD="$$ETCD_PASSWORD" etcdctl get /check_openim_component >/dev/null
         fi
-        echo "Testing authentication with OpenIM user..."
-        if etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_USERNAME}:$${ETCD_PASSWORD} put /test/auth "auth-works"; then
-          echo "Authentication working properly"
-          etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_USERNAME}:$${ETCD_PASSWORD} del /test/auth
-        else
-          echo "WARNING: Authentication test failed"
-          fi
-        else
-          echo "No authentication credentials provided. Running in no-auth mode."
-          echo "To enable authentication, set ETCD_ROOT_USER, ETCD_ROOT_PASSWORD, ETCD_USERNAME, and ETCD_PASSWORD environment variables."
-        fi
-        
-        tail -f /dev/null
-      '
+        echo "etcd startup complete."
+        wait "$$daemon"
     restart: always
     networks:
       - openim
@@ -241,6 +239,7 @@ services:
 
   minio:
     image: "${MINIO_IMAGE}"
+    user: root
     ports:
       - "10005:9000"
       - "19090:9090"

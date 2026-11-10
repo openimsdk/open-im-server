@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
@@ -12,8 +14,6 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/runtimeenv"
-	"golang.org/x/sync/errgroup"
-	"google.golang.org/grpc"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
@@ -136,79 +136,4 @@ func (d *DefaultAllNode) GetOnlinePushFailedUserIDs(_ context.Context, msg *sdkw
 	}
 
 	return datautil.SliceSub(*pushToUserIDs, onlineSuccessUserIDs)
-}
-
-type K8sStaticConsistentHash struct {
-	disCov discovery.SvcDiscoveryRegistry
-	config *Config
-}
-
-func NewK8sStaticConsistentHash(disCov discovery.SvcDiscoveryRegistry, config *Config) *K8sStaticConsistentHash {
-	return &K8sStaticConsistentHash{disCov: disCov, config: config}
-}
-
-func (k *K8sStaticConsistentHash) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData,
-	pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
-
-	var usersHost = make(map[string][]string)
-	for _, v := range pushToUserIDs {
-		tHost, err := k.disCov.GetUserIdHashGatewayHost(ctx, v)
-		if err != nil {
-			log.ZError(ctx, "get msg gateway hash error", err)
-			return nil, err
-		}
-		tUsers, tbl := usersHost[tHost]
-		if tbl {
-			tUsers = append(tUsers, v)
-			usersHost[tHost] = tUsers
-		} else {
-			usersHost[tHost] = []string{v}
-		}
-	}
-	log.ZDebug(ctx, "genUsers send hosts struct:", "usersHost", usersHost)
-	var usersConns = make(map[grpc.ClientConnInterface][]string)
-	for host, userIds := range usersHost {
-		tconn, _ := k.disCov.GetConn(ctx, host)
-		usersConns[tconn] = userIds
-	}
-	var (
-		mu         sync.Mutex
-		wg         = errgroup.Group{}
-		maxWorkers = k.config.RpcConfig.MaxConcurrentWorkers
-	)
-	if maxWorkers < 3 {
-		maxWorkers = 3
-	}
-	wg.SetLimit(maxWorkers)
-	for conn, userIds := range usersConns {
-		tcon := conn
-		tuserIds := userIds
-		wg.Go(func() error {
-			input := &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: tuserIds}
-			msgClient := msggateway.NewMsgGatewayClient(tcon)
-			reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, input)
-			if err != nil {
-				return nil
-			}
-			log.ZDebug(ctx, "push result", "reply", reply)
-			if reply != nil && reply.SinglePushResult != nil {
-				mu.Lock()
-				wsResults = append(wsResults, reply.SinglePushResult...)
-				mu.Unlock()
-			}
-			return nil
-		})
-	}
-	_ = wg.Wait()
-	return wsResults, nil
-}
-func (k *K8sStaticConsistentHash) GetOnlinePushFailedUserIDs(_ context.Context, _ *sdkws.MsgData,
-	wsResults []*msggateway.SingleMsgToUserResults, _ *[]string) []string {
-	var needOfflinePushUserIDs []string
-	for _, v := range wsResults {
-		if !v.OnlinePush {
-			needOfflinePushUserIDs = append(needOfflinePushUserIDs, v.UserID)
-		}
-	}
-	return needOfflinePushUserIDs
 }
