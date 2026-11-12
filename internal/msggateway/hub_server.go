@@ -175,22 +175,22 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 	ch := make(chan *msggateway.SingleMsgToUserResults, len(req.PushToUserIDs))
 	var count atomic.Int64
 	count.Add(int64(len(req.PushToUserIDs)))
+	pushResult := func(result *msggateway.SingleMsgToUserResults) {
+		ch <- result
+		if count.Add(-1) == 0 {
+			close(ch)
+		}
+	}
 	for i := range req.PushToUserIDs {
 		userID := req.PushToUserIDs[i]
 		err := s.queue.PushCtx(ctx, func() {
-			ch <- s.pushToUser(ctx, userID, req.MsgData)
-			if count.Add(-1) == 0 {
-				close(ch)
-			}
+			pushResult(s.pushToUser(ctx, userID, req.MsgData))
 		})
 		if err != nil {
-			if count.Add(-1) == 0 {
-				close(ch)
-			}
 			log.ZError(ctx, "pushToUser MemoryQueue failed", err, "userID", userID)
-			ch <- &msggateway.SingleMsgToUserResults{
+			pushResult(&msggateway.SingleMsgToUserResults{
 				UserID: userID,
-			}
+			})
 		}
 	}
 	resp := &msggateway.OnlineBatchPushOneMsgResp{
