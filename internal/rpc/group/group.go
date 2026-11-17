@@ -25,11 +25,6 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/openimsdk/tools/utils/stringutil"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -40,9 +35,11 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/notification/grouphash"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"github.com/openimsdk/protocol/constant"
 	pbconv "github.com/openimsdk/protocol/conversation"
 	pbgroup "github.com/openimsdk/protocol/group"
@@ -145,9 +142,6 @@ func (g *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 		if err := g.db.MemberGroupIncrVersion(ctx, groupID, []string{req.UserID}, model.VersionStateUpdate); err != nil {
 			return nil, err
 		}
-	}
-	if err = g.notification.GroupMemberInfoSetNotificationBulk(ctx, groupIDs, req.NewUserInfo); err != nil {
-		log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 	}
 	if err = g.db.DeleteGroupMemberHash(ctx, groupIDs); err != nil {
 		return nil, err
