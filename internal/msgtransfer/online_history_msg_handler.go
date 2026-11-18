@@ -32,6 +32,8 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
+	"github.com/openimsdk/open-im-server/v3/pkg/localcache/lru"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/tools/batcher"
 	"github.com/openimsdk/protocol/constant"
@@ -50,6 +52,10 @@ const (
 	worker            = 50
 	interval          = 100 * time.Millisecond
 	hasReadChanBuffer = 1000
+
+	conversationCheckCacheSize = 4096
+	conversationCheckTTL       = 5 * time.Minute
+	conversationCreateTimeout  = 10 * time.Second
 )
 
 type ContextMsg struct {
@@ -71,8 +77,9 @@ type OnlineHistoryRedisConsumerHandler struct {
 	conversationUserHasReadChan chan *userHasReadSeq
 	wg                          sync.WaitGroup
 
-	groupClient        *rpcli.GroupClient
-	conversationClient *rpcli.ConversationClient
+	groupClient          *rpcli.GroupClient
+	conversationClient   *rpcli.ConversationClient
+	checkedConversations *lru.LazyLRU[string, struct{}]
 }
 
 type ConsumerMessage struct {
@@ -96,6 +103,7 @@ func NewOnlineHistoryRedisConsumerHandler(ctx context.Context, client discovery.
 	och.conversationUserHasReadChan = make(chan *userHasReadSeq, hasReadChanBuffer)
 	och.groupClient = rpcli.NewGroupClient(groupConn)
 	och.conversationClient = rpcli.NewConversationClient(conversationConn)
+	och.checkedConversations = lru.NewLazyLRU[string, struct{}](conversationCheckCacheSize, conversationCheckTTL, 0, localcache.EmptyTarget{}, nil)
 	och.wg.Add(1)
 
 	b := batcher.New[ConsumerMessage](
@@ -280,7 +288,11 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 			userHasReadMap: userSeqMap,
 		}
 
-		if isNewConversation {
+		if msg.SessionType == constant.SingleChatType || msg.SessionType == constant.NotificationChatType {
+			if err := och.ensureSingleChatConversation(ctx, conversationID, msg); err != nil {
+				log.ZWarn(ctx, "ensure single chat conversation failed", err, "conversationID", conversationID, "sessionType", msg.SessionType)
+			}
+		} else if isNewConversation {
 			switch msg.SessionType {
 			case constant.ReadGroupChatType:
 				log.ZDebug(ctx, "group chat first create conversation", "conversationID",
@@ -297,17 +309,6 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 						log.ZWarn(ctx, "single chat first create conversation error", err,
 							"conversationID", conversationID)
 					}
-				}
-			case constant.SingleChatType, constant.NotificationChatType:
-				req := &pbconv.CreateSingleChatConversationsReq{
-					RecvID:           msg.RecvID,
-					SendID:           msg.SendID,
-					ConversationID:   conversationID,
-					ConversationType: msg.SessionType,
-				}
-				if err := och.conversationClient.CreateSingleChatConversations(ctx, req); err != nil {
-					log.ZWarn(ctx, "single chat or notification first create conversation error", err,
-						"conversationID", conversationID, "sessionType", msg.SessionType)
 				}
 			default:
 				log.ZWarn(ctx, "unknown session type", nil, "sessionType",
@@ -326,6 +327,23 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 		och.toPushTopic(ctx, key, conversationID, storageList)
 		log.ZInfo(ctx, "toPushTopic end")
 	}
+}
+
+func (och *OnlineHistoryRedisConsumerHandler) ensureSingleChatConversation(ctx context.Context, conversationID string, msg *sdkws.MsgData) error {
+	// A sequence can already exist even if the first creation RPC failed. Cache only
+	// successful checks so that a later batch (including after restart) tries again.
+	_, err := och.checkedConversations.Get(conversationID, func() (struct{}, error) {
+		ctx, cancel := context.WithTimeout(ctx, conversationCreateTimeout)
+		defer cancel()
+		err := och.conversationClient.CreateSingleChatConversations(ctx, &pbconv.CreateSingleChatConversationsReq{
+			RecvID:           msg.RecvID,
+			SendID:           msg.SendID,
+			ConversationID:   conversationID,
+			ConversationType: msg.SessionType,
+		})
+		return struct{}{}, err
+	})
+	return err
 }
 
 func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Context, key, conversationID string,

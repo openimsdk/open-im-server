@@ -35,6 +35,8 @@ type ConversationDatabase interface {
 	UpdateUsersConversationField(ctx context.Context, userIDs []string, conversationID string, args map[string]any) error
 	// CreateConversation creates a batch of new conversations.
 	CreateConversation(ctx context.Context, conversations []*relationtb.Conversation) error
+	// CreateConversationIfMissing creates a conversation without replacing an existing owner record.
+	CreateConversationIfMissing(ctx context.Context, conversation *relationtb.Conversation) (created bool, err error)
 	// SyncPeerUserPrivateConversationTx ensures transactional operation while syncing private conversations between peers.
 	SyncPeerUserPrivateConversationTx(ctx context.Context, conversation []*relationtb.Conversation) error
 	// FindConversations retrieves multiple conversations of a user by conversation IDs.
@@ -94,8 +96,9 @@ type conversationDatabase struct {
 	tx             tx.Tx
 }
 
-func (c *conversationDatabase) SetUsersConversationFieldTx(ctx context.Context, userIDs []string, conversation *relationtb.Conversation, fieldMap map[string]any) (err error) {
-	return c.tx.Transaction(ctx, func(ctx context.Context) error {
+func (c *conversationDatabase) SetUsersConversationFieldTx(ctx context.Context, userIDs []string, conversation *relationtb.Conversation, fieldMap map[string]any) error {
+	var invalidation cache.ConversationCache
+	err := c.tx.Transaction(ctx, func(ctx context.Context) error {
 		cache := c.cache.CloneConversationCache()
 		if conversation.GroupID != "" {
 			cache = cache.DelSuperGroupRecvMsgNotNotifyUserIDs(conversation.GroupID).DelSuperGroupRecvMsgNotNotifyUserIDsHash(conversation.GroupID)
@@ -142,10 +145,15 @@ func (c *conversationDatabase) SetUsersConversationFieldTx(ctx context.Context, 
 			if err != nil {
 				return err
 			}
-			cache = cache.DelConversationIDs(NotUserIDs...).DelUserConversationIDsHash(NotUserIDs...).DelConversations(conversation.ConversationID, NotUserIDs...)
+			cache = cache.DelConversationIDs(NotUserIDs...).DelUserConversationIDsHash(NotUserIDs...).DelUsersConversation(conversation.ConversationID, NotUserIDs...)
 		}
-		return cache.ChainExecDel(ctx)
+		invalidation = cache
+		return nil
 	})
+	if err != nil {
+		return err
+	}
+	return invalidation.ChainExecDel(ctx)
 }
 
 func (c *conversationDatabase) UpdateUserConversations(ctx context.Context, userID string, args map[string]any) error {
@@ -181,6 +189,35 @@ func (c *conversationDatabase) CreateConversation(ctx context.Context, conversat
 	if err := c.conversationDB.Create(ctx, conversations); err != nil {
 		return err
 	}
+	return c.invalidateCreatedConversations(ctx, conversations)
+}
+
+func (c *conversationDatabase) CreateConversationIfMissing(ctx context.Context, conversation *relationtb.Conversation) (bool, error) {
+	var created bool
+	var stored *relationtb.Conversation
+	err := c.tx.Transaction(ctx, func(ctx context.Context) error {
+		existing, err := c.conversationDB.Find(ctx, conversation.OwnerUserID, []string{conversation.ConversationID})
+		if err != nil {
+			return err
+		}
+		if len(existing) != 0 {
+			stored, created = existing[0], false
+			return nil
+		}
+		if err := c.conversationDB.Create(ctx, []*relationtb.Conversation{conversation}); err != nil {
+			return err
+		}
+		stored, created = conversation, true
+		return nil
+	})
+	if err != nil {
+		return false, err
+	}
+	// A cached miss can also mean a previous insert succeeded but invalidation did not.
+	return created, c.invalidateCreatedConversations(ctx, []*relationtb.Conversation{stored})
+}
+
+func (c *conversationDatabase) invalidateCreatedConversations(ctx context.Context, conversations []*relationtb.Conversation) error {
 	var (
 		userIDs          []string
 		notNotifyUserIDs []string
