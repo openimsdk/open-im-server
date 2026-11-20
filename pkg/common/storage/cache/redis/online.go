@@ -2,9 +2,10 @@ package redis
 
 import (
 	"context"
-	"fmt"
+	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -56,7 +57,7 @@ func (s *userOnline) GetOnline(ctx context.Context, userID string) ([]int32, err
 func (s *userOnline) GetAllOnlineUsers(ctx context.Context, cursor uint64) (map[string][]int32, uint64, error) {
 	result := make(map[string][]int32)
 
-	keys, nextCursor, err := s.rdb.Scan(ctx, cursor, fmt.Sprintf("%s*", cachekey.OnlineKey), constant.ParamMaxLength).Result()
+	keys, nextCursor, err := s.scanOnlineKeys(ctx, cursor)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -81,6 +82,52 @@ func (s *userOnline) GetAllOnlineUsers(ctx context.Context, cursor uint64) (map[
 	}
 
 	return result, nextCursor, nil
+}
+
+func (s *userOnline) scanOnlineKeys(ctx context.Context, cursor uint64) ([]string, uint64, error) {
+	const match = cachekey.OnlineKey + "*"
+	cluster, ok := s.rdb.(*redis.ClusterClient)
+	if !ok {
+		return s.rdb.Scan(ctx, cursor, match, constant.ParamMaxLength).Result()
+	}
+
+	var primaries []*redis.Client
+	var mu sync.Mutex
+	if err := cluster.ForEachMaster(ctx, func(_ context.Context, primary *redis.Client) error {
+		mu.Lock()
+		primaries = append(primaries, primary)
+		mu.Unlock()
+		return nil
+	}); err != nil {
+		return nil, 0, err
+	}
+	// With a stable cluster topology, every RPC replica sees the same order.
+	slices.SortFunc(primaries, func(a, b *redis.Client) int {
+		return strings.Compare(a.Options().Addr, b.Options().Addr)
+	})
+
+	// Keep the RPC cursor stateless. Its upper 14 bits hold the primary
+	// index (the cluster has 2^14 slots); the lower bits hold its SCAN cursor.
+	const cursorBits = 50
+	const cursorMask = 1<<cursorBits - 1
+	primaryIndex := int(cursor >> cursorBits)
+	if primaryIndex >= len(primaries) {
+		return nil, 0, errs.New("online scan cursor references an unavailable Redis primary", "index", primaryIndex).Wrap()
+	}
+	keys, nextCursor, err := primaries[primaryIndex].Scan(ctx, cursor&cursorMask, match, constant.ParamMaxLength).Result()
+	if err != nil {
+		return nil, 0, err
+	}
+	if nextCursor > cursorMask {
+		return nil, 0, errs.New("Redis SCAN cursor exceeds the online scan cursor range", "cursor", nextCursor).Wrap()
+	}
+	if nextCursor == 0 {
+		primaryIndex++
+		if primaryIndex == len(primaries) {
+			return keys, 0, nil
+		}
+	}
+	return keys, uint64(primaryIndex)<<cursorBits | nextCursor, nil
 }
 
 func (s *userOnline) SetUserOnline(ctx context.Context, userID string, online, offline []int32) error {
