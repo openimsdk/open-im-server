@@ -880,7 +880,8 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 		}
 	}
 	log.ZDebug(ctx, "GroupApplicationResponse", "inGroup", inGroup, "HandleResult", req.HandleResult, "member", member)
-	if err := s.db.HandlerGroupRequest(ctx, req.GroupID, req.FromUserID, req.HandledMsg, req.HandleResult, member); err != nil {
+	handledRequest := convert.Pb2DbGroupRequest(req, mcontext.GetOpUserID(ctx))
+	if err := s.db.HandlerGroupRequest(ctx, handledRequest, member); err != nil {
 		return nil, err
 	}
 	switch req.HandleResult {
