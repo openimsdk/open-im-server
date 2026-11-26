@@ -133,7 +133,7 @@ func (*MsgDocModel) GetMsgIndex(seq int64) int64 {
 }
 
 func (*MsgDocModel) GetLimitForSingleDoc(seq int64) int64 {
-	return seq % singleGocMsgNum
+	return (seq - 1) % singleGocMsgNum
 }
 
 func (*MsgDocModel) indexGen(conversationID string, seqSuffix int64) string {
