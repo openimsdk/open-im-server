@@ -9,5 +9,6 @@ type SeqUser interface {
 	SetUserMinSeq(ctx context.Context, conversationID string, userID string, seq int64) error
 	GetUserReadSeq(ctx context.Context, conversationID string, userID string) (int64, error)
 	SetUserReadSeq(ctx context.Context, conversationID string, userID string, seq int64) error
+	GetUserMinSeqs(ctx context.Context, userID string, conversationID []string) (map[string]int64, error)
 	GetUserReadSeqs(ctx context.Context, userID string, conversationID []string) (map[string]int64, error)
 }
