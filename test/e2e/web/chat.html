@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenIM Simple Chat Client</title>
+    <style>
+      :root {
+        --bg: #f2efe8;
+        --panel: rgba(255, 250, 242, 0.92);
+        --panel-strong: #fffdf8;
+        --border: #d6c6aa;
+        --text: #1f1a14;
+        --muted: #665b4d;
+        --accent: #b55637;
+        --accent-2: #23516b;
+        --accent-soft: #f4ddcf;
+        --bubble-self: #284b63;
+        --bubble-peer: #e9dcc5;
+        --ok: #1b6a56;
+        --err: #a2332a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Avenir Next", "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(181, 86, 55, 0.12), transparent 28%),
+          radial-gradient(circle at bottom right, rgba(35, 81, 107, 0.16), transparent 30%),
+          linear-gradient(180deg, #f7f3eb, var(--bg));
+      }
+
+      main {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 24px 16px 40px;
+      }
+
+      .header {
+        margin-bottom: 18px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(30px, 4vw, 46px);
+        line-height: 1;
+        letter-spacing: -0.04em;
+      }
+
+      .lead {
+        margin: 0;
+        max-width: 860px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 360px minmax(0, 1fr);
+        gap: 16px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        box-shadow: 0 16px 40px rgba(31, 27, 22, 0.06);
+      }
+
+      .sidebar {
+        padding: 18px;
+      }
+
+      .chat-shell {
+        display: grid;
+        grid-template-rows: auto auto minmax(420px, 1fr) auto;
+        overflow: hidden;
+      }
+
+      .section + .section {
+        margin-top: 18px;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        font-size: 16px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: var(--panel-strong);
+        border-radius: 14px;
+        padding: 11px 12px;
+        color: var(--text);
+        font: inherit;
+      }
+
+      textarea {
+        min-height: 92px;
+        resize: vertical;
+      }
+
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .grid.two {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 16px;
+        font: inherit;
+        color: white;
+        cursor: pointer;
+        background: var(--accent);
+      }
+
+      button.alt {
+        background: var(--accent-2);
+      }
+
+      button.ghost {
+        background: #6d624f;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: progress;
+      }
+
+      .status {
+        margin-top: 12px;
+        border-radius: 14px;
+        padding: 12px 14px;
+        background: #f4ecdf;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .status.ok {
+        color: var(--ok);
+      }
+
+      .status.err {
+        color: var(--err);
+      }
+
+      .note {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 18px 18px 14px;
+        border-bottom: 1px solid rgba(214, 198, 170, 0.8);
+      }
+
+      .room-title {
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .room-meta {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .sender-bar {
+        display: flex;
+        gap: 10px;
+        padding: 14px 18px;
+        border-bottom: 1px solid rgba(214, 198, 170, 0.65);
+        background: rgba(255, 248, 238, 0.85);
+      }
+
+      .sender-chip {
+        border-radius: 999px;
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text);
+      }
+
+      .sender-chip.active {
+        background: var(--accent-soft);
+        border-color: color-mix(in srgb, var(--accent) 35%, white);
+        color: #6e2f19;
+        font-weight: 600;
+      }
+
+      .messages {
+        padding: 18px;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 420px;
+        max-height: 65vh;
+      }
+
+      .empty {
+        margin: auto;
+        max-width: 440px;
+        text-align: center;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .msg {
+        max-width: min(72%, 640px);
+        padding: 12px 14px;
+        border-radius: 18px;
+        box-shadow: 0 8px 18px rgba(31, 27, 22, 0.05);
+      }
+
+      .msg.self {
+        align-self: flex-end;
+        background: var(--bubble-self);
+        color: white;
+        border-bottom-right-radius: 6px;
+      }
+
+      .msg.peer {
+        align-self: flex-start;
+        background: var(--bubble-peer);
+        color: var(--text);
+        border-bottom-left-radius: 6px;
+      }
+
+      .msg-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 6px;
+        font-size: 12px;
+        opacity: 0.86;
+      }
+
+      .msg-body {
+        white-space: pre-wrap;
+        word-break: break-word;
+        line-height: 1.45;
+      }
+
+      .composer {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        padding: 16px 18px 18px;
+        border-top: 1px solid rgba(214, 198, 170, 0.8);
+        background: rgba(255, 248, 238, 0.9);
+      }
+
+      .composer textarea {
+        min-height: 78px;
+      }
+
+      .debug {
+        margin-top: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #f7f1e8;
+        color: var(--muted);
+        font-family: "SFMono-Regular", "Consolas", monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .grid.two,
+        .composer {
+          grid-template-columns: 1fr;
+        }
+
+        .msg {
+          max-width: 88%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="header">
+        <h1>OpenIM Simple Chat Client</h1>
+        <p class="lead">
+          这是一个最小开发态聊天客户端。它用 admin token 代发消息、用搜索接口轮询消息列表，
+          目的是让你先在本地把“能聊起来”这件事跑通。它不等价于正式客户端，不做权限隔离。
+        </p>
+      </div>
+
+      <div class="layout">
+        <aside class="panel sidebar">
+          <div class="section">
+            <h2>连接</h2>
+            <div class="grid">
+              <div>
+                <label for="apiBase">API Base URL</label>
+                <input id="apiBase" value="http://127.0.0.1:10002" />
+              </div>
+              <div>
+                <label for="operationID">Operation ID</label>
+                <input id="operationID" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>管理员</h2>
+            <div class="grid two">
+              <div>
+                <label for="adminUserID">Admin User ID</label>
+                <input id="adminUserID" value="imAdmin" />
+              </div>
+              <div>
+                <label for="adminSecret">Secret</label>
+                <input id="adminSecret" value="openIM123" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>聊天双方</h2>
+            <div class="grid two">
+              <div>
+                <label for="userA">User A</label>
+                <input id="userA" value="user_1" />
+              </div>
+              <div>
+                <label for="userB">User B</label>
+                <input id="userB" value="user_2" />
+              </div>
+            </div>
+            <div class="actions">
+              <button id="bootstrapBtn">连接并初始化</button>
+              <button class="alt" id="refreshBtn">刷新消息</button>
+              <button class="ghost" id="togglePollBtn">暂停轮询</button>
+            </div>
+            <div class="note" style="margin-top: 10px">
+              “连接并初始化”会做三件事：拿 admin token、确保 `user_1` / `user_2`
+              存在、拉取当前聊天记录。
+            </div>
+            <div id="status" class="status"><pre>Ready.</pre></div>
+          </div>
+
+          <div class="section">
+            <h2>调试</h2>
+            <div id="debug" class="debug">Waiting for first request.</div>
+          </div>
+        </aside>
+
+        <section class="panel chat-shell">
+          <div class="topbar">
+            <div>
+              <div class="room-title">双人单聊</div>
+              <div class="room-meta" id="roomMeta">未连接</div>
+            </div>
+            <div class="room-meta" id="pollMeta">轮询中</div>
+          </div>
+
+          <div class="sender-bar">
+            <button class="sender-chip active" id="senderABtn" type="button">当前发送者: user_1</button>
+            <button class="sender-chip" id="senderBBtn" type="button">切到 user_2 发送</button>
+          </div>
+
+          <div class="messages" id="messages">
+            <div class="empty">
+              还没有消息。先点左侧“连接并初始化”，然后选择发送者发第一条消息。
+            </div>
+          </div>
+
+          <div class="composer">
+            <textarea id="composer" placeholder="输入消息，按按钮发送"></textarea>
+            <button id="sendBtn" type="button">发送消息</button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+
+      const els = {
+        apiBase: $("apiBase"),
+        operationID: $("operationID"),
+        adminUserID: $("adminUserID"),
+        adminSecret: $("adminSecret"),
+        userA: $("userA"),
+        userB: $("userB"),
+        bootstrapBtn: $("bootstrapBtn"),
+        refreshBtn: $("refreshBtn"),
+        togglePollBtn: $("togglePollBtn"),
+        senderABtn: $("senderABtn"),
+        senderBBtn: $("senderBBtn"),
+        status: $("status"),
+        debug: $("debug"),
+        messages: $("messages"),
+        roomMeta: $("roomMeta"),
+        pollMeta: $("pollMeta"),
+        composer: $("composer"),
+        sendBtn: $("sendBtn"),
+      };
+
+      const state = {
+        adminToken: "",
+        activeSender: "A",
+        polling: true,
+        pollTimer: null,
+        lastMessageKey: "",
+      };
+
+      function ensureOperationID() {
+        if (!els.operationID.value.trim()) {
+          els.operationID.value = `chat-${Date.now()}`;
+        }
+        return els.operationID.value.trim();
+      }
+
+      function currentUser() {
+        return state.activeSender === "A" ? els.userA.value.trim() : els.userB.value.trim();
+      }
+
+      function peerUser() {
+        return state.activeSender === "A" ? els.userB.value.trim() : els.userA.value.trim();
+      }
+
+      function setStatus(message, type = "ok") {
+        els.status.className = `status ${type}`;
+        els.status.innerHTML = `<pre>${message}</pre>`;
+      }
+
+      function setDebug(value) {
+        els.debug.textContent = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+      }
+
+      function setBusy(button, busy) {
+        button.disabled = busy;
+      }
+
+      async function postJSON(path, body, token = "") {
+        const operationID = ensureOperationID();
+        const url = `${els.apiBase.value.replace(/\/$/, "")}${path}`;
+        const headers = {
+          "Content-Type": "application/json",
+          operationID,
+          ...(token ? { token } : {}),
+        };
+        setDebug({ url, headers, body });
+
+        const response = await fetch(url, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body),
+        });
+        const text = await response.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { raw: text };
+        }
+
+        if (!response.ok || data.errCode) {
+          throw new Error(data.errDlt || data.errMsg || `HTTP ${response.status}`);
+        }
+        return data.data;
+      }
+
+      async function fetchAdminToken() {
+        const data = await postJSON("/auth/get_admin_token", {
+          secret: els.adminSecret.value.trim(),
+          userID: els.adminUserID.value.trim(),
+        });
+        state.adminToken = data.token;
+      }
+
+      async function ensureUsers() {
+        try {
+          await postJSON(
+            "/user/user_register",
+            {
+              users: [
+                { userID: els.userA.value.trim(), nickname: "User A" },
+                { userID: els.userB.value.trim(), nickname: "User B" },
+              ],
+            },
+            state.adminToken
+          );
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          if (!message.includes("registered already")) {
+            throw error;
+          }
+        }
+      }
+
+      async function searchDirection(sendID, recvID) {
+        const data = await postJSON(
+          "/msg/search_msg",
+          {
+            sendID,
+            recvID,
+            sessionType: 1,
+            pagination: {
+              pageNumber: 1,
+              showNumber: 50,
+            },
+          },
+          state.adminToken
+        );
+        return data.chatLogs || [];
+      }
+
+      function decodeTextContent(chatLog) {
+        if (!chatLog) return "";
+        if (chatLog.contentType !== 101 || !chatLog.content) {
+          return `[contentType=${chatLog.contentType}]`;
+        }
+        try {
+          const parsed = JSON.parse(chatLog.content);
+          return parsed.content || chatLog.content;
+        } catch {
+          return chatLog.content;
+        }
+      }
+
+      function normalizeChatLogs(chatLogs) {
+        return chatLogs
+          .map((item) => item.chatLog)
+          .filter(Boolean)
+          .map((log) => ({
+            key: log.serverMsgID || `${log.clientMsgID}-${log.sendTime}`,
+            sender: log.sendID,
+            receiver: log.recvID,
+            sendTime: Number(log.sendTime || 0),
+            text: decodeTextContent(log),
+          }))
+          .sort((a, b) => a.sendTime - b.sendTime);
+      }
+
+      async function loadMessages() {
+        if (!state.adminToken) {
+          throw new Error("admin token is missing");
+        }
+        const a = els.userA.value.trim();
+        const b = els.userB.value.trim();
+        const [ab, ba] = await Promise.all([searchDirection(a, b), searchDirection(b, a)]);
+        const merged = normalizeChatLogs([...ab, ...ba]);
+        renderMessages(merged);
+      }
+
+      function formatTime(ts) {
+        if (!ts) return "";
+        return new Date(ts).toLocaleTimeString("zh-CN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+      }
+
+      function renderMessages(messages) {
+        els.roomMeta.textContent = `${els.userA.value.trim()} <-> ${els.userB.value.trim()}`;
+        if (!messages.length) {
+          els.messages.innerHTML = `
+            <div class="empty">
+              当前这两个用户之间还没有查到消息。发送第一条后会自动刷新。
+            </div>
+          `;
+          return;
+        }
+
+        const html = messages
+          .map((msg) => {
+            const css = msg.sender === currentUser() ? "self" : "peer";
+            return `
+              <div class="msg ${css}">
+                <div class="msg-head">
+                  <span>${msg.sender}</span>
+                  <span>${formatTime(msg.sendTime)}</span>
+                </div>
+                <div class="msg-body">${escapeHTML(msg.text)}</div>
+              </div>
+            `;
+          })
+          .join("");
+
+        const nextKey = messages[messages.length - 1]?.key || "";
+        const shouldStickBottom = !state.lastMessageKey || nextKey !== state.lastMessageKey;
+        state.lastMessageKey = nextKey;
+        els.messages.innerHTML = html;
+        if (shouldStickBottom) {
+          els.messages.scrollTop = els.messages.scrollHeight;
+        }
+      }
+
+      function escapeHTML(value) {
+        return value
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;");
+      }
+
+      async function sendMessage() {
+        const text = els.composer.value.trim();
+        if (!text) {
+          throw new Error("message content is empty");
+        }
+        await postJSON(
+          "/msg/send_msg",
+          {
+            sendID: currentUser(),
+            recvID: peerUser(),
+            sessionType: 1,
+            contentType: 101,
+            content: {
+              content: text,
+            },
+          },
+          state.adminToken
+        );
+        els.composer.value = "";
+        await loadMessages();
+      }
+
+      function setActiveSender(which) {
+        state.activeSender = which;
+        const a = els.userA.value.trim();
+        const b = els.userB.value.trim();
+        els.senderABtn.textContent = `当前发送者: ${which === "A" ? a : b}`;
+        els.senderBBtn.textContent = `切到 ${which === "A" ? b : a} 发送`;
+        els.senderABtn.classList.toggle("active", which === "A");
+        els.senderBBtn.classList.toggle("active", which === "B");
+      }
+
+      function startPolling() {
+        stopPolling();
+        state.polling = true;
+        els.pollMeta.textContent = "轮询中";
+        els.togglePollBtn.textContent = "暂停轮询";
+        state.pollTimer = setInterval(() => {
+          loadMessages().catch((error) => {
+            setStatus(error instanceof Error ? error.message : String(error), "err");
+          });
+        }, 2000);
+      }
+
+      function stopPolling() {
+        if (state.pollTimer) {
+          clearInterval(state.pollTimer);
+          state.pollTimer = null;
+        }
+        state.polling = false;
+        els.pollMeta.textContent = "轮询已暂停";
+        els.togglePollBtn.textContent = "恢复轮询";
+      }
+
+      async function bootstrap() {
+        await fetchAdminToken();
+        await ensureUsers();
+        await loadMessages();
+      }
+
+      async function run(button, fn, okText) {
+        try {
+          setBusy(button, true);
+          setStatus("Running...", "ok");
+          await fn();
+          setStatus(okText, "ok");
+        } catch (error) {
+          setStatus(error instanceof Error ? error.message : String(error), "err");
+        } finally {
+          setBusy(button, false);
+        }
+      }
+
+      els.bootstrapBtn.addEventListener("click", () => run(els.bootstrapBtn, bootstrap, "Chat client is ready."));
+      els.refreshBtn.addEventListener("click", () => run(els.refreshBtn, loadMessages, "Messages refreshed."));
+      els.sendBtn.addEventListener("click", () => run(els.sendBtn, sendMessage, "Message sent."));
+      els.senderABtn.addEventListener("click", () => setActiveSender("A"));
+      els.senderBBtn.addEventListener("click", () => setActiveSender(state.activeSender === "A" ? "B" : "A"));
+      els.togglePollBtn.addEventListener("click", () => {
+        if (state.polling) {
+          stopPolling();
+        } else {
+          startPolling();
+        }
+      });
+
+      ensureOperationID();
+      setActiveSender("A");
+      startPolling();
+    </script>
+  </body>
+</html>
