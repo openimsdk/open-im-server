@@ -97,6 +97,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		pushHandler.WaitCache()
 		fn := func(msg mq.Message) error {
 			pushHandler.HandleMs2PsChat(authverify.WithTempAdmin(msg.Context()), msg.Value())
+			msg.Mark()
 			return nil
 		}
 		consumerCtx := mcontext.SetOperationID(context.Background(), "push_"+strconv.Itoa(int(rand.Uint32())))
@@ -112,6 +113,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	go func() {
 		fn := func(msg mq.Message) error {
 			offlineHandler.HandleMsg2OfflinePush(msg.Context(), msg.Value())
+			msg.Mark()
 			return nil
 		}
 		consumerCtx := mcontext.SetOperationID(context.Background(), "push_"+strconv.Itoa(int(rand.Uint32())))
